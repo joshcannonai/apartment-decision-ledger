@@ -17,7 +17,8 @@ Help a renter make a defensible apartment decision with relevant personal contex
 - Desktop has three working regions: a narrow ranked shortlist, a flexible decision canvas, and a compact refinement rail.
 - The shortlist is image-led and dense enough to show five candidates without scrolling on a typical laptop.
 - The decision canvas uses a short lead image with a vertical supporting strip; the source action follows the final supporting image.
-- Estimated all-in cost, space, Market Value, and Personal Fit sit in one compact decision rail beside the media.
+- Availability, layout, and location facts stack immediately beside the media.
+- Estimated all-in cost, space, Market Value, Personal Fit, and the ranking explanation form one compact horizontal rail beneath the media and facts.
 - The refinement rail asks only questions that can improve the ranking.
 - Mobile separates Results, Decision, and Refine into explicit views instead of squeezing three rails together.
 

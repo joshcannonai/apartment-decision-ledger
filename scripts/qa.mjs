@@ -58,6 +58,12 @@ async function waitForCompleteImages(page, selector, expected) {
   );
 }
 
+async function waitForImagePaint(page) {
+  await page.evaluate(() => new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  }));
+}
+
 async function verifyWebMCPTools() {
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -192,6 +198,7 @@ try {
   await compareButtons.nth(1).click();
   await waitForCompleteImages(page, 'img[data-media-role="lead-hero"]', 1);
   await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
+  await waitForImagePaint(page);
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-desktop.png"), fullPage: true });
 
   const customQuestion = page.locator(".question-row").filter({ hasText: "72-inch desk" }).first();
@@ -215,6 +222,7 @@ try {
   await page.getByRole("heading", { name: /Capitol Reef/i }).waitFor();
   await waitForCompleteImages(page, 'img[data-media-role="lead-hero"]', 1);
   await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
+  await waitForImagePaint(page);
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-mobile-decision.png"), fullPage: true });
   await page.getByRole("button", { name: "Refine" }).click();
   await page.getByRole("heading", { name: /enhance and narrow/i }).waitFor();

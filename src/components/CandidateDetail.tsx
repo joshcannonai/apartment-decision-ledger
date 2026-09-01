@@ -125,20 +125,21 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
           ) : null}
         </figure>
 
-        <aside className="decision-rail" aria-label="Decision summary">
-          <div className="all-in-summary"><span>Estimated all in</span><strong>{formatMoney(candidate.allInEstimate.low)}–{formatMoney(candidate.allInEstimate.high)}</strong><small>(base {formatMoney(candidate.baseRent)})</small></div>
-          <div className="space-summary"><span>Space</span><strong>{candidate.squareFeet ?? "Unknown"} <small>sq ft</small></strong><small>{candidate.bedrooms ?? "—"} bed · {candidate.bathrooms ?? "—"} bath</small></div>
-          <div className="score-pair"><ScoreWheel label="Market Value" score={candidate.scores.marketValue.score} /><ScoreWheel label="Personal Fit" score={candidate.scores.personalFit.score} /></div>
-          <p className="ranking-narrative">{rankingNarrative(candidate, rank, runContext)}</p>
-        </aside>
+        <section className="detail-facts listing-facts-rail" aria-label="Listing facts">
+          <div><Building size={17} /><span>Availability</span><strong>{candidate.availability}</strong></div>
+          <div><Ruler size={17} /><span>Layout</span><strong>{candidate.squareFeet ?? "Unknown"} sq ft · {candidate.bedrooms ?? "—"} bed</strong></div>
+          {candidate.distances.slice(0, 2).map((distance) => <div key={distance.anchorId}><MapPin size={17} /><span>{distance.anchorLabel}</span><strong>{distance.straightLineMiles == null ? "Needs location" : `${distance.straightLineMiles.toFixed(1)} mi estimated`}</strong></div>)}
+        </section>
       </div>
 
+      <aside className="decision-rail" aria-label="Decision summary">
+        <div className="all-in-summary"><span>Estimated all in</span><strong>{formatMoney(candidate.allInEstimate.low)}–{formatMoney(candidate.allInEstimate.high)}</strong><small>(base {formatMoney(candidate.baseRent)})</small></div>
+        <div className="space-summary"><span>Space</span><strong>{candidate.squareFeet ?? "Unknown"} <small>sq ft</small></strong><small>{candidate.bedrooms ?? "—"} bed · {candidate.bathrooms ?? "—"} bath</small></div>
+        <div className="score-pair"><ScoreWheel label="Market Value" score={candidate.scores.marketValue.score} /><ScoreWheel label="Personal Fit" score={candidate.scores.personalFit.score} /></div>
+        <p className="ranking-narrative">{rankingNarrative(candidate, rank, runContext)}</p>
+      </aside>
+
       <p className="score-caveat"><AlertCircle size={14} /> {candidate.scores.marketValue.caveat}</p>
-      <section className="detail-facts" aria-label="Listing facts">
-        <div><Building size={17} /><span>Availability</span><strong>{candidate.availability}</strong></div>
-        <div><Ruler size={17} /><span>Layout</span><strong>{candidate.squareFeet ?? "Unknown"} sq ft · {candidate.bedrooms ?? "—"} bed</strong></div>
-        {candidate.distances.slice(0, 2).map((distance) => <div key={distance.anchorId}><MapPin size={17} /><span>{distance.anchorLabel}</span><strong>{distance.straightLineMiles == null ? "Needs location" : `${distance.straightLineMiles.toFixed(1)} mi estimated`}</strong></div>)}
-      </section>
 
       <div className="decision-evidence">
         <section>
