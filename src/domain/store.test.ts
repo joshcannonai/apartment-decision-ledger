@@ -87,6 +87,59 @@ describe("apartment workspace", () => {
     );
   });
 
+  it("keeps Run 1 selectable while a queued answer creates Run 2", async () => {
+    await workspaceActions.searchCandidates({ city: "Salt Lake City" });
+    const first = workspaceStore.getSnapshot();
+    const question = first.refinementQuestions.find((item) => item.id === "refine-space");
+    expect(question).toBeDefined();
+    expect(first.searchRuns).toHaveLength(1);
+
+    const firstScores = new Map(first.searchRuns[0].candidates.map((candidate) => [candidate.id, candidate.scores.personalFit.score]));
+    workspaceActions.queueRefinementAnswer(question!.id, {
+      kind: "furniture",
+      label: `${question!.question} Needs space for a 72-inch desk`,
+      value: "72-inch desk",
+    });
+    const queued = workspaceStore.getSnapshot();
+    expect(queued.activeRunNumber).toBe(1);
+    expect(queued.queuedRefinementLabels).toHaveLength(1);
+    expect(queued.candidates.map((candidate) => candidate.id)).toEqual(first.candidates.map((candidate) => candidate.id));
+
+    const snapshots: string[] = [];
+    const unsubscribe = workspaceStore.subscribe(() => snapshots.push(workspaceStore.getSnapshot().searchStatus));
+    await workspaceActions.searchCandidates({ city: "Salt Lake City" });
+    unsubscribe();
+
+    const second = workspaceStore.getSnapshot();
+    expect(snapshots).toContain("searching");
+    expect(second.searchRuns.map((run) => run.status)).toEqual(["ready", "ready"]);
+    expect(second.activeRunNumber).toBe(2);
+    expect(second.searchRuns[1].triggerLabels[0]).toContain("72-inch desk");
+    expect(second.searchRuns[1].candidates.some((candidate) => candidate.scores.personalFit.score !== firstScores.get(candidate.id))).toBe(true);
+
+    workspaceActions.selectSearchRun(1);
+    expect(workspaceStore.getSnapshot().activeRunNumber).toBe(1);
+    expect(workspaceStore.getSnapshot().candidates[0].scores.personalFit.score).toBe(
+      workspaceStore.getSnapshot().searchRuns[0].candidates[0].scores.personalFit.score,
+    );
+  });
+
+  it("mixes agent custom questions with unanswered deterministic questions", async () => {
+    workspaceActions.prepareSearch(
+      { city: "Salt Lake City" },
+      {
+        customQuestions: [{
+          question: "Would carrying a large desk up stairs rule out a walk-up?",
+          reason: "Your agent identified unusually large furniture.",
+          kind: "furniture",
+        }],
+      },
+    );
+    const outcome = await workspaceActions.searchCandidates({ city: "Salt Lake City" });
+    expect(outcome.refinementQuestions[0].question).toMatch(/large desk/i);
+    expect(workspaceStore.getSnapshot().refinementQuestions[0]).toMatchObject({ origin: "agent_custom" });
+  });
+
   it("calculates transparent market and personal scores", () => {
     const scored = scoreCandidates(SLC_DEMO_CANDIDATES, [], []);
     expect(scored).toHaveLength(15);

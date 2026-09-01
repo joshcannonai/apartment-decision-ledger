@@ -194,12 +194,27 @@ try {
   await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-desktop.png"), fullPage: true });
 
+  const customQuestion = page.locator(".question-row").filter({ hasText: "72-inch desk" }).first();
+  await customQuestion.getByPlaceholder("Type an answer").fill("Yes, elevator access matters");
+  await customQuestion.getByRole("button", { name: /Apply answer/i }).click();
+  await customQuestion.getByText("Updated", { exact: true }).waitFor();
+  await page.screenshot({ path: resolve(artifactDirectory, "workspace-answer-updated-desktop.png"), fullPage: true });
+  await customQuestion.getByRole("button", { name: /Rerun ranking/i }).click();
+  const runTwoButton = page.getByRole("button", { name: "Run 2" });
+  await runTwoButton.waitFor({ state: "visible" });
+  if (!(await runTwoButton.isDisabled())) throw new Error("Run 2 did not expose its searching state.");
+  await page.screenshot({ path: resolve(artifactDirectory, "workspace-run-2-loading-desktop.png"), fullPage: true });
+  await runTwoButton.click();
+  await page.screenshot({ path: resolve(artifactDirectory, "workspace-run-2-desktop.png"), fullPage: true });
+
   await page.setViewportSize({ width: 390, height: 844 });
   await page.reload({ waitUntil: "networkidle" });
   await page.getByRole("heading", { name: /best options/i }).waitFor();
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-mobile.png"), fullPage: true });
   await page.getByRole("button", { name: "Decision" }).click();
   await page.getByRole("heading", { name: /Capitol Reef/i }).waitFor();
+  await waitForCompleteImages(page, 'img[data-media-role="lead-hero"]', 1);
+  await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-mobile-decision.png"), fullPage: true });
   await page.getByRole("button", { name: "Refine" }).click();
   await page.getByRole("heading", { name: /enhance and narrow/i }).waitFor();
@@ -216,7 +231,7 @@ try {
         resultCount,
         tools: webmcp.tools,
         invokedTools: Object.keys(webmcp.results).sort(),
-        screenshots: 5,
+        screenshots: 8,
       },
       null,
       2,

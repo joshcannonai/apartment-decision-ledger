@@ -67,6 +67,11 @@ describe("WebMCP apartment tools", () => {
         city: "Salt Lake City",
         state: "UT",
         anchors: [{ label: "Downtown Salt Lake City", importance: 4 }],
+        customQuestions: [{
+          question: "Would a walk-up work with your large desk?",
+          reason: "The agent knows the renter owns unusually large furniture.",
+          kind: "furniture",
+        }],
       }),
     ).toMatchObject({ ready: true });
     expect(
@@ -76,6 +81,7 @@ describe("WebMCP apartment tools", () => {
     ).toMatchObject({ proposedPreferences: 1, saveStatus: "pending_human_review" });
 
     await searchCandidatesTool.execute({ city: "Salt Lake City", state: "UT" });
+    expect(workspaceStore.getSnapshot().refinementQuestions.some((question) => question.origin === "agent_custom")).toBe(true);
     expect(organizeResultsTool.execute({ sortBy: "market_value" })).toMatchObject({
       resultCount: 15,
     });

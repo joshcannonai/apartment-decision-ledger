@@ -22,6 +22,7 @@ export function shouldRequestMedia({
   if (rank === 0 && mediaIndex === 0) return true;
   if (PHASE_ORDER[phase] >= PHASE_ORDER.shortlist && rank < 5 && mediaIndex === 0) return true;
   if (PHASE_ORDER[phase] >= PHASE_ORDER.gallery && selected && mediaIndex < 4) return true;
+  if (PHASE_ORDER[phase] >= PHASE_ORDER.background && selected) return true;
   return PHASE_ORDER[phase] >= PHASE_ORDER.background && mediaIndex === 0;
 }
 

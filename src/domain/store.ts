@@ -8,6 +8,7 @@ import type {
   ExternalCandidate,
   Preference,
   PreferenceProposalInput,
+  RefinementQuestion,
   SearchAnchor,
   SearchClient,
   SearchQuery,
@@ -30,6 +31,7 @@ export type SearchOutcome = {
   note: string;
   refinementQuestionCount: number;
   refinementQuestions: Array<{ id: string; question: string; reason: string }>;
+  runNumber: number;
 };
 
 const now = () => new Date().toISOString();
@@ -53,6 +55,11 @@ function initialState(): WorkspaceState {
     anchors: [],
     sort: { by: "recommended", anchorId: null, direction: "desc" },
     refinementQuestions: [],
+    customRefinementQuestions: [],
+    answeredQuestionIds: [],
+    queuedRefinementLabels: [],
+    searchRuns: [],
+    activeRunNumber: null,
     comparisonIds: [],
     stagedDecision: null,
     decisionHistory: [],
@@ -80,7 +87,16 @@ function loadPersistedState() {
     const serialized = window.localStorage.getItem(STORAGE_KEY);
     if (!serialized) return null;
     const parsed: unknown = JSON.parse(serialized);
-    return isWorkspaceState(parsed) ? parsed : null;
+    if (!isWorkspaceState(parsed)) return null;
+    return {
+      ...initialState(),
+      ...parsed,
+      customRefinementQuestions: parsed.customRefinementQuestions ?? [],
+      answeredQuestionIds: parsed.answeredQuestionIds ?? [],
+      queuedRefinementLabels: parsed.queuedRefinementLabels ?? [],
+      searchRuns: parsed.searchRuns ?? [],
+      activeRunNumber: parsed.activeRunNumber ?? null,
+    };
   } catch {
     return null;
   }
@@ -137,6 +153,7 @@ function cloneCandidates(candidates: ApartmentCandidate[]) {
       recommended: candidate.scores.recommended,
     },
     source: { ...candidate.source },
+    media: candidate.media?.map((item) => ({ ...item })),
     allInEstimate: { ...candidate.allInEstimate },
   }));
 }
@@ -214,7 +231,18 @@ function proposalRecords(input: PreferenceProposalInput) {
   if (anchors.some((anchor) => !anchor.label)) {
     throw new Error("Every proposed location anchor needs a visible label.");
   }
-  return { preferences, anchors };
+  const customQuestions: RefinementQuestion[] = (input.customQuestions ?? []).slice(0, 8).map((question) => ({
+    id: createId("custom-question"),
+    question: question.question.trim().slice(0, 180),
+    reason: question.reason.trim().slice(0, 220),
+    blocking: false,
+    kind: question.kind ?? "other",
+    origin: "agent_custom",
+  }));
+  if (customQuestions.some((question) => !question.question || !question.reason)) {
+    throw new Error("Every custom refinement question needs visible question and reason text.");
+  }
+  return { preferences, anchors, customQuestions };
 }
 
 function mergeProposals(current: WorkspaceState, input: PreferenceProposalInput) {
@@ -223,6 +251,9 @@ function mergeProposals(current: WorkspaceState, input: PreferenceProposalInput)
     current.preferences.map((preference) => `${preference.kind}:${preference.label.toLowerCase()}`),
   );
   const existingAnchorKeys = new Set(current.anchors.map((anchor) => anchor.label.toLowerCase()));
+  const existingQuestionKeys = new Set(
+    current.customRefinementQuestions.map((question) => question.question.toLowerCase()),
+  );
   return {
     preferences: [
       ...current.preferences,
@@ -235,13 +266,21 @@ function mergeProposals(current: WorkspaceState, input: PreferenceProposalInput)
       ...current.anchors,
       ...proposed.anchors.filter((anchor) => !existingAnchorKeys.has(anchor.label.toLowerCase())),
     ],
+    customRefinementQuestions: [
+      ...current.customRefinementQuestions,
+      ...proposed.customQuestions.filter(
+        (question) => !existingQuestionKeys.has(question.question.toLowerCase()),
+      ),
+    ],
   };
 }
 
 function questionsFor(current: WorkspaceState) {
-  const questions = [];
+  const questions: RefinementQuestion[] = [];
+  const answered = new Set(current.answeredQuestionIds);
   const activePreferences = current.preferences.filter((preference) => preference.status !== "rejected");
   if (
+    !answered.has("refine-budget") &&
     current.query?.maxAllIn == null &&
     !activePreferences.some((preference) => preference.kind === "budget")
   ) {
@@ -250,20 +289,25 @@ function questionsFor(current: WorkspaceState) {
       question: "What monthly all-in range would feel comfortable?",
       reason: "This separates a low advertised rent from the amount you would actually pay.",
       blocking: false as const,
+      kind: "budget",
+      origin: "base",
     });
   }
-  if (!current.anchors.some((anchor) => anchor.status !== "rejected")) {
+  if (!answered.has("refine-anchors") && !current.anchors.some((anchor) => anchor.status !== "rejected")) {
     questions.push({
       id: "refine-anchors",
       question: "Which two or three places should be easiest to reach each week?",
       reason: "Work, groceries, transit, family or a favorite neighborhood can change the ranking.",
       blocking: false as const,
+      kind: "lifestyle",
+      origin: "base",
     });
   }
   if (
+    !answered.has("refine-space") &&
     current.query?.minBedrooms == null &&
     !activePreferences.some(
-      (preference) => preference.kind === "bedrooms" || preference.kind === "minimum_space",
+      (preference) => ["bedrooms", "minimum_space", "furniture"].includes(preference.kind),
     )
   ) {
     questions.push({
@@ -271,17 +315,62 @@ function questionsFor(current: WorkspaceState) {
       question: "Do you need a separate office or space for any large furniture?",
       reason: "A listing can fit the budget while failing the physical-layout test.",
       blocking: false as const,
+      kind: "furniture",
+      origin: "base",
     });
   }
-  if (!current.query?.moveWindow) {
+  if (
+    !answered.has("refine-move") &&
+    !current.query?.moveWindow &&
+    !activePreferences.some((preference) => preference.kind === "lease")
+  ) {
     questions.push({
       id: "refine-move",
       question: "When would you ideally move, and how flexible is that date?",
       reason: "Availability changes quickly and may exclude an otherwise strong match.",
       blocking: false as const,
+      kind: "lease",
+      origin: "base",
     });
   }
-  return questions;
+  const hasSignal = (pattern: RegExp) => activePreferences.some(
+    (preference) => pattern.test(`${preference.label} ${String(preference.value)}`),
+  );
+  if (!answered.has("refine-pets") && !hasSignal(/pet|dog|cat/i)) {
+    questions.push({
+      id: "refine-pets",
+      question: "Will any pets live with you?",
+      reason: "Pet rules and monthly fees can change both fit and all-in cost.",
+      blocking: false,
+      kind: "amenity",
+      origin: "base",
+    });
+  }
+  if (!answered.has("refine-transport") && !hasSignal(/parking|transit|car|bike/i)) {
+    questions.push({
+      id: "refine-transport",
+      question: "Do you need parking, transit access, or secure bike storage?",
+      reason: "Transportation needs can reorder otherwise similar apartments.",
+      blocking: false,
+      kind: "amenity",
+      origin: "base",
+    });
+  }
+  if (!answered.has("refine-noise") && !hasSignal(/quiet|noise|street|night/i)) {
+    questions.push({
+      id: "refine-noise",
+      question: "How important is a quiet home, especially at night?",
+      reason: "Street exposure, nightlife and building construction can create a meaningful tradeoff.",
+      blocking: false,
+      kind: "lifestyle",
+      origin: "base",
+    });
+  }
+
+  const custom = current.customRefinementQuestions.filter(
+    (question) => !answered.has(question.id),
+  );
+  return [...custom, ...questions].slice(0, 4);
 }
 
 function defaultDirection(by: SortOption) {
@@ -409,19 +498,73 @@ function reviewPreferences(ids: string[], status: "approved" | "rejected") {
   );
 }
 
+function queueRefinementAnswer(
+  questionId: string,
+  preference: NonNullable<PreferenceProposalInput["preferences"]>[number],
+) {
+  const question = state.refinementQuestions.find((item) => item.id === questionId);
+  if (!question) throw new Error("That refinement question is not active in this workspace.");
+  const merged = mergeProposals(state, { preferences: [{ ...preference, source: "user_stated", confidence: 1 }] });
+  const label = preference.label.trim().slice(0, 160);
+  commit(
+    (current) => ({
+      ...current,
+      ...merged,
+      answeredQuestionIds: [...new Set([...current.answeredQuestionIds, questionId])],
+      queuedRefinementLabels: [...new Set([...current.queuedRefinementLabels, label])].slice(-8),
+    }),
+    {
+      type: "refinement_queued",
+      source: "human",
+      message: "A refinement answer was updated and is ready for the next ranking run.",
+    },
+  );
+  return { questionId, status: "queued_for_rerun" as const };
+}
+
+function selectSearchRun(runNumber: number) {
+  const run = state.searchRuns.find((item) => item.number === runNumber && item.status === "ready");
+  if (!run) throw new Error(`Run ${runNumber} is not ready.`);
+  commit((current) => ({
+    ...current,
+    activeRunNumber: run.number,
+    candidates: cloneCandidates(run.candidates),
+    visibleCandidateIds: run.candidates.map((candidate) => candidate.id),
+    searchStatus: "ready",
+    searchNote: `Showing Run ${run.number}.`,
+  }));
+  return run.number;
+}
+
 async function searchCandidates(
   query: SearchQuery = state.query ?? { city: "Salt Lake City", state: "UT" },
   client: SearchClient | null = configuredSearchClient,
 ): Promise<SearchOutcome> {
   const normalized = normalizeQuery(query);
+  const runNumber = Math.max(0, ...state.searchRuns.map((run) => run.number)) + 1;
+  const runId = createId("run");
+  const runStartedAt = now();
+  const runStartedMs = Date.now();
+  const triggerLabels = [...state.queuedRefinementLabels];
   commit(
-    (current) => ({
-      ...current,
-      query: normalized,
-      searchStatus: "searching",
-      searchNote: "Searching. Existing results remain visible while new evidence is gathered.",
-      refinementQuestions: [],
-    }),
+    (current) => {
+      const nextRun = {
+        id: runId,
+        number: runNumber,
+        status: "searching" as const,
+        startedAt: runStartedAt,
+        completedAt: null,
+        triggerLabels,
+        candidates: [],
+      };
+      return {
+        ...current,
+        query: normalized,
+        searchStatus: "searching",
+        searchNote: `Run ${runNumber} is ranking with the latest approved and updated context.`,
+        searchRuns: [...current.searchRuns, nextRun].slice(-5),
+      };
+    },
     { type: "search_started", source: "agent", message: `Searching apartments in ${normalized.city}.` },
   );
 
@@ -488,6 +631,16 @@ async function searchCandidates(
   );
   const sorted = sortCandidates(scored, "recommended", "desc", null).slice(0, 15);
 
+  // Keep a rerun's real state legible even when the deterministic demo scores
+  // faster than a human can perceive the Run 2 indicator. Live provider time
+  // naturally exceeds this small floor in most cases.
+  if (runNumber > 1) {
+    const remainingFeedbackMs = 320 - (Date.now() - runStartedMs);
+    if (remainingFeedbackMs > 0) {
+      await new Promise((resolve) => globalThis.setTimeout(resolve, remainingFeedbackMs));
+    }
+  }
+
   // Results are committed before questions on purpose: the renter gets useful output first.
   commit(
     (current) => ({
@@ -500,6 +653,14 @@ async function searchCandidates(
       sort: { by: "recommended", anchorId: null, direction: "desc" },
       comparisonIds: current.comparisonIds.filter((id) => sorted.some((item) => item.id === id)),
       refinementQuestions: [],
+      searchRuns: current.searchRuns.map((run) => run.id === runId ? {
+        ...run,
+        status: "ready" as const,
+        completedAt: now(),
+        candidates: cloneCandidates(sorted),
+      } : run),
+      activeRunNumber: runNumber,
+      queuedRefinementLabels: [],
     }),
     {
       type: "results_ready",
@@ -523,6 +684,7 @@ async function searchCandidates(
       question,
       reason,
     })),
+    runNumber,
   };
 }
 
@@ -558,6 +720,10 @@ function organizeResults(input: {
         sort: { by: input.by, anchorId, direction },
         candidates: sorted,
         visibleCandidateIds: sorted.map((candidate) => candidate.id),
+        searchRuns: current.searchRuns.map((run) => run.number === current.activeRunNumber ? {
+          ...run,
+          candidates: cloneCandidates(sorted),
+        } : run),
       };
     },
     {
@@ -804,7 +970,9 @@ export const workspaceActions = {
   rejectPreferences(ids: string[]) {
     reviewPreferences(ids, "rejected");
   },
+  queueRefinementAnswer,
   searchCandidates,
+  selectSearchRun,
   organizeResults,
   addCandidate,
   setComparisonSelection,

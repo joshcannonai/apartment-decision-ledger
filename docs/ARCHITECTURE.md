@@ -19,6 +19,12 @@ personal agent or human interface
 
 The human interface and WebMCP tools call the same domain actions. WebMCP does not scrape the DOM, contact third-party providers directly, or maintain a competing state model.
 
+## Refinement and run history
+
+The first search creates an immutable Run 1 candidate snapshot. Answers to deterministic or agent-supplied follow-up questions are queued as current-search context; they do not mutate the visible ranking until the renter explicitly reruns it. A rerun creates a searching Run 2 while Run 1 stays readable, then stores the newly scored candidates as another snapshot. The UI can switch between ready runs and explain movement against the previous run.
+
+This is page-owned state, so the same behavior applies whether the answer came from a human control or a WebMCP-enabled agent. Saving a preference beyond the current anonymous workspace remains a separate approval action.
+
 ## Search modes
 
 ### Verified demo
@@ -53,8 +59,10 @@ Media never blocks the result set or ranking. Public source-linked images load i
 
 1. the selected leading candidate's primary decision image;
 2. primary images for the five candidates visible in the first result viewport;
-3. up to four supporting images for the selected candidate;
-4. remaining result images during browser idle time.
+3. the first three supporting images for the selected candidate;
+4. remaining selected and result images during browser idle time.
+
+Media ordering is deterministic. If trusted metadata marks a floor plan, it is placed fourth when three ordinary photos exist, otherwise at the latest available position. A future live adapter should enrich only the leading candidates from authorized provider media, cache that result, and keep page scraping out of the initial search path.
 
 Every media record carries a source URL, observation time, alt text, and an explicit scope: `exact_unit`, `building`, or `community`. The UI does not present a building exterior or community gallery as proof of an exact unit. A failed or absent image becomes a neutral evidence placeholder and does not remove the candidate.
 

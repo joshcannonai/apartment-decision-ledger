@@ -6,6 +6,8 @@ import {
   ChevronDown,
   Clock3,
   MapPin,
+  LoaderCircle,
+  RefreshCw,
   RotateCcw,
   Sparkles,
   X,
@@ -28,6 +30,8 @@ type ContextPanelProps = {
   stagedDecision: StagedDecision | null;
   stagedCandidate: ApartmentCandidate | null;
   onAnswer: (question: RefinementQuestion, answer: string) => void;
+  onRerun: () => void;
+  isRerunning: boolean;
   onApprovePreference: (id: string) => void;
   onRejectPreference: (id: string) => void;
   onApproveAnchor: (id: string) => void;
@@ -49,6 +53,8 @@ export function ContextPanel({
   stagedDecision,
   stagedCandidate,
   onAnswer,
+  onRerun,
+  isRerunning,
   onApprovePreference,
   onRejectPreference,
   onApproveAnchor,
@@ -56,6 +62,7 @@ export function ContextPanel({
   onUndoDecision,
 }: ContextPanelProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [updatedQuestionIds, setUpdatedQuestionIds] = useState<string[]>([]);
   const pendingPreferences = preferences.filter((preference) => preference.status === "pending");
   const acceptedPreferences = preferences.filter((preference) => preference.status === "approved");
   const pendingAnchors = anchors.filter((anchor) => anchor.status === "pending");
@@ -82,29 +89,52 @@ export function ContextPanel({
         <h2>Answer these to enhance and narrow your search</h2>
         <p className="section-intro">You already have results. Answer only what helps.</p>
         <div className="question-list">
-          {questions.map((question) => (
+          {questions.map((question) => {
+            const updated = updatedQuestionIds.includes(question.id);
+            return (
             <form
               key={question.id}
-              className="question-row"
+              className={`question-row${updated ? " is-updated" : ""}`}
               onSubmit={(event) => {
                 event.preventDefault();
+                if (updated) {
+                  onRerun();
+                  return;
+                }
                 const answer = answers[question.id]?.trim();
-                if (answer) onAnswer(question, answer);
+                if (answer) {
+                  onAnswer(question, answer);
+                  setUpdatedQuestionIds((current) => [...new Set([...current, question.id])]);
+                }
               }}
             >
-              <label htmlFor={`answer-${question.id}`}>{question.question}</label>
+              <label htmlFor={`answer-${question.id}`}>
+                {question.question}
+                {question.origin === "agent_custom" ? <span className="agent-question-label">Agent follow-up</span> : null}
+                {updated ? <span className="updated-label"><Check size={12} /> Updated</span> : null}
+              </label>
               <small>{question.reason}</small>
               <div>
                 <input
                   id={`answer-${question.id}`}
                   value={answers[question.id] ?? ""}
-                  onChange={(event) => setAnswers((current) => ({ ...current, [question.id]: event.target.value }))}
+                  onChange={(event) => {
+                    setAnswers((current) => ({ ...current, [question.id]: event.target.value }));
+                    setUpdatedQuestionIds((current) => current.filter((id) => id !== question.id));
+                  }}
                   placeholder="Type an answer"
                 />
-                <button type="submit" aria-label={`Apply answer to ${question.question}`}><Check size={15} /></button>
+                <button
+                  className={updated ? "rerun-question" : ""}
+                  type="submit"
+                  disabled={updated && isRerunning}
+                  aria-label={updated ? "Rerun ranking with updated answers" : `Apply answer to ${question.question}`}
+                >
+                  {updated && isRerunning ? <LoaderCircle className="spin" size={15} /> : updated ? <RefreshCw size={15} /> : <Check size={15} />}
+                </button>
               </div>
             </form>
-          ))}
+          );})}
         </div>
       </section>
 

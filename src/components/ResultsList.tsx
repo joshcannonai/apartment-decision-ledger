@@ -1,12 +1,15 @@
 import {
   ArrowDownUp,
+  ArrowDown,
+  ArrowUp,
   Check,
   Clock3,
   ImageOff,
+  LoaderCircle,
   MapPin,
   Ruler,
 } from "lucide-react";
-import type { ApartmentCandidate, SearchAnchor, SortOption } from "../domain/types";
+import type { ApartmentCandidate, SearchAnchor, SearchRun, SortOption } from "../domain/types";
 import { formatFreshness, formatMoney, scoreTone } from "./format";
 import type { MediaPhase } from "../media/priority";
 import { mediaLoadingHint, shouldRequestMedia } from "../media/priority";
@@ -23,6 +26,9 @@ type ResultsListProps = {
   onSort: (sort: SortOption) => void;
   mediaPhase: MediaPhase;
   onMediaSettled: (candidateId: string, mediaIndex: number, rank: number) => void;
+  searchRuns: SearchRun[];
+  activeRunNumber: number | null;
+  onSelectRun: (runNumber: number) => void;
 };
 
 const sortOptions: Array<{ value: SortOption; label: string }> = [
@@ -48,13 +54,34 @@ export function ResultsList({
   onSort,
   mediaPhase,
   onMediaSettled,
+  searchRuns,
+  activeRunNumber,
+  onSelectRun,
 }: ResultsListProps) {
+  const readyRuns = searchRuns.filter((run) => run.status === "ready");
+  const activeRunIndex = readyRuns.findIndex((run) => run.number === activeRunNumber);
+  const previousRun = activeRunIndex > 0 ? readyRuns[activeRunIndex - 1] : null;
   return (
     <section className="results-region" aria-label="Ranked apartment results">
       <div className="region-heading results-heading">
         <div>
           <h2>{candidates.length} best options</h2>
           <p>Ranked for this search</p>
+        </div>
+        <div className="run-tabs" aria-label="Ranking runs">
+          {searchRuns.map((run) => (
+            <button
+              key={run.id}
+              type="button"
+              className={run.number === activeRunNumber ? "is-active" : ""}
+              disabled={run.status !== "ready"}
+              aria-pressed={run.number === activeRunNumber}
+              onClick={() => onSelectRun(run.number)}
+            >
+              {run.status === "searching" ? <LoaderCircle className="spin" size={12} /> : null}
+              Run {run.number}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -93,6 +120,8 @@ export function ResultsList({
               selected,
             }) : false;
             const loadingHint = mediaLoadingHint({ rank: index, mediaIndex: 0, selected });
+            const previousRank = previousRun?.candidates.findIndex((item) => item.id === candidate.id) ?? -1;
+            const rankDelta = previousRank >= 0 ? previousRank - index : null;
 
             return (
               <li key={candidate.id}>
@@ -129,6 +158,12 @@ export function ResultsList({
                         </span>
                       </span>
                       <span className="result-location">{candidate.neighborhood}</span>
+                      {rankDelta != null && rankDelta !== 0 ? (
+                        <span className={`result-change ${rankDelta > 0 ? "rose" : "fell"}`}>
+                          {rankDelta > 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+                          {rankDelta > 0 ? "Up" : "Down"} {Math.abs(rankDelta)} in this run
+                        </span>
+                      ) : null}
                       <span className="result-cost">
                         {formatMoney(candidate.allInEstimate.low)}–{formatMoney(candidate.allInEstimate.high)} all in
                       </span>

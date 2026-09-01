@@ -65,6 +65,7 @@ export type CandidateMedia = {
   sourceLabel: string;
   sourceUrl: string;
   observedAt: string;
+  kind?: "photo" | "floor_plan";
 };
 
 export type DistanceEstimate = {
@@ -127,6 +128,18 @@ export type RefinementQuestion = {
   question: string;
   reason: string;
   blocking: false;
+  kind: PreferenceKind;
+  origin: "base" | "agent_custom";
+};
+
+export type SearchRun = {
+  id: string;
+  number: number;
+  status: "searching" | "ready" | "error";
+  startedAt: string;
+  completedAt: string | null;
+  triggerLabels: string[];
+  candidates: ApartmentCandidate[];
 };
 
 export type WorkspaceEvent = {
@@ -137,6 +150,7 @@ export type WorkspaceEvent = {
     | "preferences_reviewed"
     | "search_started"
     | "results_ready"
+    | "refinement_queued"
     | "results_organized"
     | "candidate_added"
     | "comparison_opened"
@@ -178,6 +192,11 @@ export type WorkspaceState = {
   anchors: SearchAnchor[];
   sort: { by: SortOption; anchorId: string | null; direction: "asc" | "desc" };
   refinementQuestions: RefinementQuestion[];
+  customRefinementQuestions: RefinementQuestion[];
+  answeredQuestionIds: string[];
+  queuedRefinementLabels: string[];
+  searchRuns: SearchRun[];
+  activeRunNumber: number | null;
   comparisonIds: string[];
   stagedDecision: StagedDecision | null;
   decisionHistory: Array<StagedDecision | null>;
@@ -200,6 +219,11 @@ export type PreferenceProposalInput = {
     longitude?: number;
     source?: PreferenceSource;
     confidence?: number;
+  }>;
+  customQuestions?: Array<{
+    question: string;
+    reason: string;
+    kind?: PreferenceKind;
   }>;
 };
 

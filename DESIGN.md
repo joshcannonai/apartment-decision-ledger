@@ -16,7 +16,8 @@ Help a renter make a defensible apartment decision with relevant personal contex
 
 - Desktop has three working regions: a narrow ranked shortlist, a flexible decision canvas, and a compact refinement rail.
 - The shortlist is image-led and dense enough to show five candidates without scrolling on a typical laptop.
-- The decision canvas owns the largest media and cost/fit evidence.
+- The decision canvas uses a short lead image with a vertical supporting strip; the source action follows the final supporting image.
+- Estimated all-in cost, space, Market Value, and Personal Fit sit in one compact decision rail beside the media.
 - The refinement rail asks only questions that can improve the ranking.
 - Mobile separates Results, Decision, and Refine into explicit views instead of squeezing three rails together.
 
@@ -24,8 +25,10 @@ Help a renter make a defensible apartment decision with relevant personal contex
 
 1. Load the selected candidate's primary decision image first.
 2. Load primary images for the first five ranked results.
-3. Load up to four selected-candidate supporting images.
+3. Load the first three selected-candidate supporting images.
 4. Load remaining result images during idle time.
+
+When a verified floor-plan image exists, order it fourth. Do not classify an image as a floor plan from visual guesswork in the critical path; prefer provider metadata or a cached enrichment result.
 
 Images never delay facts or ranking. Every image must identify its evidence scope as exact-unit, building, or community. Never imply that representative media proves the condition or layout of an exact unit.
 
@@ -46,6 +49,15 @@ Images never delay facts or ranking. Every image must identify its evidence scop
 4. Personal Fit as a circular score.
 
 Market Value and Personal Fit must remain visually separate. Scores always appear with evidence caveats elsewhere in the same decision view.
+Circular scores must display the true missing arc. A score of 97 cannot render as a complete ring.
+
+## Refinement runs
+
+- Base questions are deterministic and disappear as their information becomes known: budget, key locations, furniture or space constraints, move and lease window, pets, transportation, and noise sensitivity.
+- An agent may supply a relevant custom question with a reason; it is labeled as an agent follow-up.
+- Applying an answer marks it Updated but does not silently change the visible ranking.
+- The explicit rerun creates a preserved numbered snapshot. Run 1 remains available while Run 2 searches and after it completes.
+- The new run explains meaningful rank movement using the answer that triggered it.
 
 ## Disclosure rules
 

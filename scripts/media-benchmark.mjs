@@ -42,7 +42,21 @@ try {
     await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
     const selectedGallery = performance.now() - startedAt;
 
-    samples.push({ results, leadImage, firstFive, selectedGallery });
+    const customQuestion = page.locator(".question-row", { hasText: "72-inch desk" });
+    await customQuestion.getByRole("textbox").fill("Yes, an elevator or ground-floor unit matters.");
+    await customQuestion.getByRole("button", { name: /Apply answer/i }).click();
+    const rerunStartedAt = performance.now();
+    await customQuestion.getByRole("button", { name: /Rerun ranking/i }).click();
+    const runTwo = page.getByRole("button", { name: "Run 2" });
+    await runTwo.waitFor();
+    await page.waitForFunction(() => {
+      const buttons = [...document.querySelectorAll("button")];
+      const run = buttons.find((button) => button.textContent?.trim() === "Run 2");
+      return run instanceof HTMLButtonElement && !run.disabled && run.getAttribute("aria-pressed") === "true";
+    });
+    const refinementRerun = performance.now() - rerunStartedAt;
+
+    samples.push({ results, leadImage, firstFive, selectedGallery, refinementRerun });
     await context.close();
   }
 } finally {
@@ -69,5 +83,6 @@ console.log(JSON.stringify({
   leadImage: summarize("leadImage"),
   firstFiveResultImages: summarize("firstFive"),
   selectedGallery: summarize("selectedGallery"),
+  refinementRerun: summarize("refinementRerun"),
   scope: "Fresh browser contexts on the local deterministic demo. Includes network image fetches from their public source URLs; excludes browser-agent reasoning and a live listing-provider search.",
 }, null, 2));

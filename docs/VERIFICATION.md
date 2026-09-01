@@ -8,15 +8,17 @@ Verified locally on September 1, 2026.
 | --- | --- |
 | TypeScript project references | Passed |
 | ESLint | Passed |
-| Vitest | 7 files, 22 tests passed |
+| Vitest | 8 files, 27 tests passed |
 | Production build | Passed |
 | Full npm dependency audit | 0 vulnerabilities |
 | Native Chrome WebMCP discovery | 7 of 7 tools registered |
 | Native Chrome WebMCP execution | 7 of 7 tools invoked successfully |
 | Browser console and page errors | 0 |
 | Deterministic demo results | 15 |
-| Responsive screenshot states | Empty desktop, workspace desktop, mobile results, mobile decision, mobile refinement |
-| Progressive media sequence | Lead image, first five result images, then selected gallery |
+| Responsive screenshot states | 8 states: empty, workspace, Updated answer, Run 2 loading, Run 2 ready, mobile results, mobile decision, mobile refinement |
+| Progressive media sequence | Lead image, first five result images, first gallery batch, then background media |
+| Layout detector | 0 findings across the changed application surfaces |
+| Refinement history | Run 1 remains selectable while Run 2 searches and after it is ready |
 
 ## Local media benchmark
 
@@ -24,10 +26,13 @@ Seven fresh Chrome contexts measured from demo activation. This is the determini
 
 | Milestone | Average | Median | P95 |
 | --- | ---: | ---: | ---: |
-| Results visible | 158 ms | 155 ms | 175 ms |
-| Lead image visible | 166 ms | 163 ms | 184 ms |
-| First five result images visible | 428 ms | 424 ms | 441 ms |
-| Selected four-image gallery visible | 448 ms | 450 ms | 461 ms |
+| Results visible | 153 ms | 153 ms | 179 ms |
+| Lead image visible | 168 ms | 161 ms | 196 ms |
+| First five result images visible | 430 ms | 422 ms | 473 ms |
+| Selected four-image gallery visible | 451 ms | 441 ms | 493 ms |
+| Refinement Run 2 ready | 370 ms | 368 ms | 382 ms |
+
+The Run 2 measurement begins when the explicit rerun control is selected. The deterministic demo intentionally keeps its searching state visible for at least 320 ms; it does not represent a live provider request.
 
 ## Per-tool WebMCP ladder
 

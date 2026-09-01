@@ -19,7 +19,7 @@ import { OptionalAccountDialog } from "./components/OptionalAccountDialog";
 import { ResultsList } from "./components/ResultsList";
 import { SearchHeader } from "./components/SearchHeader";
 import { useWorkspace, workspaceActions } from "./domain/store";
-import type { PreferenceKind, RefinementQuestion, SearchQuery, SortOption } from "./domain/types";
+import type { RefinementQuestion, SearchQuery, SortOption } from "./domain/types";
 import { SLC_DEMO_CANDIDATES } from "./data/slcCandidates";
 import type { MediaPhase } from "./media/priority";
 
@@ -65,16 +65,14 @@ const demoContext = {
       confidence: 0.7,
     },
   ],
+  customQuestions: [
+    {
+      question: "Would carrying the 72-inch desk up stairs rule out a walk-up?",
+      reason: "Your agent flagged a large desk; elevator and stair access could change otherwise strong options.",
+      kind: "furniture" as const,
+    },
+  ],
 };
-
-function kindForQuestion(question: RefinementQuestion): PreferenceKind {
-  const text = `${question.id} ${question.question}`.toLowerCase();
-  if (text.includes("budget") || text.includes("cost") || text.includes("rent")) return "budget";
-  if (text.includes("bed")) return "bedrooms";
-  if (text.includes("move") || text.includes("lease")) return "lease";
-  if (text.includes("space") || text.includes("square")) return "minimum_space";
-  return "other";
-}
 
 export function App() {
   const workspace = useWorkspace();
@@ -106,6 +104,13 @@ export function App() {
   const stagedCandidate = workspace.stagedDecision
     ? workspace.candidates.find((candidate) => candidate.id === workspace.stagedDecision?.candidateId) ?? null
     : null;
+  const readyRuns = workspace.searchRuns.filter((run) => run.status === "ready");
+  const activeRunIndex = readyRuns.findIndex((run) => run.number === workspace.activeRunNumber);
+  const activeRun = activeRunIndex >= 0 ? readyRuns[activeRunIndex] : null;
+  const previousRun = activeRunIndex > 0 ? readyRuns[activeRunIndex - 1] : null;
+  const selectedPreviousRank = previousRun && selectedCandidate
+    ? previousRun.candidates.findIndex((candidate) => candidate.id === selectedCandidate.id)
+    : -1;
 
   useEffect(() => {
     if (visibleCandidates.length === 0) return;
@@ -179,19 +184,22 @@ export function App() {
   }
 
   function answerQuestion(question: RefinementQuestion, answer: string) {
-    const kind = kindForQuestion(question);
+    const kind = question.kind;
     const numericValue = Number(answer.replace(/[^0-9.]/g, ""));
-    workspaceActions.proposePreferences({
-      preferences: [{
-        kind,
-        label: `${question.question} ${answer}`,
-        value: kind === "budget" || kind === "bedrooms" || kind === "minimum_space"
-          ? (Number.isFinite(numericValue) && numericValue > 0 ? numericValue : answer)
-          : answer,
-        source: "user_stated",
-        confidence: 1,
-      }],
+    workspaceActions.queueRefinementAnswer(question.id, {
+      kind,
+      label: `${question.question} ${answer}`,
+      value: ["budget", "bedrooms", "minimum_space"].includes(kind)
+        ? (Number.isFinite(numericValue) && numericValue > 0 ? numericValue : answer)
+        : answer,
+      source: "user_stated",
+      confidence: 1,
     });
+  }
+
+  async function rerunSearch() {
+    if (!workspace.query || workspace.searchStatus === "searching") return;
+    await workspaceActions.searchCandidates(workspace.query);
   }
 
   function resetWorkspace() {
@@ -277,6 +285,9 @@ export function App() {
               onSort={organizeResults}
               mediaPhase={mediaPhase}
               onMediaSettled={handleMediaSettled}
+              searchRuns={workspace.searchRuns}
+              activeRunNumber={workspace.activeRunNumber}
+              onSelectRun={(runNumber) => workspaceActions.selectSearchRun(runNumber)}
             />
             <CandidateDetail
               candidate={selectedCandidate}
@@ -291,6 +302,12 @@ export function App() {
                 });
               }}
               rank={Math.max(0, visibleCandidates.findIndex((candidate) => candidate.id === selectedCandidate.id))}
+              runContext={{
+                number: activeRun?.number ?? 1,
+                previousCandidate: previousRun?.candidates.find((candidate) => candidate.id === selectedCandidate.id) ?? null,
+                previousRank: selectedPreviousRank >= 0 ? selectedPreviousRank : null,
+                triggerLabels: activeRun?.triggerLabels ?? [],
+              }}
               mediaPhase={mediaPhase}
               onMediaSettled={handleMediaSettled}
             />
@@ -302,6 +319,8 @@ export function App() {
               stagedDecision={workspace.stagedDecision}
               stagedCandidate={stagedCandidate}
               onAnswer={answerQuestion}
+              onRerun={() => void rerunSearch()}
+              isRerunning={workspace.searchStatus === "searching"}
               onApprovePreference={(id) => workspaceActions.approvePreferences([id])}
               onRejectPreference={(id) => workspaceActions.rejectPreferences([id])}
               onApproveAnchor={(id) => workspaceActions.approvePreferences([id])}

@@ -35,11 +35,19 @@ type PrepareSearchInput = {
   request?: string;
   preferences?: ToolPreference[];
   anchors?: ToolAnchor[];
+  customQuestions?: ToolQuestion[];
 };
 
 type ProposePreferencesInput = {
   preferences?: ToolPreference[];
   anchors?: ToolAnchor[];
+  customQuestions?: ToolQuestion[];
+};
+
+type ToolQuestion = {
+  question: string;
+  reason: string;
+  kind?: PreferenceKind;
 };
 
 type SearchCandidatesInput = {
@@ -102,15 +110,34 @@ function toQuery(input: SearchCandidatesInput | PrepareSearchInput): SearchQuery
 }
 
 function toProposals(input: ProposePreferencesInput | PrepareSearchInput): PreferenceProposalInput {
-  return { preferences: input.preferences, anchors: input.anchors };
+  return {
+    preferences: input.preferences,
+    anchors: input.anchors,
+    customQuestions: input.customQuestions,
+  };
 }
+
+const customQuestionSchema = {
+  type: "array",
+  maxItems: 8,
+  items: {
+    type: "object",
+    properties: {
+      question: { type: "string", minLength: 1, maxLength: 180 },
+      reason: { type: "string", minLength: 1, maxLength: 220 },
+      kind: { type: "string", enum: Object.values(preferenceProperties.kind.enum) },
+    },
+    required: ["question", "reason"],
+    additionalProperties: false,
+  },
+};
 
 export const prepareSearchTool = defineTool<PrepareSearchInput>({
   stableKey: "apartment.prepare_search",
   name: "prepare_search",
   title: "Prepare apartment search",
   description:
-    "Prepare an apartment search from the renter's request and only the context they or their agent explicitly share. Use before searching when context is available. It visibly labels agent-proposed preferences and location anchors as pending, applies them only to the current search, saves nothing durably without human approval, and returns readiness counts.",
+    "Prepare an apartment search from the renter's request and only the context they or their agent explicitly share. Use before searching when context is available. It visibly labels agent-proposed preferences and location anchors as pending, accepts relevant custom follow-up questions, applies context only to the current search, saves nothing durably without human approval, and returns readiness counts.",
   version: "1.0.0",
   source: "merchant_authored",
   intent: "act",
@@ -144,6 +171,7 @@ export const prepareSearchTool = defineTool<PrepareSearchInput>({
           additionalProperties: false,
         },
       },
+      customQuestions: customQuestionSchema,
     },
     required: ["city"],
     additionalProperties: false,
@@ -158,7 +186,7 @@ export const proposePreferencesTool = defineTool<ProposePreferencesInput>({
   name: "propose_preferences",
   title: "Propose renter context",
   description:
-    "Show renter preferences or important location anchors that the agent has relevant reason to propose. Use to improve the current ranking after results appear. The proposals visibly include source and confidence, immediately affect only this search, and remain pending until the human approves or rejects them.",
+    "Show renter preferences, important location anchors, or relevant custom follow-up questions the agent has reason to propose. Use to improve the current ranking after results appear. Context proposals visibly include source and confidence, affect only a later explicit rerun, and remain pending until the human approves or rejects them for durable saving.",
   version: "1.0.0",
   source: "merchant_authored",
   intent: "act",
@@ -186,12 +214,17 @@ export const proposePreferencesTool = defineTool<ProposePreferencesInput>({
           additionalProperties: false,
         },
       },
+      customQuestions: customQuestionSchema,
     },
     additionalProperties: false,
   },
   execute(input) {
-    if ((input.preferences?.length ?? 0) === 0 && (input.anchors?.length ?? 0) === 0) {
-      throw new Error("Provide at least one preference or location anchor to propose.");
+    if (
+      (input.preferences?.length ?? 0) === 0 &&
+      (input.anchors?.length ?? 0) === 0 &&
+      (input.customQuestions?.length ?? 0) === 0
+    ) {
+      throw new Error("Provide at least one preference, location anchor, or custom question to propose.");
     }
     return workspaceActions.proposePreferences(toProposals(input));
   },
@@ -202,7 +235,7 @@ export const searchCandidatesTool = defineTool<SearchCandidatesInput>({
   name: "search_candidates",
   title: "Search apartment candidates",
   description:
-    "Run the site's apartment search and visibly rank up to 15 candidates. Use as soon as a city is known; do not wait for every preference. Results appear before optional refinement questions. It returns compact result IDs, source-mode metadata, and the few follow-up questions the agent should ask next; listing claims remain untrusted until their linked sources are verified.",
+    "Run the site's apartment search and visibly rank up to 15 candidates. Use as soon as a city is known; do not wait for every preference. Results appear before optional refinement questions. A later call creates a preserved numbered run so the renter can compare ranking changes. It returns compact result IDs, source-mode metadata, and the few follow-up questions the agent should ask next; listing claims remain untrusted until their linked sources are verified.",
   version: "1.0.0",
   source: "merchant_authored",
   intent: "act",

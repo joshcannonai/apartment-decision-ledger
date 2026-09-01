@@ -8,6 +8,8 @@ The renter's personal agent brings only the context it chooses to share. The pag
 
 - Complete anonymous experience; sign-in is not required.
 - Results before questionnaire: a location is enough to produce a preliminary shortlist.
+- Deterministic unanswered questions and agent-supplied custom follow-ups can refine the shortlist without blocking the first result set.
+- Explicit numbered reruns preserve the original ranking and explain what changed.
 - Preferences and location anchors are visibly attributed and require approval before durable saving.
 - Market Value Score and Personal Fit Score remain separate.
 - No applications, bookings, landlord messages, payments, or lease commitments.
@@ -53,7 +55,7 @@ npm run qa
 
 The QA pass discovers and invokes all seven WebMCP tools in an isolated anonymous workspace, verifies visible UI effects, checks persistence and responsive rendering, captures desktop plus all three mobile workspace sections, and fails on browser console errors.
 
-The media benchmark opens fresh browser contexts and measures the non-blocking sequence from visible results to the lead image, first-screen shortlist images, and selected listing gallery.
+The media benchmark opens fresh browser contexts and measures the non-blocking sequence from visible results to the lead image, first-screen shortlist images, selected listing gallery, and a visible refinement rerun.
 
 ## Optional nationwide provider
 
@@ -70,6 +72,6 @@ The live adapter:
 
 ## Submission status
 
-The local product, deterministic demo, submission copy, demo script, and verification harness are complete. Typecheck, lint, 22 tests, production build, native Chrome WebMCP execution, and the full npm security audit pass.
+The local product, deterministic demo, submission copy, demo script, and verification harness are complete. Typecheck, lint, 27 tests, production build, native Chrome WebMCP execution, and the full npm security audit pass.
 
 Publishing a GitHub repository, deploying to Vercel, enabling paid providers, recording/uploading the demo video, and submitting the entry remain separate approval-time actions.

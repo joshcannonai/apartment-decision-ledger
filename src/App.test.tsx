@@ -80,4 +80,26 @@ describe("Apartment Decision Ledger UI", () => {
       expect(screen.queryByText(/marks one leading option in this workspace only/i)).not.toBeInTheDocument();
     });
   });
+
+  it("queues an answer, marks it updated, and exposes Run 2 without replacing Run 1", async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /salt lake city demo/i }));
+    await screen.findByRole("heading", { name: /best options/i });
+
+    const customQuestion = screen.getByText(/carrying the 72-inch desk/i).closest("form");
+    expect(customQuestion).not.toBeNull();
+    fireEvent.change(within(customQuestion!).getByPlaceholderText(/type an answer/i), {
+      target: { value: "Yes, elevator access matters" },
+    });
+    fireEvent.click(within(customQuestion!).getByRole("button", { name: /apply answer/i }));
+
+    expect(within(customQuestion!).getByText("Updated")).toBeInTheDocument();
+    fireEvent.click(within(customQuestion!).getByRole("button", { name: /rerun ranking/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Run 2" })).toBeEnabled();
+    });
+    expect(screen.getByRole("button", { name: "Run 1" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Run 2" })).toHaveAttribute("aria-pressed", "true");
+  });
 });
