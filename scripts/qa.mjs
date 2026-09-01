@@ -184,6 +184,12 @@ try {
   await page.reload({ waitUntil: "networkidle" });
   await page.getByRole("heading", { name: /best options/i }).waitFor();
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-mobile.png"), fullPage: true });
+  await page.getByRole("button", { name: "Decision" }).click();
+  await page.getByRole("heading", { name: /Capitol Reef/i }).waitFor();
+  await page.screenshot({ path: resolve(artifactDirectory, "workspace-mobile-decision.png"), fullPage: true });
+  await page.getByRole("button", { name: "Refine" }).click();
+  await page.getByRole("heading", { name: /enhance and narrow/i }).waitFor();
+  await page.screenshot({ path: resolve(artifactDirectory, "workspace-mobile-refine.png"), fullPage: true });
 
   if (consoleErrors.length > 0) {
     throw new Error(`Browser console errors:\n${consoleErrors.join("\n")}`);
@@ -196,7 +202,7 @@ try {
         resultCount,
         tools: webmcp.tools,
         invokedTools: Object.keys(webmcp.results).sort(),
-        screenshots: 3,
+        screenshots: 5,
       },
       null,
       2,

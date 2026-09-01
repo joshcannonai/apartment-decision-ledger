@@ -15,7 +15,7 @@ Verified locally on August 31, 2026.
 | Native Chrome WebMCP execution | 7 of 7 tools invoked successfully |
 | Browser console and page errors | 0 |
 | Deterministic demo results | 15 |
-| Responsive screenshot states | Empty desktop, workspace desktop, workspace mobile |
+| Responsive screenshot states | Empty desktop, workspace desktop, mobile results, mobile decision, mobile refinement |
 
 ## Per-tool WebMCP ladder
 

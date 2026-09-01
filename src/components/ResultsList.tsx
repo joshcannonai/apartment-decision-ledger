@@ -2,7 +2,6 @@ import {
   ArrowDownUp,
   Check,
   Clock3,
-  ListFilter,
   MapPin,
   Ruler,
 } from "lucide-react";
@@ -47,12 +46,9 @@ export function ResultsList({
     <section className="results-region" aria-label="Ranked apartment results">
       <div className="region-heading results-heading">
         <div>
-          <p className="eyebrow">Ranked shortlist</p>
           <h2>{candidates.length} best options</h2>
+          <p>Ranked for this search</p>
         </div>
-        <button className="filter-button" type="button" aria-label="Filters are available in refinement panel">
-          <ListFilter size={17} />
-        </button>
       </div>
 
       <p className="results-source-note"><Clock3 size={13} /> {sourceNote}</p>

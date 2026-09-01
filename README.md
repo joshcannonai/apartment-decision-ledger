@@ -50,7 +50,7 @@ With the app running at `http://127.0.0.1:4173`, Chrome 150+ can execute the nat
 npm run qa
 ```
 
-The QA pass discovers and invokes all seven WebMCP tools in an isolated anonymous workspace, verifies visible UI effects, checks persistence and responsive rendering, captures three local screenshots, and fails on browser console errors.
+The QA pass discovers and invokes all seven WebMCP tools in an isolated anonymous workspace, verifies visible UI effects, checks persistence and responsive rendering, captures desktop plus all three mobile workspace sections, and fails on browser console errors.
 
 ## Optional nationwide provider
 

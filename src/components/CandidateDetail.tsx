@@ -48,7 +48,7 @@ export function CandidateDetail({
     <article className="candidate-detail">
       <div className="detail-topline">
         <div>
-          <p className="eyebrow">{candidate.neighborhood}</p>
+          <p className="detail-neighborhood">{candidate.neighborhood}</p>
           <h1>{candidate.name}</h1>
           <p className="detail-address">{candidate.address}, {candidate.city}</p>
         </div>
@@ -78,8 +78,8 @@ export function CandidateDetail({
       <section className="cost-ledger" aria-labelledby="cost-heading">
         <div className="section-heading-row">
           <div>
-            <p className="eyebrow">Cost ledger</p>
             <h2 id="cost-heading">What this could actually cost</h2>
+            <p>Advertised rent, planning range, and usable space in one view.</p>
           </div>
           <span className="evidence-badge">Evidence {candidate.source.evidenceGrade}</span>
         </div>
@@ -105,8 +105,8 @@ export function CandidateDetail({
       <section className="score-section" aria-labelledby="score-heading">
         <div className="section-heading-row">
           <div>
-            <p className="eyebrow">Two different questions</p>
             <h2 id="score-heading">Value is not the same as fit</h2>
+            <p>Market pricing and personal constraints stay separate.</p>
           </div>
         </div>
         <div className="score-grid">
@@ -146,7 +146,6 @@ export function CandidateDetail({
 
       <div className="detail-columns">
         <section>
-          <p className="eyebrow">Matched</p>
           <h2>Why it rose</h2>
           <ul className="signal-list positive-list">
             {candidate.scores.personalFit.matched.length > 0
@@ -155,7 +154,6 @@ export function CandidateDetail({
           </ul>
         </section>
         <section>
-          <p className="eyebrow">Verify before deciding</p>
           <h2>Open questions</h2>
           <ul className="signal-list unknown-list">
             {candidate.unknowns.map((item) => <li key={item}><AlertCircle size={15} /> {item}</li>)}

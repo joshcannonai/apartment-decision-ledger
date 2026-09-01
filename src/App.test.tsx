@@ -51,6 +51,22 @@ describe("Apartment Decision Ledger UI", () => {
     expect(screen.getByRole("button", { name: /compare 1 option/i })).toHaveTextContent("Add one more");
   });
 
+  it("moves between the mobile workspace sections without losing the selected candidate", async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /salt lake city demo/i }));
+    await screen.findByRole("heading", { name: /best options/i });
+
+    const decisionTab = screen.getByRole("button", { name: "Decision" });
+    const refineTab = screen.getByRole("button", { name: "Refine" });
+    fireEvent.click(decisionTab);
+    expect(decisionTab).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("heading", { name: /Capitol Reef/i })).toBeInTheDocument();
+
+    fireEvent.click(refineTab);
+    expect(refineTab).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("heading", { name: /enhance and narrow/i })).toBeInTheDocument();
+  });
+
   it("stages a reversible internal decision without implying landlord action", async () => {
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: /salt lake city demo/i }));

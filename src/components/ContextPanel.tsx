@@ -65,7 +65,7 @@ export function ContextPanel({
     <aside className="context-region" aria-label="Search refinement and approvals">
       {stagedDecision && stagedCandidate ? (
         <section className="decision-review">
-          <p className="eyebrow"><Sparkles size={13} /> Decision staged</p>
+          <p className="decision-status"><Sparkles size={13} /> Decision staged</p>
           <h2>{stagedCandidate.name}</h2>
           <p>{stagedDecision.rationale}</p>
           <div className="decision-scope">
@@ -79,7 +79,6 @@ export function ContextPanel({
       ) : null}
 
       <section className="refinement-section">
-        <p className="eyebrow">Next best questions</p>
         <h2>Answer these to enhance and narrow your search</h2>
         <p className="section-intro">You already have results. Answer only what helps.</p>
         <div className="question-list">
@@ -111,8 +110,7 @@ export function ContextPanel({
 
       {(pendingPreferences.length > 0 || pendingAnchors.length > 0) ? (
         <section className="approval-section">
-          <p className="eyebrow"><Bot size={13} /> Agent proposals</p>
-          <h2>Review what shaped this ranking</h2>
+          <h2><Bot size={16} /> Review what shaped this ranking</h2>
           <p className="section-intro">Used for this search now. Approve only if you want it remembered.</p>
 
           {pendingPreferences.map((preference) => (

@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
-  Bot,
   Building2,
   CheckCircle2,
+  FileText,
+  List,
   LoaderCircle,
   MapPin,
   Search,
   ShieldCheck,
+  SlidersHorizontal,
 } from "lucide-react";
 import { CandidateDetail } from "./components/CandidateDetail";
 import { CompareTray } from "./components/CompareTray";
@@ -74,6 +76,7 @@ function kindForQuestion(question: RefinementQuestion): PreferenceKind {
 export function App() {
   const workspace = useWorkspace();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mobileSection, setMobileSection] = useState<"results" | "decision" | "context">("results");
   const [compareOpen, setCompareOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
 
@@ -100,6 +103,7 @@ export function App() {
     : null;
 
   async function runSearch(city: string, includeDemoContext = false) {
+    setMobileSection("results");
     const query: SearchQuery = { city, text: city };
     workspaceActions.prepareSearch(query, includeDemoContext ? demoContext : undefined);
     await workspaceActions.searchCandidates(query);
@@ -149,6 +153,7 @@ export function App() {
     workspaceActions.resetWorkspace();
     setCompareOpen(false);
     setSelectedId(null);
+    setMobileSection("results");
   }
 
   const hasWorkspace = workspace.query != null || workspace.candidates.length > 0;
@@ -183,7 +188,33 @@ export function App() {
         ) : null}
 
         {visibleCandidates.length > 0 && selectedCandidate ? (
-          <div className="workspace-layout">
+          <div className={`workspace-layout workspace-${mobileSection}`}>
+            <nav className="mobile-workspace-nav" aria-label="Apartment workspace sections">
+              <button
+                type="button"
+                className={mobileSection === "results" ? "is-active" : ""}
+                aria-current={mobileSection === "results" ? "page" : undefined}
+                onClick={() => setMobileSection("results")}
+              >
+                <List size={16} /> Results
+              </button>
+              <button
+                type="button"
+                className={mobileSection === "decision" ? "is-active" : ""}
+                aria-current={mobileSection === "decision" ? "page" : undefined}
+                onClick={() => setMobileSection("decision")}
+              >
+                <FileText size={16} /> Decision
+              </button>
+              <button
+                type="button"
+                className={mobileSection === "context" ? "is-active" : ""}
+                aria-current={mobileSection === "context" ? "page" : undefined}
+                onClick={() => setMobileSection("context")}
+              >
+                <SlidersHorizontal size={16} /> Refine
+              </button>
+            </nav>
             <ResultsList
               candidates={visibleCandidates}
               selectedId={selectedCandidate.id}
@@ -191,7 +222,10 @@ export function App() {
               sortBy={workspace.sort.by}
               anchors={workspace.anchors.filter((anchor) => anchor.status !== "rejected")}
               sourceNote={workspace.searchNote}
-              onSelect={setSelectedId}
+              onSelect={(candidateId) => {
+                setSelectedId(candidateId);
+                setMobileSection("decision");
+              }}
               onToggleCompare={toggleCompare}
               onSort={organizeResults}
             />
@@ -235,6 +269,7 @@ export function App() {
         onSelect={(id) => {
           setSelectedId(id);
           setCompareOpen(false);
+          setMobileSection("decision");
         }}
       />
 
@@ -249,7 +284,6 @@ function EmptyWorkspace({ onSearch, onDemo }: { onSearch: (city: string) => void
   return (
     <section className="empty-workspace">
       <div className="empty-hero">
-        <p className="eyebrow"><Bot size={14} /> Built for you and your agent</p>
         <h1>Find the apartment that fits your actual life.</h1>
         <p>Start with a city. We will rank real options first, then ask only the questions that materially improve the decision.</p>
         <form
@@ -280,7 +314,6 @@ function SearchingState({ city, note }: { city: string; note: string }) {
   return (
     <section className="state-page" aria-live="polite">
       <LoaderCircle className="spin" size={24} />
-      <p className="eyebrow">Search in progress</p>
       <h1>Building your {city} shortlist</h1>
       <p>{note || "Normalizing costs, checking evidence, and ranking candidates."}</p>
       <div className="loading-lines" aria-hidden="true"><span /><span /><span /></div>
@@ -292,7 +325,6 @@ function ErrorState({ note, onRetry }: { note: string; onRetry: () => void }) {
   return (
     <section className="state-page error-page">
       <AlertCircle size={24} />
-      <p className="eyebrow">Search paused</p>
       <h1>We could not finish this search.</h1>
       <p>{note || "The workspace is still safe. Try the search again."}</p>
       <button className="primary-button" type="button" onClick={onRetry}>Retry search</button>
@@ -304,7 +336,6 @@ function NoMatches({ onResetSort }: { onResetSort: () => void }) {
   return (
     <section className="state-page">
       <Search size={24} />
-      <p className="eyebrow">No visible matches</p>
       <h1>Your current organization hid every result.</h1>
       <p>The underlying candidates are still in this workspace.</p>
       <button className="secondary-button" type="button" onClick={onResetSort}>Show recommended results</button>
