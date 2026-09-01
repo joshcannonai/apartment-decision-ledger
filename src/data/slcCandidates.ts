@@ -1,4 +1,4 @@
-import type { ApartmentCandidate, CandidateScores, EvidenceGrade } from "../domain/types";
+import type { ApartmentCandidate, CandidateMedia, CandidateScores, EvidenceGrade } from "../domain/types";
 
 const EMPTY_SCORES: CandidateScores = {
   marketValue: {
@@ -37,7 +37,21 @@ type Seed = {
   url: string;
   sourceLabel: string;
   evidenceGrade: EvidenceGrade;
+  media?: CandidateMedia[];
 };
+
+const MEDIA_OBSERVED_AT = "2026-08-31T23:30:00.000Z";
+
+function media(
+  url: string,
+  thumbnailUrl: string,
+  alt: string,
+  scope: CandidateMedia["scope"],
+  sourceLabel: string,
+  sourceUrl: string,
+): CandidateMedia {
+  return { url, thumbnailUrl, alt, scope, sourceLabel, sourceUrl, observedAt: MEDIA_OBSERVED_AT };
+}
 
 const seeds: Seed[] = [
   {
@@ -58,6 +72,16 @@ const seeds: Seed[] = [
     url: "https://www.zillow.com/apartments/salt-lake-city-ut/the-swallow/9M2pT2/",
     sourceLabel: "Zillow building inventory",
     evidenceGrade: "B",
+    media: [
+      media(
+        "https://images.cdn.appfolio.com/highlandrealestatepartners/leads_marketing_photos/f3c0c322-9849-4ec2-a35c-b40a915a6fa3/original.jpg",
+        "https://images.cdn.appfolio.com/highlandrealestatepartners/leads_marketing_photos/f3c0c322-9849-4ec2-a35c-b40a915a6fa3/original.jpg",
+        "Exterior of The Swallow apartment building",
+        "building",
+        "Building photo from Highland Real Estate Partners",
+        "https://www.highlandptrs.com/listings/detail/4b888b97-ea73-4ed3-aafd-2d2a7f59c54e",
+      ),
+    ],
   },
   {
     id: "slc-uffens-408",
@@ -115,6 +139,32 @@ const seeds: Seed[] = [
     url: "https://corecommunities.appfolio.com/listings/detail/26819e04-7b8d-44b3-9889-5fe091878ce2",
     sourceLabel: "Property manager listing",
     evidenceGrade: "A",
+    media: [
+      media(
+        "https://images.cdn.appfolio.com/corecommunities/images/dfbbfee1-e119-4694-bdcb-a41751d0f906/large.jpg",
+        "https://images.cdn.appfolio.com/corecommunities/images/dfbbfee1-e119-4694-bdcb-a41751d0f906/medium.jpg",
+        "Open living room in Fountain View unit 15",
+        "exact_unit",
+        "Core Communities property listing",
+        "https://corecommunities.appfolio.com/listings/detail/26819e04-7b8d-44b3-9889-5fe091878ce2",
+      ),
+      media(
+        "https://images.cdn.appfolio.com/corecommunities/images/de4e1670-979e-4749-81da-2847d0d5dbfe/large.jpg",
+        "https://images.cdn.appfolio.com/corecommunities/images/de4e1670-979e-4749-81da-2847d0d5dbfe/medium.jpg",
+        "Kitchen and open living area in Fountain View unit 15",
+        "exact_unit",
+        "Core Communities property listing",
+        "https://corecommunities.appfolio.com/listings/detail/26819e04-7b8d-44b3-9889-5fe091878ce2",
+      ),
+      media(
+        "https://images.cdn.appfolio.com/corecommunities/images/9aef3b1b-d3ab-4ffe-bfe6-67b787917489/large.jpg",
+        "https://images.cdn.appfolio.com/corecommunities/images/9aef3b1b-d3ab-4ffe-bfe6-67b787917489/medium.jpg",
+        "Window view from Fountain View unit 15",
+        "exact_unit",
+        "Core Communities property listing",
+        "https://corecommunities.appfolio.com/listings/detail/26819e04-7b8d-44b3-9889-5fe091878ce2",
+      ),
+    ],
   },
   {
     id: "slc-bigelow-cottage",
@@ -153,6 +203,32 @@ const seeds: Seed[] = [
     url: "https://corecommunities.appfolio.com/listings/detail/1cd69f50-6b1a-4b6b-be4b-0598c620d991",
     sourceLabel: "Property manager listing",
     evidenceGrade: "B",
+    media: [
+      media(
+        "https://images.cdn.appfolio.com/corecommunities/images/06a0e3c0-e222-4882-a444-08dbbd66fa4f/large.jpg",
+        "https://images.cdn.appfolio.com/corecommunities/images/06a0e3c0-e222-4882-a444-08dbbd66fa4f/medium.jpg",
+        "Living area and kitchen pass-through in Pollyanna unit 528",
+        "exact_unit",
+        "Core Communities property listing",
+        "https://corecommunities.appfolio.com/listings/detail/1cd69f50-6b1a-4b6b-be4b-0598c620d991",
+      ),
+      media(
+        "https://images.cdn.appfolio.com/corecommunities/images/341b7756-d962-47ec-8cb5-8c46c819680e/large.jpg",
+        "https://images.cdn.appfolio.com/corecommunities/images/341b7756-d962-47ec-8cb5-8c46c819680e/medium.jpg",
+        "Galley kitchen in Pollyanna unit 528",
+        "exact_unit",
+        "Core Communities property listing",
+        "https://corecommunities.appfolio.com/listings/detail/1cd69f50-6b1a-4b6b-be4b-0598c620d991",
+      ),
+      media(
+        "https://images.cdn.appfolio.com/corecommunities/images/8ae640c3-2fcf-4e35-87c6-6c32476d57de/large.jpg",
+        "https://images.cdn.appfolio.com/corecommunities/images/8ae640c3-2fcf-4e35-87c6-6c32476d57de/medium.jpg",
+        "Entry hall and parquet floors in Pollyanna unit 528",
+        "exact_unit",
+        "Core Communities property listing",
+        "https://corecommunities.appfolio.com/listings/detail/1cd69f50-6b1a-4b6b-be4b-0598c620d991",
+      ),
+    ],
   },
   {
     id: "slc-bandelier-01",
@@ -191,6 +267,32 @@ const seeds: Seed[] = [
     url: "https://www.rentler.com/places-for-rent/ut/salt-lake-city/49-s-400-e/12578743",
     sourceLabel: "Exact-unit Rentler listing",
     evidenceGrade: "C",
+    media: [
+      media(
+        "https://assets.marketapts.com/assets/converted/STRTON/images/apartments/photos/dbf9a75c5ca31656d9326726481cbb40.jpg.800x600.jpg",
+        "https://assets.marketapts.com/assets/converted/STRTON/images/apartments/photos/dbf9a75c5ca31656d9326726481cbb40.jpg.800x600.webp",
+        "Representative living room at Stratton Apartments",
+        "community",
+        "Stratton Apartments community gallery",
+        "https://www.strattonapts.com/",
+      ),
+      media(
+        "https://assets.marketapts.com/assets/converted/STRTON/images/apartments/photos/b602f786268b5881dc3df965826ef2eb.jpg.800x600.jpg",
+        "https://assets.marketapts.com/assets/converted/STRTON/images/apartments/photos/b602f786268b5881dc3df965826ef2eb.jpg.800x600.webp",
+        "View of downtown Salt Lake City from the Stratton community gallery",
+        "community",
+        "Stratton Apartments community gallery",
+        "https://www.strattonapts.com/",
+      ),
+      media(
+        "https://assets.marketapts.com/assets/converted/STRTON/images/apartments/photos/120e23ba5f91a42081175c562ef65d17.jpg.800x600.jpg",
+        "https://assets.marketapts.com/assets/converted/STRTON/images/apartments/photos/120e23ba5f91a42081175c562ef65d17.jpg.800x600.webp",
+        "Downtown skyline from the Stratton community gallery",
+        "community",
+        "Stratton Apartments community gallery",
+        "https://www.strattonapts.com/",
+      ),
+    ],
   },
   {
     id: "slc-madrid-8",
@@ -229,6 +331,40 @@ const seeds: Seed[] = [
     url: "https://rizehomesource.appfolio.com/listings/detail/dfb08d65-7132-4b9d-b891-7a7d0a0d3761",
     sourceLabel: "Property manager listing",
     evidenceGrade: "B",
+    media: [
+      media(
+        "https://images.cdn.appfolio.com/rizehomesource/images/a0b0a111-312f-42a9-9849-19c889de0ed9/large.jpg",
+        "https://images.cdn.appfolio.com/rizehomesource/images/a0b0a111-312f-42a9-9849-19c889de0ed9/medium.jpg",
+        "Living room and bedroom doors in Capitol Reef unit 206",
+        "exact_unit",
+        "Rize Property Management listing",
+        "https://rizehomesource.appfolio.com/listings/detail/dfb08d65-7132-4b9d-b891-7a7d0a0d3761",
+      ),
+      media(
+        "https://images.cdn.appfolio.com/rizehomesource/images/028e65d9-5954-47a8-bf56-b95ac211b600/large.jpg",
+        "https://images.cdn.appfolio.com/rizehomesource/images/028e65d9-5954-47a8-bf56-b95ac211b600/medium.jpg",
+        "Kitchen opening into the living room in Capitol Reef unit 206",
+        "exact_unit",
+        "Rize Property Management listing",
+        "https://rizehomesource.appfolio.com/listings/detail/dfb08d65-7132-4b9d-b891-7a7d0a0d3761",
+      ),
+      media(
+        "https://images.cdn.appfolio.com/rizehomesource/images/aba10ae8-e2c3-4094-b58d-b8a279e2bda7/large.jpg",
+        "https://images.cdn.appfolio.com/rizehomesource/images/aba10ae8-e2c3-4094-b58d-b8a279e2bda7/medium.jpg",
+        "Galley kitchen in Capitol Reef unit 206",
+        "exact_unit",
+        "Rize Property Management listing",
+        "https://rizehomesource.appfolio.com/listings/detail/dfb08d65-7132-4b9d-b891-7a7d0a0d3761",
+      ),
+      media(
+        "https://images.cdn.appfolio.com/rizehomesource/images/cf148128-fd9a-4054-bbd9-23900b89b498/large.jpg",
+        "https://images.cdn.appfolio.com/rizehomesource/images/cf148128-fd9a-4054-bbd9-23900b89b498/medium.jpg",
+        "Kitchen storage in Capitol Reef unit 206",
+        "exact_unit",
+        "Rize Property Management listing",
+        "https://rizehomesource.appfolio.com/listings/detail/dfb08d65-7132-4b9d-b891-7a7d0a0d3761",
+      ),
+    ],
   },
   {
     id: "slc-encore-305",
@@ -359,6 +495,7 @@ export const SLC_DEMO_CANDIDATES: ApartmentCandidate[] = seeds.map((seed) => ({
     evidenceGrade: seed.evidenceGrade,
     note: "Curated challenge-demo snapshot. Open the source and verify before acting.",
   },
+  media: seed.media,
   distances: [],
   scores: structuredClone(EMPTY_SCORES),
   addedBy: "curated_demo",

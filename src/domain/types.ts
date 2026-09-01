@@ -57,6 +57,16 @@ export type CandidateSource = {
   note: string;
 };
 
+export type CandidateMedia = {
+  url: string;
+  thumbnailUrl: string;
+  alt: string;
+  scope: "exact_unit" | "building" | "community";
+  sourceLabel: string;
+  sourceUrl: string;
+  observedAt: string;
+};
+
 export type DistanceEstimate = {
   anchorId: string;
   anchorLabel: string;
@@ -106,6 +116,7 @@ export type ApartmentCandidate = {
   features: string[];
   unknowns: string[];
   source: CandidateSource;
+  media?: CandidateMedia[];
   distances: DistanceEstimate[];
   scores: CandidateScores;
   addedBy: "curated_demo" | "live_search" | "agent_import" | "human_import";

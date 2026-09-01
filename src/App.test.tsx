@@ -72,7 +72,7 @@ describe("Apartment Decision Ledger UI", () => {
     fireEvent.click(screen.getByRole("button", { name: /salt lake city demo/i }));
     await screen.findByRole("heading", { name: /best options/i });
 
-    fireEvent.click(screen.getByRole("button", { name: /stage as leading option/i }));
+    fireEvent.click(screen.getByRole("button", { name: /stage leader/i }));
     expect(screen.getByText(/marks one leading option in this workspace only/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /undo staged decision/i }));

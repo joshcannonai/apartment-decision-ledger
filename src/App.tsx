@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
+  Bot,
   Building2,
   CheckCircle2,
   FileText,
@@ -19,6 +20,8 @@ import { ResultsList } from "./components/ResultsList";
 import { SearchHeader } from "./components/SearchHeader";
 import { useWorkspace, workspaceActions } from "./domain/store";
 import type { PreferenceKind, RefinementQuestion, SearchQuery, SortOption } from "./domain/types";
+import { SLC_DEMO_CANDIDATES } from "./data/slcCandidates";
+import type { MediaPhase } from "./media/priority";
 
 const demoContext = {
   preferences: [
@@ -79,6 +82,8 @@ export function App() {
   const [mobileSection, setMobileSection] = useState<"results" | "decision" | "context">("results");
   const [compareOpen, setCompareOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [mediaPhase, setMediaPhase] = useState<MediaPhase>("lead");
+  const settledShortlistMedia = useRef(new Set<string>());
 
   useEffect(() => {
     const openComparison = () => setCompareOpen(true);
@@ -102,8 +107,48 @@ export function App() {
     ? workspace.candidates.find((candidate) => candidate.id === workspace.stagedDecision?.candidateId) ?? null
     : null;
 
+  useEffect(() => {
+    if (visibleCandidates.length === 0) return;
+    if (mediaPhase === "lead") {
+      const fallback = window.setTimeout(() => setMediaPhase("shortlist"), 1600);
+      return () => window.clearTimeout(fallback);
+    }
+    if (mediaPhase === "shortlist") {
+      const fallback = window.setTimeout(() => setMediaPhase("gallery"), 2200);
+      return () => window.clearTimeout(fallback);
+    }
+    if (mediaPhase === "gallery") {
+      const loadBackground = () => setMediaPhase("background");
+      const idleWindow = window as Window & {
+        requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+        cancelIdleCallback?: (id: number) => void;
+      };
+      if (idleWindow.requestIdleCallback) {
+        const idleId = idleWindow.requestIdleCallback(loadBackground, { timeout: 1400 });
+        return () => idleWindow.cancelIdleCallback?.(idleId);
+      }
+      const fallback = window.setTimeout(loadBackground, 700);
+      return () => window.clearTimeout(fallback);
+    }
+  }, [mediaPhase, visibleCandidates.length]);
+
+  function handleMediaSettled(candidateId: string, mediaIndex: number, rank: number) {
+    if (mediaIndex !== 0) return;
+
+    if (rank === 0) setMediaPhase((current) => current === "lead" ? "shortlist" : current);
+    if (rank >= 5) return;
+
+    settledShortlistMedia.current.add(candidateId);
+    const expected = visibleCandidates.slice(0, 5).filter((candidate) => (candidate.media?.length ?? 0) > 0).length;
+    if (expected > 0 && settledShortlistMedia.current.size >= expected) {
+      setMediaPhase((current) => current === "lead" || current === "shortlist" ? "gallery" : current);
+    }
+  }
+
   async function runSearch(city: string, includeDemoContext = false) {
     setMobileSection("results");
+    settledShortlistMedia.current.clear();
+    setMediaPhase("lead");
     const query: SearchQuery = { city, text: city };
     workspaceActions.prepareSearch(query, includeDemoContext ? demoContext : undefined);
     await workspaceActions.searchCandidates(query);
@@ -154,6 +199,8 @@ export function App() {
     setCompareOpen(false);
     setSelectedId(null);
     setMobileSection("results");
+    settledShortlistMedia.current.clear();
+    setMediaPhase("lead");
   }
 
   const hasWorkspace = workspace.query != null || workspace.candidates.length > 0;
@@ -228,6 +275,8 @@ export function App() {
               }}
               onToggleCompare={toggleCompare}
               onSort={organizeResults}
+              mediaPhase={mediaPhase}
+              onMediaSettled={handleMediaSettled}
             />
             <CandidateDetail
               candidate={selectedCandidate}
@@ -241,6 +290,9 @@ export function App() {
                   stagedBy: "human",
                 });
               }}
+              rank={Math.max(0, visibleCandidates.findIndex((candidate) => candidate.id === selectedCandidate.id))}
+              mediaPhase={mediaPhase}
+              onMediaSettled={handleMediaSettled}
             />
             <ContextPanel
               questions={workspace.refinementQuestions}
@@ -280,12 +332,15 @@ export function App() {
 
 function EmptyWorkspace({ onSearch, onDemo }: { onSearch: (city: string) => void; onDemo: () => void }) {
   const [city, setCity] = useState("");
+  const previewCandidates = ["slc-capitol-reef-206", "slc-swallow-4", "slc-fountain-view-15"]
+    .map((id) => SLC_DEMO_CANDIDATES.find((candidate) => candidate.id === id))
+    .filter((candidate): candidate is NonNullable<typeof candidate> => candidate != null);
 
   return (
     <section className="empty-workspace">
       <div className="empty-hero">
         <h1>Find the apartment that fits your actual life.</h1>
-        <p>Start with a city. We will rank real options first, then ask only the questions that materially improve the decision.</p>
+        <p>Start with a city. Your agent can bring what it already knows, while you keep control over what becomes a saved preference.</p>
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -298,13 +353,41 @@ function EmptyWorkspace({ onSearch, onDemo }: { onSearch: (city: string) => void
           <button className="primary-button" type="submit"><Search size={17} /> Find apartments</button>
         </form>
         <button className="demo-link" type="button" onClick={onDemo}>
-          See the Salt Lake City demo with clearly labeled sample agent context
+          Open the Salt Lake City decision demo
         </button>
       </div>
+      <button className="empty-preview" type="button" onClick={onDemo} aria-label="Open the Salt Lake City demo preview">
+        <span className="preview-heading">
+          <span><strong>Salt Lake City</strong><small>Demo preview · source-linked snapshot</small></span>
+          <span>15 options →</span>
+        </span>
+        <span className="preview-lead">
+          {previewCandidates[0]?.media?.[0] ? (
+            <img src={previewCandidates[0].media[0].thumbnailUrl} alt="" loading="eager" fetchPriority="high" />
+          ) : null}
+          <span>
+            <strong>{previewCandidates[0]?.name}</strong>
+            <small>{previewCandidates[0] ? `$${previewCandidates[0].allInEstimate.low}–$${previewCandidates[0].allInEstimate.high} all in` : ""}</small>
+          </span>
+          <b>01</b>
+        </span>
+        <span className="preview-list">
+          {previewCandidates.slice(1).map((candidate, index) => (
+            <span key={candidate.id}>
+              {candidate.media?.[0] ? <img src={candidate.media[0].thumbnailUrl} alt="" loading="lazy" /> : null}
+              <span><strong>{candidate.name}</strong><small>{candidate.neighborhood}</small></span>
+              <b>0{index + 2}</b>
+            </span>
+          ))}
+        </span>
+        <span className="preview-context">
+          <Bot size={15} /> Agent brought: 72-inch desk · Trader Joe’s · character over generic luxury
+        </span>
+      </button>
       <div className="empty-principles" aria-label="What makes the search different">
-        <article><Building2 size={19} /><strong>Results before forms</strong><span>A ranked shortlist appears before the refinement questions.</span></article>
-        <article><ShieldCheck size={19} /><strong>Evidence stays attached</strong><span>Costs, freshness, sources, confidence, and unknowns remain visible.</span></article>
-        <article><CheckCircle2 size={19} /><strong>You approve memory</strong><span>Agent context can shape this search without silently becoming a saved preference.</span></article>
+        <article><Building2 size={19} /><strong>Results first</strong><span>A broad shortlist appears before follow-up questions.</span></article>
+        <article><ShieldCheck size={19} /><strong>Evidence attached</strong><span>Media scope, costs, sources, freshness, and unknowns stay visible.</span></article>
+        <article><CheckCircle2 size={19} /><strong>Memory by approval</strong><span>Context can shape this run without being silently saved.</span></article>
       </div>
     </section>
   );

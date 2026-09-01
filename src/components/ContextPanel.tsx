@@ -108,10 +108,13 @@ export function ContextPanel({
         </div>
       </section>
 
-      {(pendingPreferences.length > 0 || pendingAnchors.length > 0) ? (
-        <section className="approval-section">
-          <h2><Bot size={16} /> Review what shaped this ranking</h2>
-          <p className="section-intro">Used for this search now. Approve only if you want it remembered.</p>
+      {(pendingPreferences.length + pendingAnchors.length + acceptedPreferences.length + acceptedAnchors.length > 0) ? (
+        <details className="approval-section ranking-context">
+          <summary>
+            <span><Bot size={16} /><strong>Review what shaped this ranking</strong><small>{pendingPreferences.length + pendingAnchors.length} awaiting approval · {acceptedPreferences.length + acceptedAnchors.length} saved</small></span>
+            <ChevronDown size={17} />
+          </summary>
+          <p className="section-intro">Every signal used in this search is shown here. Approve only if you want it remembered.</p>
 
           {pendingPreferences.map((preference) => (
             <article className="proposal-row" key={preference.id}>
@@ -139,23 +142,24 @@ export function ContextPanel({
               </div>
             </article>
           ))}
-        </section>
-      ) : null}
 
-      <details className="accepted-context" open>
-        <summary>Current search context <ChevronDown size={16} /></summary>
-        <div>
-          {acceptedPreferences.map((preference) => (
-            <span className="context-chip" key={preference.id}><Check size={12} /> {preference.label}</span>
-          ))}
-          {acceptedAnchors.map((anchor) => (
-            <span className="context-chip" key={anchor.id}><MapPin size={12} /> {anchor.label}</span>
-          ))}
-          {acceptedPreferences.length + acceptedAnchors.length === 0 ? (
-            <p className="empty-copy">No approved context yet. Results are using broad city-level assumptions.</p>
+          {acceptedPreferences.length + acceptedAnchors.length > 0 ? (
+            <div className="accepted-context-list">
+              <p>Saved to this workspace</p>
+              <div>
+                {acceptedPreferences.map((preference) => (
+                  <span className="context-chip" key={preference.id}><Check size={12} /> {preference.label}</span>
+                ))}
+                {acceptedAnchors.map((anchor) => (
+                  <span className="context-chip" key={anchor.id}><MapPin size={12} /> {anchor.label}</span>
+                ))}
+              </div>
+            </div>
           ) : null}
-        </div>
-      </details>
+        </details>
+      ) : (
+        <p className="empty-copy">No personal context shaped this search.</p>
+      )}
 
       <details className="activity-log">
         <summary>Agent activity <ChevronDown size={16} /></summary>

@@ -46,6 +46,18 @@ async function invokeWebMCP(page, name, input) {
   );
 }
 
+async function waitForCompleteImages(page, selector, expected) {
+  await page.waitForFunction(
+    ({ imageSelector, count }) => {
+      const images = [...document.querySelectorAll(imageSelector)];
+      return images.length >= count
+        && images.slice(0, count).every((item) => item.complete && item.naturalWidth > 0);
+    },
+    { imageSelector: selector, count: expected },
+    { timeout: 15_000 },
+  );
+}
+
 async function verifyWebMCPTools() {
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -95,7 +107,7 @@ async function verifyWebMCPTools() {
       maxAllIn: 2200,
     });
     await page.getByRole("heading", { name: /best options/i }).waitFor();
-    await page.getByText("Needs a workable place for a 72-inch desk", { exact: true }).first().waitFor();
+    await page.getByText("Needs a workable place for a 72-inch desk", { exact: true }).first().waitFor({ state: "attached" });
     if (results.search_candidates.resultCount !== 15) {
       throw new Error(`search_candidates returned ${results.search_candidates.resultCount}, expected 15`);
     }
@@ -111,7 +123,7 @@ async function verifyWebMCPTools() {
         },
       ],
     });
-    await page.getByText("Prefers a quieter home base", { exact: true }).waitFor();
+    await page.getByText("Prefers a quieter home base", { exact: true }).waitFor({ state: "attached" });
 
     results.organize_results = await invokeWebMCP(page, "organize_results", {
       sortBy: "market_value",
@@ -161,7 +173,7 @@ try {
   await page.getByRole("heading", { name: "Find the apartment that fits your actual life." }).waitFor();
   await page.screenshot({ path: resolve(artifactDirectory, "empty-desktop.png"), fullPage: true });
 
-  await page.getByRole("button", { name: /See the Salt Lake City demo/i }).click();
+  await page.getByRole("button", { name: /Open the Salt Lake City decision demo/i }).click();
   await page.getByRole("heading", { name: /best options/i }).waitFor();
   await page.getByRole("heading", { name: "Answer these to enhance and narrow your search" }).waitFor();
 
@@ -178,6 +190,8 @@ try {
   const compareButtons = page.locator(".compare-check");
   await compareButtons.nth(0).click();
   await compareButtons.nth(1).click();
+  await waitForCompleteImages(page, 'img[data-media-role="lead-hero"]', 1);
+  await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-desktop.png"), fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });

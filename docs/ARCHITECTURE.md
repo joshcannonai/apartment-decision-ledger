@@ -47,6 +47,17 @@ Market Value Score and Personal Fit Score remain separate.
 - Personal Fit Score applies current-search and approved preferences, including explicit furniture and location-anchor constraints.
 - Unknown fees and weak evidence reduce confidence rather than becoming optimistic defaults.
 
+## Progressive media
+
+Media never blocks the result set or ranking. Public source-linked images load in four phases:
+
+1. the selected leading candidate's primary decision image;
+2. primary images for the five candidates visible in the first result viewport;
+3. up to four supporting images for the selected candidate;
+4. remaining result images during browser idle time.
+
+Every media record carries a source URL, observation time, alt text, and an explicit scope: `exact_unit`, `building`, or `community`. The UI does not present a building exterior or community gallery as proof of an exact unit. A failed or absent image becomes a neutral evidence placeholder and does not remove the candidate.
+
 ## Persistence
 
 The first release uses a versioned anonymous workspace in browser storage. A later account layer may attach that workspace to a user after explicit authentication. Sign-in is never required for the challenge path and never imports model-provider memory.

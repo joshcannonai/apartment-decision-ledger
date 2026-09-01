@@ -2,11 +2,14 @@ import {
   ArrowDownUp,
   Check,
   Clock3,
+  ImageOff,
   MapPin,
   Ruler,
 } from "lucide-react";
 import type { ApartmentCandidate, SearchAnchor, SortOption } from "../domain/types";
 import { formatFreshness, formatMoney, scoreTone } from "./format";
+import type { MediaPhase } from "../media/priority";
+import { mediaLoadingHint, shouldRequestMedia } from "../media/priority";
 
 type ResultsListProps = {
   candidates: ApartmentCandidate[];
@@ -18,6 +21,8 @@ type ResultsListProps = {
   onSelect: (candidateId: string) => void;
   onToggleCompare: (candidateId: string) => void;
   onSort: (sort: SortOption) => void;
+  mediaPhase: MediaPhase;
+  onMediaSettled: (candidateId: string, mediaIndex: number, rank: number) => void;
 };
 
 const sortOptions: Array<{ value: SortOption; label: string }> = [
@@ -41,6 +46,8 @@ export function ResultsList({
   onSelect,
   onToggleCompare,
   onSort,
+  mediaPhase,
+  onMediaSettled,
 }: ResultsListProps) {
   return (
     <section className="results-region" aria-label="Ranked apartment results">
@@ -75,6 +82,17 @@ export function ResultsList({
             const selected = candidate.id === selectedId;
             const compared = comparisonIds.includes(candidate.id);
             const primaryDistance = candidate.distances.find((distance) => distance.straightLineMiles != null);
+            const heroMedia = candidate.media?.[0];
+            // During the lead phase the large decision image owns the only
+            // high-priority request. The matching row thumbnail joins the
+            // first-screen batch after that image settles.
+            const requestHero = heroMedia && !(mediaPhase === "lead" && index === 0) ? shouldRequestMedia({
+              phase: mediaPhase,
+              rank: index,
+              mediaIndex: 0,
+              selected,
+            }) : false;
+            const loadingHint = mediaLoadingHint({ rank: index, mediaIndex: 0, selected });
 
             return (
               <li key={candidate.id}>
@@ -83,7 +101,26 @@ export function ResultsList({
                   aria-current={selected ? "true" : undefined}
                 >
                   <button className="result-main" type="button" onClick={() => onSelect(candidate.id)}>
-                    <span className="result-rank">{String(index + 1).padStart(2, "0")}</span>
+                    <span className={`result-media${requestHero ? " is-requested" : ""}`}>
+                      {requestHero && heroMedia ? (
+                        <img
+                          data-media-rank={index + 1}
+                          data-media-role="result-hero"
+                          src={heroMedia.thumbnailUrl}
+                          alt=""
+                          loading={loadingHint.loading}
+                          fetchPriority={loadingHint.fetchPriority}
+                          decoding="async"
+                          onLoad={() => onMediaSettled(candidate.id, 0, index)}
+                          onError={() => onMediaSettled(candidate.id, 0, index)}
+                        />
+                      ) : heroMedia ? (
+                        <span className="media-skeleton" aria-hidden="true" />
+                      ) : (
+                        <span className="media-unavailable"><ImageOff size={16} /><small>No verified photo</small></span>
+                      )}
+                      <span className="result-rank">{String(index + 1).padStart(2, "0")}</span>
+                    </span>
                     <span className="result-copy">
                       <span className="result-title-line">
                         <strong>{candidate.name}</strong>
@@ -100,7 +137,7 @@ export function ResultsList({
                         {primaryDistance ? (
                           <span><MapPin size={13} /> {primaryDistance.straightLineMiles?.toFixed(1)} mi</span>
                         ) : null}
-                        <span><Clock3 size={13} /> {formatFreshness(candidate.source.observedAt)}</span>
+                        {index < 2 ? <span><Clock3 size={13} /> {formatFreshness(candidate.source.observedAt)}</span> : null}
                       </span>
                     </span>
                   </button>

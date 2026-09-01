@@ -12,7 +12,8 @@
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
     "qa": "node scripts/qa.mjs",
-    "benchmark": "node scripts/benchmark.mjs"
+    "benchmark": "node scripts/benchmark.mjs",
+    "benchmark:media": "node scripts/media-benchmark.mjs"
   },
   "dependencies": {
     "@nekuda/webmcp-sdk": "^0.4.0",

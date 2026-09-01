@@ -4,6 +4,7 @@ import { App } from "./App";
 import { configureSearchClient, createSameOriginSearchClient } from "./domain/store";
 import { WebMCPRegistrar } from "./webmcp";
 import "./styles.css";
+import "./decision-workspace.css";
 
 configureSearchClient(
   import.meta.env.VITE_ENABLE_LIVE_SEARCH === "true"

@@ -12,7 +12,7 @@ The renter's personal agent brings only the context it chooses to share. The pag
 - Market Value Score and Personal Fit Score remain separate.
 - No applications, bookings, landlord messages, payments, or lease commitments.
 - No claim of access to a user's complete ChatGPT memory.
-- No images in v0.1; candidate facts remain useful while an authorized media path is evaluated.
+- Source-linked media is progressively disclosed and labeled as exact-unit, building, or community imagery; listing facts remain useful when verified media is unavailable.
 
 ## WebMCP tools
 
@@ -42,6 +42,7 @@ npm test
 npm run typecheck
 npm run lint
 npm run build
+npm run benchmark:media
 ```
 
 With the app running at `http://127.0.0.1:4173`, Chrome 150+ can execute the native browser verification:
@@ -51,6 +52,8 @@ npm run qa
 ```
 
 The QA pass discovers and invokes all seven WebMCP tools in an isolated anonymous workspace, verifies visible UI effects, checks persistence and responsive rendering, captures desktop plus all three mobile workspace sections, and fails on browser console errors.
+
+The media benchmark opens fresh browser contexts and measures the non-blocking sequence from visible results to the lead image, first-screen shortlist images, and selected listing gallery.
 
 ## Optional nationwide provider
 
@@ -67,6 +70,6 @@ The live adapter:
 
 ## Submission status
 
-The local product, deterministic demo, submission copy, demo script, and verification harness are complete. Typecheck, lint, 18 tests, production build, native Chrome WebMCP execution, and the full npm security audit pass.
+The local product, deterministic demo, submission copy, demo script, and verification harness are complete. Typecheck, lint, 22 tests, production build, native Chrome WebMCP execution, and the full npm security audit pass.
 
 Publishing a GitHub repository, deploying to Vercel, enabling paid providers, recording/uploading the demo video, and submitting the entry remain separate approval-time actions.

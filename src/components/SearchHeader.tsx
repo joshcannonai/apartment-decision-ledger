@@ -1,7 +1,6 @@
 import type { FormEvent } from "react";
 import {
   Bot,
-  Building2,
   CircleUserRound,
   MapPin,
   RotateCcw,
@@ -19,6 +18,15 @@ type SearchHeaderProps = {
   onReset: () => void;
   onAccount: () => void;
 };
+
+function DecisionMark() {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M5 5.5h22v21H5zM16 5.5v10.5H5M16 16h11M21.5 16v10.5" />
+      <rect x="20" y="20" width="4" height="4" rx="1" />
+    </svg>
+  );
+}
 
 export function SearchHeader({
   city,
@@ -39,7 +47,7 @@ export function SearchHeader({
     <header className="site-header">
       <div className="brand-lockup" aria-label="Apartment Decision Ledger home">
         <span className="brand-mark" aria-hidden="true">
-          <Building2 size={18} strokeWidth={1.9} />
+          <DecisionMark />
         </span>
         <span>
           <strong>Apartment Ledger</strong>

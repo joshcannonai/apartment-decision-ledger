@@ -1,6 +1,6 @@
 # Verification report
 
-Verified locally on August 31, 2026.
+Verified locally on September 1, 2026.
 
 ## Automated checks
 
@@ -8,7 +8,7 @@ Verified locally on August 31, 2026.
 | --- | --- |
 | TypeScript project references | Passed |
 | ESLint | Passed |
-| Vitest | 6 files, 18 tests passed |
+| Vitest | 7 files, 22 tests passed |
 | Production build | Passed |
 | Full npm dependency audit | 0 vulnerabilities |
 | Native Chrome WebMCP discovery | 7 of 7 tools registered |
@@ -16,6 +16,18 @@ Verified locally on August 31, 2026.
 | Browser console and page errors | 0 |
 | Deterministic demo results | 15 |
 | Responsive screenshot states | Empty desktop, workspace desktop, mobile results, mobile decision, mobile refinement |
+| Progressive media sequence | Lead image, first five result images, then selected gallery |
+
+## Local media benchmark
+
+Seven fresh Chrome contexts measured from demo activation. This is the deterministic local demonstration with public image-network requests, not a live provider-wide apartment search and not browser-agent reasoning.
+
+| Milestone | Average | Median | P95 |
+| --- | ---: | ---: | ---: |
+| Results visible | 158 ms | 155 ms | 175 ms |
+| Lead image visible | 166 ms | 163 ms | 184 ms |
+| First five result images visible | 428 ms | 424 ms | 441 ms |
+| Selected four-image gallery visible | 448 ms | 450 ms | 461 ms |
 
 ## Per-tool WebMCP ladder
 
