@@ -47,8 +47,18 @@ function ScoreWheel({ label, score }: { label: string; score: number }) {
   );
 }
 
-function rankingNarrative(candidate: ApartmentCandidate, rank: number, run: RunContext) {
-  const strongestSignal = candidate.scores.personalFit.matched[0] ?? candidate.scores.marketValue.explanation;
+function fitNarrative(candidate: ApartmentCandidate, rank: number, run: RunContext) {
+  const strongestSignal = candidate.scores.personalFit.matched.find(
+    (signal) => !/estimated all-in|cost|rent/i.test(signal),
+  ) ?? candidate.scores.personalFit.matched[0] ?? candidate.scores.marketValue.explanation;
+  const cost = `${formatMoney(candidate.allInEstimate.low)}–${formatMoney(candidate.allInEstimate.high)} estimated all in`;
+  const space = candidate.squareFeet != null
+    ? `${candidate.squareFeet.toLocaleString()} square feet with ${candidate.bedrooms ?? "an unconfirmed number of"} bedroom${candidate.bedrooms === 1 ? "" : "s"}`
+    : `${candidate.bedrooms ?? "an unconfirmed number of"} bedroom${candidate.bedrooms === 1 ? "" : "s"}, with square footage still unverified`;
+  const verification = candidate.unknowns[0]
+    ? `${candidate.unknowns[0].replace(/^./, (letter) => letter.toLowerCase())} before treating this ranking as final.`
+    : candidate.scores.marketValue.caveat;
+
   if (run.number > 1 && run.previousRank != null) {
     const movement = run.previousRank - rank;
     const movementText = movement > 0
@@ -56,10 +66,20 @@ function rankingNarrative(candidate: ApartmentCandidate, rank: number, run: RunC
       : movement < 0
         ? `moved down ${Math.abs(movement)} place${Math.abs(movement) === 1 ? "" : "s"}`
         : "held its position";
-    const context = run.triggerLabels[0] ?? "your latest answer";
-    return `In Run ${run.number}, this option ${movementText} after “${context}”. ${strongestSignal}`;
+    const context = run.triggerLabels[0]
+      ? ` This rerank used your update: “${run.triggerLabels[0]}”.`
+      : "";
+    return {
+      headline: `Run ${run.number}: ${movementText}, now ranked #${rank + 1}.`,
+      explanation: `${strongestSignal} The listing combines ${cost} with ${space}.${context}`,
+      verification,
+    };
   }
-  return `Ranked #${rank + 1} because it currently offers one of the strongest balances of all-in cost, evidence quality, and personal fit. ${strongestSignal}`;
+  return {
+    headline: `Ranked #${rank + 1} for its current balance of personal fit and total cost.`,
+    explanation: `${strongestSignal} The listing combines ${cost} with ${space}.`,
+    verification,
+  };
 }
 
 export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCompare, onStage, rank, runContext, mediaPhase, onMediaSettled }: CandidateDetailProps) {
@@ -71,6 +91,7 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
   const activeRequest = activeMedia ? shouldRequestMedia({ phase: mediaPhase, rank, mediaIndex: activeMediaIndex, selected: true }) : false;
   const activeHint = mediaLoadingHint({ rank, mediaIndex: activeMediaIndex, selected: true });
   const tensions = candidate.scores.personalFit.tensions;
+  const narrative = fitNarrative(candidate, rank, runContext);
 
   return (
     <article className="candidate-detail">
@@ -136,7 +157,14 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
         <div className="all-in-summary"><span>Estimated all in</span><strong>{formatMoney(candidate.allInEstimate.low)}–{formatMoney(candidate.allInEstimate.high)}</strong><small>(base {formatMoney(candidate.baseRent)})</small></div>
         <div className="space-summary"><span>Space</span><strong>{candidate.squareFeet ?? "Unknown"} <small>sq ft</small></strong><small>{candidate.bedrooms ?? "—"} bed · {candidate.bathrooms ?? "—"} bath</small></div>
         <div className="score-pair"><ScoreWheel label="Market Value" score={candidate.scores.marketValue.score} /><ScoreWheel label="Personal Fit" score={candidate.scores.personalFit.score} /></div>
-        <p className="ranking-narrative">{rankingNarrative(candidate, rank, runContext)}</p>
+        <section className="ranking-narrative" aria-labelledby={`fit-narrative-${candidate.id}`}>
+          <div className="ranking-narrative-label"><Sparkles size={16} /><span>Why this fits you</span></div>
+          <div className="ranking-narrative-copy">
+            <h2 id={`fit-narrative-${candidate.id}`}>{narrative.headline}</h2>
+            <p>{narrative.explanation}</p>
+            <p className="ranking-narrative-watch"><AlertCircle size={14} /><span><strong>Keep in mind:</strong> {narrative.verification}</span></p>
+          </div>
+        </section>
       </aside>
 
       <p className="score-caveat"><AlertCircle size={14} /> {candidate.scores.marketValue.caveat}</p>

@@ -285,7 +285,7 @@ summary:focus-visible {
 
 .decision-rail {
   display: grid;
-  grid-template-columns: minmax(170px, 1fr) minmax(112px, 0.62fr) minmax(170px, 0.92fr) minmax(220px, 1.35fr);
+  grid-template-columns: minmax(190px, 1.15fr) minmax(120px, 0.68fr) minmax(220px, 1fr);
   align-items: stretch;
   margin-top: 16px;
   border-top: 1px solid var(--line);
@@ -301,16 +301,33 @@ summary:focus-visible {
 .space-summary > strong small { color: var(--ink); font-size: 12px; font-weight: 650; }
 .all-in-summary > small,
 .space-summary > small { color: var(--muted); font-size: 9px; }
-.score-pair { display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 10px 14px; border-right: 1px solid var(--line); }
+.score-pair { display: grid; grid-template-columns: 1fr 1fr; align-items: center; min-height: 112px; padding: 10px 16px; }
 .score-wheel { display: grid; min-width: 0; justify-items: center; align-content: start; }
-.score-wheel-gauge { position: relative; display: grid; width: 64px; height: 64px; place-items: center; }
-.score-wheel svg { width: 64px; height: 64px; transform: rotate(-90deg); }
-.score-wheel circle { fill: none; stroke-width: 5; }
+.score-wheel-gauge { position: relative; display: grid; width: 82px; height: 82px; place-items: center; }
+.score-wheel svg { width: 82px; height: 82px; transform: rotate(-90deg); }
+.score-wheel circle { fill: none; stroke-width: 4.5; }
 .score-wheel-track { stroke: #e3e7eb; }
 .score-wheel-value { stroke: currentColor; stroke-linecap: butt; transition: stroke-dasharray 240ms ease-out; }
-.score-wheel-gauge > strong { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink); font-size: 16px; }
-.score-wheel > span { margin-top: 3px; color: var(--muted); font-size: 9px; font-weight: 700; text-align: center; }
-.ranking-narrative { display: grid; align-content: center; margin: 0; padding: 14px 0 14px 16px; color: #394454; font-size: 10px; line-height: 1.5; }
+.score-wheel-gauge > strong { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink); font-size: 19px; }
+.score-wheel > span { margin-top: 4px; color: var(--muted); font-size: 10px; font-weight: 700; text-align: center; }
+.ranking-narrative {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 18px;
+  margin: 0;
+  padding: 17px 0 18px;
+  border-top: 1px solid var(--line);
+  color: #394454;
+}
+.ranking-narrative-label { display: flex; align-items: flex-start; gap: 7px; color: var(--blue); font-size: 11px; font-weight: 760; }
+.ranking-narrative-label svg { flex: 0 0 auto; margin-top: 1px; }
+.ranking-narrative-copy { display: grid; max-width: 78ch; gap: 7px; }
+.ranking-narrative-copy h2 { margin: 0; color: var(--ink); font-size: 14px; line-height: 1.3; }
+.ranking-narrative-copy > p { margin: 0; font-size: 11px; line-height: 1.58; }
+.ranking-narrative-watch { display: flex; align-items: flex-start; gap: 6px; color: var(--muted); }
+.ranking-narrative-watch svg { flex: 0 0 auto; margin-top: 2px; color: var(--amber); }
+.ranking-narrative-watch strong { color: var(--ink); }
 .score-caveat { margin-top: 9px; font-size: 9px; }
 .detail-facts { margin-top: 20px; }
 .detail-facts > div { min-height: 48px; font-size: 10px; }
@@ -497,7 +514,7 @@ summary:focus-visible {
   .workspace-layout { grid-template-columns: 274px minmax(540px, 1fr) 292px; }
   .candidate-detail { padding-right: 26px; padding-left: 26px; }
   .decision-overview { grid-template-columns: minmax(0, 1.52fr) minmax(156px, 0.55fr); gap: 16px; }
-  .decision-rail { grid-template-columns: minmax(156px, 1fr) minmax(100px, 0.6fr) minmax(160px, 0.9fr) minmax(190px, 1.25fr); }
+  .decision-rail { grid-template-columns: minmax(168px, 1.05fr) minmax(105px, 0.62fr) minmax(200px, 1fr); }
   .media-stage-grid { grid-template-columns: minmax(0, 1fr) 76px; }
   .media-filmstrip { max-height: 320px; }
   .media-hero { max-height: 320px; }
@@ -531,7 +548,7 @@ summary:focus-visible {
   .space-summary { padding-left: 14px; border-right: 0; }
   .score-pair,
   .ranking-narrative { grid-column: 1 / -1; border-top: 1px solid var(--line); border-right: 0; }
-  .ranking-narrative { padding-left: 0; }
+  .ranking-narrative { grid-template-columns: 1fr; gap: 8px; padding-left: 0; }
   .decision-evidence { grid-template-columns: 1fr; }
   .detail-facts,
   .detail-columns { grid-template-columns: 1fr; }
