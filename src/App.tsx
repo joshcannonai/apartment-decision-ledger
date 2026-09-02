@@ -301,6 +301,14 @@ export function App() {
                   stagedBy: "human",
                 });
               }}
+              onAddLocation={(label) => {
+                setSelectedId(selectedCandidate.id);
+                return workspaceActions.addLocationAnchor(label);
+              }}
+              onSortByLocation={(anchorId) => {
+                setSelectedId(selectedCandidate.id);
+                workspaceActions.organizeResults({ by: "distance", anchorId, direction: "asc" });
+              }}
               rank={Math.max(0, visibleCandidates.findIndex((candidate) => candidate.id === selectedCandidate.id))}
               runContext={{
                 number: activeRun?.number ?? 1,

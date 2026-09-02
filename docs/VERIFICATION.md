@@ -15,10 +15,11 @@ Verified locally on September 1, 2026.
 | Native Chrome WebMCP execution | 7 of 7 tools invoked successfully |
 | Browser console and page errors | 0 |
 | Deterministic demo results | 15 |
-| Responsive screenshot states | 8 states: empty, workspace, Updated answer, Run 2 loading, Run 2 ready, mobile results, mobile decision, mobile refinement |
+| Responsive screenshot states | 9 states: empty, workspace, Updated answer, Run 2 loading, Run 2 ready, mobile results, mobile decision, mobile refinement, added-location map |
 | Progressive media sequence | Lead image, first five result images, first gallery batch, then background media |
 | Layout detector | 0 findings across the changed application surfaces |
 | Refinement history | Run 1 remains selectable while Run 2 searches and after it is ready |
+| Location preview | Keyless personal-list map preview rendered; University of Utah added with verified coordinates and used for distance sorting |
 
 ## Local media benchmark
 

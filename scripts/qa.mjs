@@ -64,6 +64,17 @@ async function waitForImagePaint(page) {
   }));
 }
 
+async function waitForGoogleMapPaint(page) {
+  const mapLocator = page.locator('iframe[title^="Google map"]').first();
+  await mapLocator.scrollIntoViewIfNeeded();
+  const mapHandle = await mapLocator.elementHandle();
+  const mapFrame = await mapHandle?.contentFrame();
+  await mapFrame?.waitForLoadState("domcontentloaded");
+  // Google paints its map tiles after the iframe document reaches DOM ready.
+  // Give the third-party canvas time to become visually inspectable.
+  await page.waitForTimeout(3500);
+}
+
 async function verifyWebMCPTools() {
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -223,10 +234,32 @@ try {
   await waitForCompleteImages(page, 'img[data-media-role="lead-hero"]', 1);
   await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
   await waitForImagePaint(page);
+  await waitForGoogleMapPaint(page);
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-mobile-decision.png"), fullPage: true });
   await page.getByRole("button", { name: "Refine" }).click();
   await page.getByRole("heading", { name: /enhance and narrow/i }).waitFor();
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-mobile-refine.png"), fullPage: true });
+
+  await page.getByRole("button", { name: "Decision" }).click();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const mapFrame = page.locator('iframe[title^="Google map"]').first();
+  await mapFrame.waitFor({ state: "visible" });
+  if (!(await mapFrame.getAttribute("src"))?.includes("maps.google.com/maps?output=embed")) {
+    throw new Error("The keyless Google Maps preview was not rendered.");
+  }
+  await page.getByRole("button", { name: /add location/i }).click();
+  await page.getByPlaceholder("Place name or address").fill("University of Utah");
+  await page.getByRole("button", { name: "Add to search" }).click();
+  await page.getByRole("button", { name: /University of Utah/i }).waitFor();
+  await page.getByRole("button", { name: /sort results by this place/i }).click();
+  if (await page.locator(".sort-control select").inputValue() !== "distance") {
+    throw new Error("The added location did not become an available distance sort.");
+  }
+  await page.reload({ waitUntil: "networkidle" });
+  await page.getByRole("heading", { name: /best options/i }).waitFor();
+  await page.getByText("Capitol Reef · #206", { exact: true }).first().click();
+  await waitForGoogleMapPaint(page);
+  await page.screenshot({ path: resolve(artifactDirectory, "workspace-location-added-desktop.png"), fullPage: true });
 
   if (consoleErrors.length > 0) {
     throw new Error(`Browser console errors:\n${consoleErrors.join("\n")}`);
@@ -239,7 +272,7 @@ try {
         resultCount,
         tools: webmcp.tools,
         invokedTools: Object.keys(webmcp.results).sort(),
-        screenshots: 8,
+        screenshots: 9,
       },
       null,
       2,

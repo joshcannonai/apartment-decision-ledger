@@ -1,6 +1,23 @@
 import { useState } from "react";
-import { AlertCircle, Building, CalendarClock, Check, ExternalLink, ImageOff, MapPin, Ruler, Scale, ShieldCheck, Sparkles } from "lucide-react";
-import type { ApartmentCandidate, CandidateMedia } from "../domain/types";
+import {
+  AlertCircle,
+  Building,
+  CalendarClock,
+  Check,
+  ExternalLink,
+  ImageOff,
+  MapPin,
+  Navigation,
+  Plus,
+  Ruler,
+  Scale,
+  ShieldCheck,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { KNOWN_SLC_ANCHORS } from "../domain/geo";
+import type { ApartmentCandidate, CandidateMedia, SearchAnchor } from "../domain/types";
+import { buildGoogleMapUrls } from "../maps/googleMaps";
 import { orderCandidateMedia } from "../media/order";
 import type { MediaPhase } from "../media/priority";
 import { mediaLoadingHint, shouldRequestMedia } from "../media/priority";
@@ -19,6 +36,8 @@ type CandidateDetailProps = {
   isStaged: boolean;
   onToggleCompare: (candidateId: string) => void;
   onStage: (candidateId: string) => void;
+  onAddLocation: (label: string) => SearchAnchor;
+  onSortByLocation: (anchorId: string) => void;
   rank: number;
   runContext: RunContext;
   mediaPhase: MediaPhase;
@@ -82,8 +101,14 @@ function fitNarrative(candidate: ApartmentCandidate, rank: number, run: RunConte
   };
 }
 
-export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCompare, onStage, rank, runContext, mediaPhase, onMediaSettled }: CandidateDetailProps) {
+export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCompare, onStage, onAddLocation, onSortByLocation, rank, runContext, mediaPhase, onMediaSettled }: CandidateDetailProps) {
   const [mediaSelection, setMediaSelection] = useState({ candidateId: candidate.id, index: 0 });
+  const [locationEditorOpen, setLocationEditorOpen] = useState(false);
+  const [locationDraft, setLocationDraft] = useState("");
+  const [mapSelection, setMapSelection] = useState<{ candidateId: string; anchorId: string | null }>({
+    candidateId: candidate.id,
+    anchorId: candidate.distances[0]?.anchorId ?? null,
+  });
   const compared = comparisonIds.includes(candidate.id);
   const media = orderCandidateMedia(candidate.media ?? []);
   const activeMediaIndex = mediaSelection.candidateId === candidate.id ? Math.min(mediaSelection.index, Math.max(0, media.length - 1)) : 0;
@@ -92,6 +117,20 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
   const activeHint = mediaLoadingHint({ rank, mediaIndex: activeMediaIndex, selected: true });
   const tensions = candidate.scores.personalFit.tensions;
   const narrative = fitNarrative(candidate, rank, runContext);
+  const activeAnchorId = mapSelection.candidateId === candidate.id
+    ? mapSelection.anchorId
+    : candidate.distances[0]?.anchorId ?? null;
+  const activeDistance = candidate.distances.find((distance) => distance.anchorId === activeAnchorId)
+    ?? candidate.distances[0]
+    ?? null;
+  const mapOrigin = candidate.latitude != null && candidate.longitude != null
+    ? `${candidate.latitude},${candidate.longitude}`
+    : `${candidate.address}, ${candidate.city}, ${candidate.state}`;
+  const mapUrls = buildGoogleMapUrls({
+    origin: mapOrigin,
+    destination: activeDistance?.anchorLabel,
+    embedApiKey: import.meta.env.VITE_GOOGLE_MAPS_EMBED_API_KEY,
+  });
 
   return (
     <article className="candidate-detail">
@@ -158,7 +197,7 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
         <div className="space-summary"><span>Space</span><strong>{candidate.squareFeet ?? "Unknown"} <small>sq ft</small></strong><small>{candidate.bedrooms ?? "—"} bed · {candidate.bathrooms ?? "—"} bath</small></div>
         <div className="score-pair"><ScoreWheel label="Market Value" score={candidate.scores.marketValue.score} /><ScoreWheel label="Personal Fit" score={candidate.scores.personalFit.score} /></div>
         <section className="ranking-narrative" aria-labelledby={`fit-narrative-${candidate.id}`}>
-          <div className="ranking-narrative-label"><Sparkles size={16} /><span>Why this fits you</span></div>
+          <div className="ranking-narrative-label"><Sparkles size={16} /><span>Why the AI ranked it here</span></div>
           <div className="ranking-narrative-copy">
             <h2 id={`fit-narrative-${candidate.id}`}>{narrative.headline}</h2>
             <p>{narrative.explanation}</p>
@@ -168,6 +207,99 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
       </aside>
 
       <p className="score-caveat"><AlertCircle size={14} /> {candidate.scores.marketValue.caveat}</p>
+
+      <section className="location-preview" aria-labelledby={`location-preview-${candidate.id}`}>
+        <header>
+          <div>
+            <h2 id={`location-preview-${candidate.id}`}>Location preview</h2>
+            <p>See this listing relative to the places that shape your week.</p>
+          </div>
+          <a href={mapUrls.openUrl} target="_blank" rel="noreferrer">Open in Google Maps <ExternalLink size={13} /></a>
+        </header>
+
+        <div className="location-anchor-row" aria-label="Locations used for distance context">
+          {candidate.distances.map((distance) => (
+            <button
+              key={distance.anchorId}
+              type="button"
+              className={distance.anchorId === activeDistance?.anchorId ? "is-active" : ""}
+              aria-pressed={distance.anchorId === activeDistance?.anchorId}
+              onClick={() => setMapSelection({ candidateId: candidate.id, anchorId: distance.anchorId })}
+            >
+              <MapPin size={12} />
+              <span>{distance.anchorLabel}</span>
+              <strong>{distance.straightLineMiles == null ? "Route preview" : `${distance.straightLineMiles.toFixed(1)} mi`}</strong>
+            </button>
+          ))}
+          <button className="add-location-button" type="button" onClick={() => setLocationEditorOpen(true)}>
+            <Plus size={13} /> Add location
+          </button>
+        </div>
+
+        {locationEditorOpen ? (
+          <form
+            className="add-location-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const label = locationDraft.trim();
+              if (!label) return;
+              const anchor = onAddLocation(label);
+              setMapSelection({ candidateId: candidate.id, anchorId: anchor.id });
+              setLocationDraft("");
+              setLocationEditorOpen(false);
+            }}
+          >
+            <MapPin size={15} aria-hidden="true" />
+            <label className="sr-only" htmlFor={`location-${candidate.id}`}>Place name or address</label>
+            <input
+              id={`location-${candidate.id}`}
+              list={`known-locations-${candidate.id}`}
+              value={locationDraft}
+              onChange={(event) => setLocationDraft(event.target.value)}
+              placeholder="Place name or address"
+              autoFocus
+            />
+            <datalist id={`known-locations-${candidate.id}`}>
+              {KNOWN_SLC_ANCHORS.map((anchor) => <option value={anchor.label} key={anchor.label} />)}
+            </datalist>
+            <button className="primary-button" type="submit">Add to search</button>
+            <button className="icon-button" type="button" aria-label="Cancel adding location" onClick={() => setLocationEditorOpen(false)}><X size={15} /></button>
+          </form>
+        ) : null}
+
+        <div className="location-map-frame">
+          <iframe
+            key={`${candidate.id}-${activeDistance?.anchorId ?? "listing"}`}
+            title={mapUrls.embedMode === "official_api" && activeDistance
+              ? `Google map from ${candidate.name} to ${activeDistance.anchorLabel}`
+              : `Google map showing ${candidate.name}`}
+            src={mapUrls.embedUrl}
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        </div>
+
+        <footer>
+          <span>
+            <Navigation size={14} />
+            {activeDistance
+              ? activeDistance.straightLineMiles == null
+                ? `${activeDistance.anchorLabel} is saved, but shortlist distance still needs verified coordinates.`
+                : `${activeDistance.straightLineMiles.toFixed(1)} miles straight-line to ${activeDistance.anchorLabel}; open Google Maps for the live route.`
+              : "Add a place to compare its route with this listing."}
+          </span>
+          {activeDistance ? (
+            <button
+              type="button"
+              disabled={activeDistance.straightLineMiles == null}
+              onClick={() => onSortByLocation(activeDistance.anchorId)}
+            >
+              Sort results by this place
+            </button>
+          ) : null}
+        </footer>
+      </section>
 
       <div className="decision-evidence">
         <section>

@@ -140,6 +140,21 @@ describe("apartment workspace", () => {
     expect(workspaceStore.getSnapshot().refinementQuestions[0]).toMatchObject({ origin: "agent_custom" });
   });
 
+  it("adds a known human location as an approved distance anchor", async () => {
+    workspaceActions.prepareSearch({ city: "Salt Lake City", state: "UT" });
+    await workspaceActions.searchCandidates();
+
+    const anchor = workspaceActions.addLocationAnchor("University of Utah");
+    const state = workspaceStore.getSnapshot();
+
+    expect(anchor.status).toBe("approved");
+    expect(anchor.verification).toBe("verified_coordinates");
+    expect(state.anchors.some((item) => item.id === anchor.id)).toBe(true);
+    expect(state.candidates.every((candidate) => (
+      candidate.distances.some((distance) => distance.anchorId === anchor.id)
+    ))).toBe(true);
+  });
+
   it("calculates transparent market and personal scores", () => {
     const scored = scoreCandidates(SLC_DEMO_CANDIDATES, [], []);
     expect(scored).toHaveLength(15);

@@ -498,6 +498,58 @@ function reviewPreferences(ids: string[], status: "approved" | "rejected") {
   );
 }
 
+function addLocationAnchor(label: string) {
+  const normalizedLabel = label.trim().replace(/\s+/g, " ").slice(0, 160);
+  if (!normalizedLabel) throw new Error("Enter a place name or address to add.");
+
+  let selectedAnchorId = "";
+  commit(
+    (current) => {
+      const existing = current.anchors.find(
+        (anchor) => anchor.label.toLowerCase() === normalizedLabel.toLowerCase(),
+      );
+      const proposed = existing ?? proposalRecords({
+        anchors: [{
+          label: normalizedLabel,
+          importance: 3,
+          source: "user_stated",
+          confidence: 1,
+        }],
+      }).anchors[0];
+      const approvedAnchor: SearchAnchor = {
+        ...proposed,
+        source: existing?.source ?? "user_stated",
+        confidence: existing?.confidence ?? 1,
+        status: "approved",
+      };
+      selectedAnchorId = approvedAnchor.id;
+      const anchors = existing
+        ? current.anchors.map((anchor) => anchor.id === existing.id ? approvedAnchor : anchor)
+        : [...current.anchors, approvedAnchor];
+      const next = { ...current, anchors };
+      const candidates = recomputeAndSort(next, next.candidates);
+      const withCandidates = {
+        ...next,
+        candidates,
+        visibleCandidateIds: candidates.map((candidate) => candidate.id),
+      };
+      return {
+        ...withCandidates,
+        refinementQuestions: questionsFor(withCandidates),
+      };
+    },
+    {
+      type: "location_added",
+      source: "human",
+      message: `Added ${normalizedLabel} to this workspace's distance context.`,
+    },
+  );
+
+  const selectedAnchor = state.anchors.find((anchor) => anchor.id === selectedAnchorId);
+  if (!selectedAnchor) throw new Error("The location could not be added.");
+  return selectedAnchor;
+}
+
 function queueRefinementAnswer(
   questionId: string,
   preference: NonNullable<PreferenceProposalInput["preferences"]>[number],
@@ -964,6 +1016,7 @@ export const workspaceStore = {
 export const workspaceActions = {
   prepareSearch,
   proposePreferences,
+  addLocationAnchor,
   approvePreferences(ids: string[]) {
     reviewPreferences(ids, "approved");
   },

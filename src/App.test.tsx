@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { App } from "./App";
-import { workspaceActions } from "./domain/store";
+import { workspaceActions, workspaceStore } from "./domain/store";
 
 describe("Apartment Decision Ledger UI", () => {
   beforeEach(() => {
@@ -101,5 +101,30 @@ describe("Apartment Decision Ledger UI", () => {
     });
     expect(screen.getByRole("button", { name: "Run 1" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Run 2" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("previews Google Maps and adds a verified location beside existing anchors", async () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /salt lake city demo/i }));
+    await screen.findByRole("heading", { name: /best options/i });
+
+    expect(screen.getByTitle(/Google map showing Capitol Reef/i)).toHaveAttribute(
+      "src",
+      expect.stringContaining("maps.google.com/maps?output=embed"),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /add location/i }));
+    fireEvent.change(screen.getByPlaceholderText(/place name or address/i), {
+      target: { value: "University of Utah" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /add to search/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /University of Utah/i })).toBeInTheDocument();
+    });
+    const added = workspaceStore.getSnapshot().anchors.find((anchor) => anchor.label === "University of Utah");
+    expect(added).toMatchObject({ status: "approved", verification: "verified_coordinates" });
+
+    fireEvent.click(screen.getByRole("button", { name: /sort results by this place/i }));
+    expect(workspaceStore.getSnapshot().sort).toMatchObject({ by: "distance", anchorId: added?.id });
   });
 });

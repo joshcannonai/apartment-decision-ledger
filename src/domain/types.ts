@@ -148,6 +148,7 @@ export type WorkspaceEvent = {
     | "search_prepared"
     | "preferences_proposed"
     | "preferences_reviewed"
+    | "location_added"
     | "search_started"
     | "results_ready"
     | "refinement_queued"

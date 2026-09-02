@@ -19,7 +19,9 @@ Help a renter make a defensible apartment decision with relevant personal contex
 - The decision canvas uses a short lead image with a vertical supporting strip; the source action follows the final supporting image.
 - Availability, layout, and location facts stack immediately beside the media.
 - Estimated all-in cost, space, and larger Market Value and Personal Fit gauges form one compact metric row beneath the media and facts.
-- A full-width “Why this fits you” explanation follows the metrics with the ranking reason, relevant cost and space context, the latest rerun input when applicable, and the most important remaining verification.
+- A full-width “Why the AI ranked it here” explanation follows the metrics with the ranking reason, relevant cost and space context, the latest rerun input when applicable, and the most important remaining verification.
+- The model-thought label sits directly above the explanation rather than consuming a separate left column.
+- A lazy Google Maps location preview follows the decision summary. Location chips select a route, “Add location” sits beside those chips, and sorting is enabled only when an anchor has verified coordinates.
 - The refinement rail asks only questions that can improve the ranking.
 - Mobile separates Results, Decision, and Refine into explicit views instead of squeezing three rails together.
 

@@ -10,6 +10,7 @@ The renter's personal agent brings only the context it chooses to share. The pag
 - Results before questionnaire: a location is enough to produce a preliminary shortlist.
 - Deterministic unanswered questions and agent-supplied custom follow-ups can refine the shortlist without blocking the first result set.
 - Explicit numbered reruns preserve the original ranking and explain what changed.
+- A built-in Google Maps preview shows the listing against selected location anchors; renters can add another place, open a live Google route, and sort by anchors with verified coordinates.
 - Preferences and location anchors are visibly attributed and require approval before durable saving.
 - Market Value Score and Personal Fit Score remain separate.
 - No applications, bookings, landlord messages, payments, or lease commitments.
@@ -38,6 +39,8 @@ npm run dev
 ```
 
 The deterministic Salt Lake City demo does not require credentials.
+
+It reuses the personal shortlist's keyless Google map-preview pattern. For the supported production embed and in-page directions mode, configure a website-restricted `VITE_GOOGLE_MAPS_EMBED_API_KEY`; Google Maps links themselves do not require a key.
 
 ```bash
 npm test
