@@ -22,6 +22,18 @@ describe("Apartment Ledger UI", () => {
     expect(screen.getByRole("button", { name: /continue with chatgpt/i })).toBeDisabled();
   });
 
+  it("offers light, dark, and system themes and persists the selection", () => {
+    render(<App />);
+
+    const themeSelect = screen.getByRole("combobox", { name: /color theme/i });
+    expect(themeSelect).toHaveValue("system");
+    fireEvent.change(themeSelect, { target: { value: "dark" } });
+
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
+    expect(window.localStorage.getItem("apartment-ledger.theme")).toBe("dark");
+    expect(themeSelect).toHaveValue("dark");
+  });
+
   it("shows results before refinement and keeps agent context pending approval", async () => {
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: /salt lake city demo/i }));

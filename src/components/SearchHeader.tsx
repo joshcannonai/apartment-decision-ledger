@@ -3,11 +3,15 @@ import {
   Bot,
   CircleUserRound,
   MapPin,
+  Monitor,
+  Moon,
   RotateCcw,
   Search,
   Sparkles,
+  Sun,
 } from "lucide-react";
 import type { SearchStatus } from "../domain/types";
+import type { ThemePreference } from "../theme";
 
 type SearchHeaderProps = {
   city: string;
@@ -17,6 +21,9 @@ type SearchHeaderProps = {
   onSearch: (city: string) => void;
   onReset: () => void;
   onAccount: () => void;
+  themePreference: ThemePreference;
+  resolvedTheme: "light" | "dark";
+  onThemeChange: (preference: ThemePreference) => void;
 };
 
 function DecisionMark() {
@@ -36,12 +43,17 @@ export function SearchHeader({
   onSearch,
   onReset,
   onAccount,
+  themePreference,
+  resolvedTheme,
+  onThemeChange,
 }: SearchHeaderProps) {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextCity = String(new FormData(event.currentTarget).get("city") ?? "").trim();
     if (nextCity) onSearch(nextCity);
   }
+
+  const ThemeIcon = themePreference === "system" ? Monitor : resolvedTheme === "dark" ? Moon : Sun;
 
   return (
     <header className="site-header">
@@ -84,6 +96,19 @@ export function SearchHeader({
             <RotateCcw size={18} />
           </button>
         ) : null}
+        <label className="theme-control" title={`Color theme: ${themePreference}`}>
+          <ThemeIcon size={17} aria-hidden="true" />
+          <span className="sr-only">Color theme</span>
+          <select
+            aria-label="Color theme"
+            value={themePreference}
+            onChange={(event) => onThemeChange(event.target.value as ThemePreference)}
+          >
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="system">System</option>
+          </select>
+        </label>
         <button className="account-button" type="button" onClick={onAccount}>
           <CircleUserRound size={18} />
           <span>Optional sign in</span>

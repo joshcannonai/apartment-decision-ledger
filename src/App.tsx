@@ -23,6 +23,7 @@ import type { RefinementQuestion, SearchQuery, SortOption } from "./domain/types
 import { SLC_DEMO_CANDIDATES } from "./data/slcCandidates";
 import { orderCandidateMedia } from "./media/order";
 import type { MediaPhase } from "./media/priority";
+import { useThemePreference } from "./theme";
 
 const demoContext = {
   preferences: [
@@ -77,6 +78,7 @@ const demoContext = {
 
 export function App() {
   const workspace = useWorkspace();
+  const theme = useThemePreference();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileSection, setMobileSection] = useState<"results" | "decision" | "context">("results");
   const [compareOpen, setCompareOpen] = useState(false);
@@ -235,6 +237,9 @@ export function App() {
         onSearch={(city) => void runSearch(city)}
         onReset={resetWorkspace}
         onAccount={() => setAccountOpen(true)}
+        themePreference={theme.preference}
+        resolvedTheme={theme.resolved}
+        onThemeChange={theme.setPreference}
       />
 
       <main>

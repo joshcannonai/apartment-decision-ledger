@@ -108,6 +108,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .search-button { flex: 0 0 auto; min-height: 36px; padding: 7px 12px; font-size: 13px; }
 .header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 .agent-status { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 6px 9px; color: var(--forest-deep); font-size: 12px; font-weight: 650; }
+.theme-control {
+  position: relative;
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted);
+  background: transparent;
+}
+.theme-control:hover { color: var(--ink); background: var(--paper-soft); }
+.theme-control svg { flex: 0 0 auto; pointer-events: none; }
+.theme-control select { max-width: 70px; border: 0; outline: 0; color: inherit; background: transparent; font-size: 11px; font-weight: 650; }
 .icon-button { width: 38px; padding: 0; border: 1px solid var(--line); color: var(--muted); background: transparent; }
 .icon-button:hover { color: var(--ink); background: var(--paper-soft); }
 .account-button { padding: 8px 11px; border: 1px solid var(--line); color: var(--muted); background: transparent; font-size: 12px; }
@@ -354,6 +369,8 @@ h1, h2 { color: var(--ink); letter-spacing: -0.035em; }
   .site-header { grid-template-columns: minmax(180px, 0.7fr) minmax(340px, 1.4fr) auto; }
   .account-button span, .agent-status span { display: none; }
   .account-button { width: 38px; padding: 0; }
+  .theme-control { width: 38px; padding: 0; justify-content: center; }
+  .theme-control select { position: absolute; inset: 0; width: 100%; max-width: none; opacity: 0; }
   .workspace-layout { grid-template-columns: minmax(280px, 0.78fr) minmax(500px, 1.45fr) minmax(290px, 0.8fr); }
   .candidate-detail { padding-right: 30px; padding-left: 30px; }
   .context-region { padding-right: 15px; padding-left: 15px; }

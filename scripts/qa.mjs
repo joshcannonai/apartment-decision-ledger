@@ -213,6 +213,16 @@ try {
   await page.getByRole("heading", { name: "Find the apartment that fits your actual life." }).waitFor();
   await page.screenshot({ path: resolve(artifactDirectory, "empty-desktop.png"), fullPage: true });
 
+  const themeControl = page.getByRole("combobox", { name: "Color theme" });
+  await themeControl.selectOption("dark");
+  if (await page.locator("html").getAttribute("data-theme") !== "dark") {
+    throw new Error("Dark mode did not apply to the document.");
+  }
+  await page.reload({ waitUntil: "networkidle" });
+  if (await themeControl.inputValue() !== "dark" || await page.locator("html").getAttribute("data-theme") !== "dark") {
+    throw new Error("Dark mode did not persist across reload.");
+  }
+
   await page.getByRole("button", { name: /Open the Salt Lake City decision demo/i }).click();
   await page.getByRole("heading", { name: /best options/i }).waitFor();
   await page.getByRole("heading", { name: "Answer these to enhance and narrow your search" }).waitFor();
