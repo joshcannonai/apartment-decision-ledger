@@ -2,6 +2,8 @@
 
 An agent-native apartment decision workspace for the OpenAI WebMCP Challenge.
 
+**Live demo:** [apartment-decision-ledger.vercel.app](https://apartment-decision-ledger.vercel.app/)
+
 ![Apartment Decision Ledger workspace](docs/images/workspace-submission.webp)
 
 The renter's personal agent brings only the context it chooses to share. The page turns that context into visible assumptions, a ranked preliminary shortlist, transparent market-value and personal-fit reasoning, refinement questions, comparisons, and a reversible staged decision.
@@ -82,4 +84,4 @@ The local product, deterministic demo, submission copy, judge guide, demo script
 
 Challenge-period implementation evidence is documented in [`docs/CHALLENGE_BUILD.md`](docs/CHALLENGE_BUILD.md). Judge instructions are in [`docs/JUDGE_GUIDE.md`](docs/JUDGE_GUIDE.md). This repository is licensed under the [MIT License](LICENSE).
 
-Publishing a GitHub repository, deploying to Vercel, enabling paid providers, recording/uploading the demo video, and submitting the entry remain separate approval-time actions.
+The public repository and production Vercel deployment are live. Enabling paid providers, recording/uploading the demo video, and submitting the Devpost entry remain separate approval-time actions.
