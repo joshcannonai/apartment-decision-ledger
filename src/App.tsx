@@ -441,54 +441,55 @@ function EmptyWorkspace({
         }}
       >
         <div className="empty-hero">
-          {unavailableNote ? <p className="eyebrow">Search needs a live source</p> : <p className="eyebrow">New apartment ledger</p>}
-          <h1 aria-label={unavailableNote ? `${displayCity} is ready. Inventory source needed.` : "Build your first apartment shortlist."}>
+          {unavailableNote ? <p className="eyebrow">Search needs a live source</p> : <p className="eyebrow"><Bot size={13} /> Agent-ready apartment search</p>}
+          <h1 aria-label={unavailableNote ? `${displayCity} is ready. Inventory source needed.` : "Find a place that fits."}>
             {unavailableNote ? (
               <><span>{displayCity} is ready.</span><span>Inventory source needed.</span></>
             ) : (
-              <><span>Build your first</span><span>apartment shortlist.</span></>
+              <span>Find a place that fits.</span>
             )}
           </h1>
           <p>{unavailableNote
             ? "The search is prepared, but live apartment inventory is not connected yet. Open the verified Salt Lake City demo or connect the listing provider for real candidates."
-            : "Start with what you know. Your agent can bring relevant context it already has and visibly prefill the rest."}</p>
-          <div className="city-field-heading"><span>City or metro area</span><small>WebMCP or you</small></div>
-          <div className="city-entry-row">
-            <MapPin size={19} />
-            <label className="sr-only" htmlFor="empty-city">City or metro area</label>
-            <input id="empty-city" data-agent-field="city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="City and state, like Denver, CO" autoComplete="address-level2" />
-            <button className="primary-button" type="submit" disabled={!city.trim()}><Search size={17} /> Find apartments</button>
-          </div>
-          <button className="demo-link" type="button" onClick={onDemo}>Open the Salt Lake City demo</button>
-          <p className="entry-privacy"><Bot size={14} /> Agent context shapes this search, but is not saved until you approve it.</p>
+            : "Set the essentials yourself, or let your agent bring the apartment context it already has."}</p>
         </div>
 
         <section className="agent-prefill-panel" aria-labelledby="agent-prefill-heading">
           <header>
-            <span><Bot size={15} /> WebMCP agent inputs</span>
-            <small>Visible before search</small>
+            <div>
+              <span>Apartment search</span>
+              <h2 id="agent-prefill-heading">Start with the essentials</h2>
+            </div>
+            <small><Bot size={13} /> Agent-fillable</small>
           </header>
-          <h2 id="agent-prefill-heading">Your agent can prefill these fields</h2>
-          <p>Review or change anything before the first run.</p>
-          <div className="agent-field-grid">
-            <label><span>Rental type <small>WebMCP</small></span><select data-agent-field="rental-type" value={rentalType} onChange={(event) => setRentalType(event.target.value as RentalType)}><option value="any">Any rental</option><option value="whole_place">Whole place</option><option value="private_room">Private room</option><option value="shared_room">Shared room</option></select></label>
-            <label><span>Maximum all-in monthly cost <small>WebMCP</small></span><input data-agent-field="max-all-in" type="number" min="300" step="50" value={maxAllIn} onChange={(event) => setMaxAllIn(event.target.value)} placeholder="No maximum" /></label>
-            <label><span>Minimum bedrooms <small>WebMCP</small></span><select data-agent-field="minimum-bedrooms" value={minBedrooms} onChange={(event) => setMinBedrooms(event.target.value)}><option value="">Any</option><option value="0">Studio</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label>
-            <label><span>Move window <small>WebMCP</small></span><input data-agent-field="move-window" value={moveWindow} onChange={(event) => setMoveWindow(event.target.value)} placeholder="For example, October" /></label>
-            <label><span>Anything else that matters <small>WebMCP</small></span><input data-agent-field="request" value={request} onChange={(event) => setRequest(event.target.value)} placeholder="Desk, pet, parking, neighborhood..." /></label>
-            <label><span>Budget suggestion rationale <small>Agent suggestion</small></span><input data-agent-field="budget-rationale" value={budgetRationale} onChange={(event) => setBudgetRationale(event.target.value)} placeholder="Why your agent suggested this amount" /></label>
-            <label className="agent-field-full"><span>What your agent knows about you <small>Optional memory context</small></span><textarea data-agent-field="shared-context" value={sharedContextSummary} onChange={(event) => setSharedContextSummary(event.target.value)} placeholder="Apartment-related context your current agent chose to share, such as living alone, a 72-inch desk, or important places." /></label>
+          <label className="city-field-label" htmlFor="empty-city">Where do you want to live?</label>
+          <div className="city-entry-row">
+            <MapPin size={18} />
+            <input id="empty-city" data-agent-field="city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="City and state, like Denver, CO" autoComplete="address-level2" />
           </div>
-          <div className="agent-proposal-note">
-            <strong>Your agent controls what it brings</strong>
-            <span>Apartment Ledger cannot open an agent’s complete memory. If the current agent has relevant context, it can place only those details here for you to review.</span>
+          <div className="agent-field-grid">
+            <label><span>Rental type</span><select data-agent-field="rental-type" value={rentalType} onChange={(event) => setRentalType(event.target.value as RentalType)}><option value="any">Any rental</option><option value="whole_place">Whole place</option><option value="private_room">Private room</option><option value="shared_room">Shared room</option></select></label>
+            <label><span>Maximum all-in cost</span><input data-agent-field="max-all-in" type="number" min="300" step="50" value={maxAllIn} onChange={(event) => setMaxAllIn(event.target.value)} placeholder="No maximum" /></label>
+            <label><span>Minimum bedrooms</span><select data-agent-field="minimum-bedrooms" value={minBedrooms} onChange={(event) => setMinBedrooms(event.target.value)}><option value="">Any</option><option value="0">Studio</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label>
+            <label><span>Move window</span><input data-agent-field="move-window" value={moveWindow} onChange={(event) => setMoveWindow(event.target.value)} placeholder="For example, October" /></label>
+            <div className="context-divider"><span>Personal context</span><small>Optional</small></div>
+            <label><span>Anything else that matters</span><input data-agent-field="request" value={request} onChange={(event) => setRequest(event.target.value)} placeholder="Desk, pet, parking, neighborhood..." /></label>
+            <label><span>Why this budget</span><input data-agent-field="budget-rationale" value={budgetRationale} onChange={(event) => setBudgetRationale(event.target.value)} placeholder="Your agent can explain its suggestion" /></label>
+            <label className="agent-field-full"><span>Relevant context from your agent</span><textarea data-agent-field="shared-context" value={sharedContextSummary} onChange={(event) => setSharedContextSummary(event.target.value)} placeholder="Only apartment-related details, such as living alone, furniture, or important places." /></label>
           </div>
           {proposedContext.length > 0 ? (
             <div className="agent-proposal-preview" aria-label="Context proposed by your agent">
-              <strong>Proposed by your agent</strong>
+              <strong>Added by your agent</strong>
               <div>{proposedContext.slice(0, 4).map((label) => <span key={label}>{label}</span>)}</div>
             </div>
           ) : null}
+          <footer className="entry-actions">
+            <p className="entry-privacy"><Bot size={14} /> Only context shown here reaches Apartment Ledger. Nothing becomes a saved preference without your approval.</p>
+            <div>
+              <button className="demo-link" type="button" onClick={onDemo}>Use Salt Lake City demo</button>
+              <button className="primary-button" type="submit" disabled={!city.trim()}><Search size={17} /> Find apartments</button>
+            </div>
+          </footer>
         </section>
       </form>
     </section>

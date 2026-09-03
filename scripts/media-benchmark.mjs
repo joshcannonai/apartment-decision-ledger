@@ -29,7 +29,7 @@ try {
     await page.goto(baseUrl, { waitUntil: "networkidle" });
 
     const startedAt = performance.now();
-    await page.getByRole("button", { name: /Open the Salt Lake City demo/i }).click();
+    await page.getByRole("button", { name: /Use Salt Lake City demo/i }).click();
     await page.getByRole("heading", { name: /best options/i }).waitFor();
     const results = performance.now() - startedAt;
 

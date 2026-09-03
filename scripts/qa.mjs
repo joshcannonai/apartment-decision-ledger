@@ -224,7 +224,7 @@ page.on("pageerror", (error) => consoleErrors.push(error.message));
 try {
   const webmcp = await verifyWebMCPTools();
   await page.goto(baseUrl, { waitUntil: "networkidle" });
-  await page.getByRole("heading", { name: /build your first apartment shortlist/i }).waitFor();
+  await page.getByRole("heading", { name: /find a place that fits/i }).waitFor();
   if (!(await page.getByRole("button", { name: "Find apartments" }).isDisabled())) {
     throw new Error("The empty apartment search action should be disabled.");
   }
@@ -232,6 +232,9 @@ try {
     throw new Error("The entry screen did not expose all eight visible WebMCP-prefillable fields.");
   }
   await page.screenshot({ path: resolve(artifactDirectory, "empty-desktop.png"), fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: resolve(artifactDirectory, "empty-mobile.png"), fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 1000 });
 
   const themeControl = page.getByRole("button", { name: /Theme: system/i });
   await themeControl.click();
@@ -243,7 +246,7 @@ try {
     throw new Error("Dark mode did not persist across reload.");
   }
 
-  await page.getByRole("button", { name: /Open the Salt Lake City demo/i }).click();
+  await page.getByRole("button", { name: /Use Salt Lake City demo/i }).click();
   await page.getByRole("heading", { name: /building your .* shortlist/i }).waitFor();
   await page.screenshot({ path: resolve(artifactDirectory, "search-thinking-desktop.png"), fullPage: true });
   await page.getByRole("heading", { name: /best options/i }).waitFor();
@@ -330,7 +333,7 @@ try {
         resultCount,
         tools: webmcp.tools,
         invokedTools: Object.keys(webmcp.results).sort(),
-        screenshots: 10,
+        screenshots: 11,
       },
       null,
       2,

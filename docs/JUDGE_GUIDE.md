@@ -17,7 +17,7 @@
 
 ## Deterministic fallback
 
-Select **Open the Salt Lake City decision demo**. This exercises the same domain state as the WebMCP tools without requiring credentials or a live listing provider.
+Select **Use Salt Lake City demo**. This exercises the same domain state as the WebMCP tools without requiring credentials or a live listing provider.
 
 ## Expected tool inventory
 

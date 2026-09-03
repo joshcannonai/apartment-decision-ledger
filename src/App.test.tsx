@@ -14,7 +14,7 @@ describe("Apartment Ledger UI", () => {
   it("starts anonymously and makes optional identity boundaries explicit", () => {
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: /build your first apartment shortlist/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /find a place that fits/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /optional sign in/i }));
 
     expect(screen.getByRole("heading", { name: /use this without an account/i })).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe("Apartment Ledger UI", () => {
 
     expect(await screen.findByRole("heading", { name: /Denver, CO is ready/i })).toBeInTheDocument();
     expect(screen.getByText(/live apartment inventory is not connected yet/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /open the Salt Lake City demo/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /use Salt Lake City demo/i })).toBeInTheDocument();
   });
 
   it("keeps the empty search action disabled until a city is entered", () => {
@@ -69,13 +69,13 @@ describe("Apartment Ledger UI", () => {
 
     render(<App />);
 
-    expect(screen.getByLabelText(/city or metro area/i)).toHaveValue("Denver, CO");
-    expect(screen.getByLabelText(/maximum all-in monthly cost/i)).toHaveValue(2100);
+    expect(screen.getByLabelText(/where do you want to live/i)).toHaveValue("Denver, CO");
+    expect(screen.getByLabelText(/maximum all-in cost/i)).toHaveValue(2100);
     expect(screen.getByLabelText(/minimum bedrooms/i)).toHaveValue("2");
     expect(screen.getByLabelText(/move window/i)).toHaveValue("October");
     expect(screen.getByLabelText(/rental type/i)).toHaveValue("whole_place");
-    expect(screen.getByLabelText(/what your agent knows/i)).toHaveValue("Lives alone and owns a 72-inch desk");
-    expect(screen.getByLabelText(/budget suggestion rationale/i)).toHaveValue("Agent suggestion based on context the user shared");
+    expect(screen.getByLabelText(/relevant context from your agent/i)).toHaveValue("Lives alone and owns a 72-inch desk");
+    expect(screen.getByLabelText(/why this budget/i)).toHaveValue("Agent suggestion based on context the user shared");
     expect(screen.getByLabelText(/anything else that matters/i)).toHaveValue("Needs parking and room for a long desk");
     expect(screen.getByText("72-inch desk", { exact: true })).toBeInTheDocument();
     expect(screen.getByText("Trader Joe's", { exact: true })).toBeInTheDocument();

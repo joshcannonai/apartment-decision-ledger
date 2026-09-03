@@ -4,7 +4,7 @@ Verified locally on September 3, 2026.
 
 ## Production read-back
 
-The production site at `https://apartmentledger.vercel.app/` returned HTTP 200 and the expected WebMCP permissions policy on September 3, 2026. The native Chrome QA was then rerun against the production deployment: all eight tools registered and executed, 10 results rendered, ten responsive states were captured, and no browser console or page errors were reported.
+The production site at `https://apartmentledger.vercel.app/` returned HTTP 200 and the expected WebMCP permissions policy on September 3, 2026. The native Chrome QA was then rerun against the production deployment: all eight tools registered and executed, 10 results rendered, eleven responsive states were captured, and no browser console or page errors were reported.
 
 ## Automated checks
 
@@ -19,7 +19,7 @@ The production site at `https://apartmentledger.vercel.app/` returned HTTP 200 a
 | Native Chrome WebMCP execution | 8 of 8 tools invoked successfully |
 | Browser console and page errors | 0 |
 | Deterministic demo results | 10 |
-| Responsive screenshot states | 10 states: empty, search progress, workspace, Updated answer, Run 2 loading, Run 2 ready, mobile results, mobile decision, mobile refinement, added-location map |
+| Responsive screenshot states | 11 states: empty desktop, empty mobile, search progress, workspace, Updated answer, Run 2 loading, Run 2 ready, mobile results, mobile decision, mobile refinement, added-location map |
 | Progressive media sequence | Kitchen/living overview first, first five result images, then ranks 6–10 one at a time |
 | Layout detector | 0 findings across the changed application surfaces |
 | Refinement history | Run 1 remains selectable while Run 2 searches and after it is ready |
