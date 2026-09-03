@@ -7,7 +7,7 @@
 
    > Find apartments in Salt Lake City. Use only relevant context you already have about my budget, furniture, and important locations. Do not save anything yet.
 
-3. The agent can call `prepare_search`, then `search_candidates`. The page should visibly show attributed pending context, 15 ranked demo candidates, evidence and uncertainty, and refinement questions.
+3. The agent can call `prepare_search`, then `search_candidates`. The page should visibly show attributed pending context, 10 ranked demo candidates, evidence and uncertainty, and refinement questions.
 4. Ask:
 
    > Review this workspace, add the University of Utah as an important location, sort around it, and compare the strongest two options.

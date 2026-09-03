@@ -374,7 +374,7 @@ const seeds: Seed[] = [
  * Public, source-linked demo fixtures. Facts are an August 28, 2026 research
  * snapshot and are deliberately not presented as live availability.
  */
-export const SLC_DEMO_CANDIDATES: ApartmentCandidate[] = seeds.map((seed) => ({
+export const SLC_DEMO_CANDIDATES: ApartmentCandidate[] = seeds.map((seed, index) => ({
   id: seed.id,
   name: seed.name,
   address: seed.address,
@@ -402,7 +402,7 @@ export const SLC_DEMO_CANDIDATES: ApartmentCandidate[] = seeds.map((seed) => ({
     evidenceGrade: seed.evidenceGrade,
     note: "Curated challenge-demo snapshot. Open the source and verify before acting.",
   },
-  media: seed.media,
+  media: seed.media ?? [index % 2 === 0 ? DEMO_KITCHEN : DEMO_LIVING_ROOM],
   distances: [],
   scores: structuredClone(EMPTY_SCORES),
   addedBy: "curated_demo",

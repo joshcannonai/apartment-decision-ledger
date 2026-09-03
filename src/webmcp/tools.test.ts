@@ -38,14 +38,14 @@ describe("WebMCP apartment tools", () => {
 
   it("executes the same visible search action and returns a compact response", async () => {
     const result = await searchCandidatesTool.execute({ city: "Salt Lake City", state: "UT" });
-    expect(result).toMatchObject({ resultCount: 15, sourceMode: "curated_demo" });
+    expect(result).toMatchObject({ resultCount: 10, sourceMode: "curated_demo" });
     expect(result && typeof result === "object" && "topCandidateIds" in result).toBe(true);
     if (!result || typeof result !== "object" || !("topCandidateIds" in result)) {
       throw new Error("Search tool returned no topCandidateIds array.");
     }
     expect((result.topCandidateIds as unknown[]).length).toBeLessThanOrEqual(5);
     expect("refinementQuestions" in result && Array.isArray(result.refinementQuestions)).toBe(true);
-    expect(workspaceStore.getSnapshot().candidates).toHaveLength(15);
+    expect(workspaceStore.getSnapshot().candidates).toHaveLength(10);
   });
 
   it("reviews a persisted workspace without mutating it", async () => {
@@ -109,7 +109,7 @@ describe("WebMCP apartment tools", () => {
     });
     expect(workspaceStore.getSnapshot().refinementQuestions.some((question) => question.origin === "agent_custom")).toBe(true);
     expect(organizeResultsTool.execute({ sortBy: "market_value" })).toMatchObject({
-      resultCount: 15,
+      resultCount: 10,
     });
     expect(
       addCandidateTool.execute({

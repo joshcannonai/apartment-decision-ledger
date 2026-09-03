@@ -61,7 +61,7 @@ npm run qa
 
 The QA pass discovers and invokes all eight WebMCP tools in an isolated anonymous workspace, verifies visible UI effects, checks persistence and responsive rendering, captures desktop plus all three mobile workspace sections, and fails on browser console errors.
 
-The media benchmark opens fresh browser contexts and measures the non-blocking sequence from visible results to the lead image, first-screen shortlist images, selected listing gallery, and a visible refinement rerun.
+The media benchmark opens fresh browser contexts and measures the non-blocking sequence from visible results to the lead image, the first five shortlist images, selected listing gallery, progressively released ranks 6–10, and a visible refinement rerun.
 
 ## Optional nationwide provider
 

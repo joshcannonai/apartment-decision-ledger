@@ -8,7 +8,7 @@ describe("apartment workspace", () => {
     workspaceActions.resetWorkspace();
   });
 
-  it("publishes 15 source-linked demo results before refinement questions", async () => {
+  it("publishes 10 source-linked demo results before refinement questions", async () => {
     const snapshots: Array<{ status: string; resultCount: number; questionCount: number }> = [];
     const unsubscribe = workspaceStore.subscribe(() => {
       const snapshot = workspaceStore.getSnapshot();
@@ -23,8 +23,8 @@ describe("apartment workspace", () => {
     unsubscribe();
 
     expect(result.sourceMode).toBe("curated_demo");
-    expect(result.resultCount).toBe(15);
-    expect(workspaceStore.getSnapshot().candidates).toHaveLength(15);
+    expect(result.resultCount).toBe(10);
+    expect(workspaceStore.getSnapshot().candidates).toHaveLength(10);
     expect(
       workspaceStore.getSnapshot().candidates.every((candidate) => {
         const url = new URL(candidate.source.url);
@@ -33,7 +33,7 @@ describe("apartment workspace", () => {
     ).toBe(true);
 
     const resultsFirstIndex = snapshots.findIndex(
-      (snapshot) => snapshot.status === "ready" && snapshot.resultCount === 15 && snapshot.questionCount === 0,
+      (snapshot) => snapshot.status === "ready" && snapshot.resultCount === 10 && snapshot.questionCount === 0,
     );
     const questionsIndex = snapshots.findIndex(
       (snapshot) => snapshot.status === "ready" && snapshot.questionCount > 0,

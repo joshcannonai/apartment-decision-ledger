@@ -25,6 +25,7 @@ type ResultsListProps = {
   onToggleCompare: (candidateId: string) => void;
   onSort: (sort: SortOption) => void;
   mediaPhase: MediaPhase;
+  visibleHeroCount: number;
   onMediaSettled: (candidateId: string, mediaIndex: number, rank: number) => void;
   searchRuns: SearchRun[];
   activeRunNumber: number | null;
@@ -53,6 +54,7 @@ export function ResultsList({
   onToggleCompare,
   onSort,
   mediaPhase,
+  visibleHeroCount,
   onMediaSettled,
   searchRuns,
   activeRunNumber,
@@ -113,7 +115,8 @@ export function ResultsList({
             // During the lead phase the large decision image owns the only
             // high-priority request. The matching row thumbnail joins the
             // first-screen batch after that image settles.
-            const requestHero = heroMedia && !(mediaPhase === "lead" && index === 0) ? shouldRequestMedia({
+            const withinProgressiveWindow = index < visibleHeroCount || selected;
+            const requestHero = heroMedia && withinProgressiveWindow && !(mediaPhase === "lead" && index === 0) ? shouldRequestMedia({
               phase: mediaPhase,
               rank: index,
               mediaIndex: 0,

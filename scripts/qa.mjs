@@ -134,8 +134,8 @@ async function verifyWebMCPTools() {
     });
     await page.getByRole("heading", { name: /best options/i }).waitFor();
     await page.getByText("Needs a workable place for a 72-inch desk", { exact: true }).first().waitFor({ state: "attached" });
-    if (results.search_candidates.resultCount !== 15) {
-      throw new Error(`search_candidates returned ${results.search_candidates.resultCount}, expected 15`);
+    if (results.search_candidates.resultCount !== 10) {
+      throw new Error(`search_candidates returned ${results.search_candidates.resultCount}, expected 10`);
     }
     results.review_workspace = await invokeWebMCP(page, "review_workspace", {});
     if (results.review_workspace.leadingCandidates?.length !== 5) {
@@ -218,7 +218,7 @@ try {
   await page.getByRole("heading", { name: "Answer these to enhance and narrow your search" }).waitFor();
 
   const resultCount = await page.locator(".result-row").count();
-  if (resultCount !== 15) throw new Error(`Expected 15 demo candidates; found ${resultCount}`);
+  if (resultCount !== 10) throw new Error(`Expected 10 demo candidates; found ${resultCount}`);
   if ((await page.getByText(/demo snapshot/i).count()) === 0) {
     throw new Error("The curated demo is not visibly labeled as a demo snapshot.");
   }
@@ -232,6 +232,7 @@ try {
   await compareButtons.nth(1).click();
   await waitForCompleteImages(page, 'img[data-media-role="lead-hero"]', 1);
   await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
+  await waitForCompleteImages(page, 'img[data-media-role="result-hero"][data-media-rank]', 10);
   await waitForImagePaint(page);
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-desktop.png"), fullPage: true });
 

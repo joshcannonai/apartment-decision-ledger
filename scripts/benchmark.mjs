@@ -28,7 +28,7 @@ try {
         JSON.stringify({ city: "Salt Lake City", state: "UT", maxAllIn: 2200 }),
       );
     });
-    await page.locator(".result-row").nth(14).waitFor();
+    await page.locator(".result-row").nth(9).waitFor();
     samples.push(performance.now() - startedAt);
 
     const parsed = JSON.parse(result);
@@ -53,7 +53,7 @@ console.log(
       p95: Math.round(percentile(0.95) * 10) / 10,
       minimum: Math.round(sorted[0] * 10) / 10,
       maximum: Math.round(sorted.at(-1) * 10) / 10,
-      scope: "Native WebMCP search_candidates invocation through 15 visible deterministic demo rows; page load and browser-agent reasoning excluded.",
+      scope: "Native WebMCP search_candidates invocation through 10 visible deterministic demo rows; page load and browser-agent reasoning excluded.",
     },
     null,
     2,

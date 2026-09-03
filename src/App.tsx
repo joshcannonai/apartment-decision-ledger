@@ -82,6 +82,7 @@ export function App() {
   const [compareOpen, setCompareOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [mediaPhase, setMediaPhase] = useState<MediaPhase>("lead");
+  const [visibleHeroCount, setVisibleHeroCount] = useState(1);
   const settledShortlistMedia = useRef(new Set<string>());
 
   useEffect(() => {
@@ -116,7 +117,10 @@ export function App() {
   useEffect(() => {
     if (visibleCandidates.length === 0) return;
     if (mediaPhase === "lead") {
-      const fallback = window.setTimeout(() => setMediaPhase("shortlist"), 1600);
+      const fallback = window.setTimeout(() => {
+        setVisibleHeroCount(Math.min(5, visibleCandidates.length));
+        setMediaPhase("shortlist");
+      }, 1600);
       return () => window.clearTimeout(fallback);
     }
     if (mediaPhase === "shortlist") {
@@ -124,24 +128,29 @@ export function App() {
       return () => window.clearTimeout(fallback);
     }
     if (mediaPhase === "gallery") {
-      const loadBackground = () => setMediaPhase("background");
-      const idleWindow = window as Window & {
-        requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
-        cancelIdleCallback?: (id: number) => void;
+      const loadBackground = () => {
+        setVisibleHeroCount((current) => Math.max(current, Math.min(6, visibleCandidates.length)));
+        setMediaPhase("background");
       };
-      if (idleWindow.requestIdleCallback) {
-        const idleId = idleWindow.requestIdleCallback(loadBackground, { timeout: 1400 });
-        return () => idleWindow.cancelIdleCallback?.(idleId);
-      }
-      const fallback = window.setTimeout(loadBackground, 700);
-      return () => window.clearTimeout(fallback);
+      const firstBackgroundHero = window.setTimeout(loadBackground, 420);
+      return () => window.clearTimeout(firstBackgroundHero);
     }
-  }, [mediaPhase, visibleCandidates.length]);
+    if (mediaPhase === "background" && visibleHeroCount < visibleCandidates.length) {
+      const nextHero = window.setTimeout(
+        () => setVisibleHeroCount((current) => Math.min(current + 1, visibleCandidates.length)),
+        260,
+      );
+      return () => window.clearTimeout(nextHero);
+    }
+  }, [mediaPhase, visibleCandidates.length, visibleHeroCount]);
 
   function handleMediaSettled(candidateId: string, mediaIndex: number, rank: number) {
     if (mediaIndex !== 0) return;
 
-    if (rank === 0) setMediaPhase((current) => current === "lead" ? "shortlist" : current);
+    if (rank === 0) {
+      setVisibleHeroCount((current) => Math.max(current, Math.min(5, visibleCandidates.length)));
+      setMediaPhase((current) => current === "lead" ? "shortlist" : current);
+    }
     if (rank >= 5) return;
 
     settledShortlistMedia.current.add(candidateId);
@@ -155,6 +164,7 @@ export function App() {
     setMobileSection("results");
     settledShortlistMedia.current.clear();
     setMediaPhase("lead");
+    setVisibleHeroCount(1);
     const query: SearchQuery = { city, text: city };
     workspaceActions.prepareSearch(query, includeDemoContext ? demoContext : undefined);
     await workspaceActions.searchCandidates(query);
@@ -210,6 +220,7 @@ export function App() {
     setMobileSection("results");
     settledShortlistMedia.current.clear();
     setMediaPhase("lead");
+    setVisibleHeroCount(1);
   }
 
   const hasWorkspace = workspace.query != null || workspace.candidates.length > 0;
@@ -285,6 +296,7 @@ export function App() {
               onToggleCompare={toggleCompare}
               onSort={organizeResults}
               mediaPhase={mediaPhase}
+              visibleHeroCount={visibleHeroCount}
               onMediaSettled={handleMediaSettled}
               searchRuns={workspace.searchRuns}
               activeRunNumber={workspace.activeRunNumber}
@@ -390,7 +402,7 @@ function EmptyWorkspace({ onSearch, onDemo }: { onSearch: (city: string) => void
       <button className="empty-preview" type="button" onClick={onDemo} aria-label="Open the Salt Lake City demo preview">
         <span className="preview-heading">
           <span><strong>Salt Lake City</strong><small>Demo preview · source-linked snapshot</small></span>
-          <span>15 options →</span>
+          <span>10 options</span>
         </span>
         <span className="preview-lead">
           {previewLeadMedia ? (

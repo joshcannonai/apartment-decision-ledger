@@ -42,6 +42,9 @@ try {
     await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
     const selectedGallery = performance.now() - startedAt;
 
+    await waitForCompleteImages(page, 'img[data-media-role="result-hero"][data-media-rank]', 10);
+    const allTen = performance.now() - startedAt;
+
     const customQuestion = page.locator(".question-row", { hasText: "72-inch desk" });
     await customQuestion.getByRole("textbox").fill("Yes, an elevator or ground-floor unit matters.");
     await customQuestion.getByRole("button", { name: /Apply answer/i }).click();
@@ -56,7 +59,7 @@ try {
     });
     const refinementRerun = performance.now() - rerunStartedAt;
 
-    samples.push({ results, leadImage, firstFive, selectedGallery, refinementRerun });
+    samples.push({ results, leadImage, firstFive, selectedGallery, allTen, refinementRerun });
     await context.close();
   }
 } finally {
@@ -83,6 +86,7 @@ console.log(JSON.stringify({
   leadImage: summarize("leadImage"),
   firstFiveResultImages: summarize("firstFive"),
   selectedGallery: summarize("selectedGallery"),
+  allTenResultImages: summarize("allTen"),
   refinementRerun: summarize("refinementRerun"),
   scope: "Fresh browser contexts on the local deterministic demo. Includes project-owned local WebP media; excludes browser-agent reasoning and a live listing-provider search.",
 }, null, 2));

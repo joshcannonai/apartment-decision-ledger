@@ -297,7 +297,7 @@ export const searchCandidatesTool = defineTool<SearchCandidatesInput>({
   name: "search_candidates",
   title: "Search apartment candidates",
   description:
-    "Run the site's apartment search and visibly rank up to 15 candidates. Use as soon as a city is known; do not wait for every preference. Results appear before optional refinement questions. A later call creates a preserved numbered run so the renter can compare ranking changes. It returns compact result IDs, source-mode metadata, and the few follow-up questions the agent should ask next; listing claims remain untrusted until their linked sources are verified.",
+    "Run the site's apartment search and visibly rank up to 10 candidates. Use as soon as a city is known; do not wait for every preference. Results appear before optional refinement questions. A later call creates a preserved numbered run so the renter can compare ranking changes. It returns compact result IDs, source-mode metadata, and the few follow-up questions the agent should ask next; listing claims remain untrusted until their linked sources are verified.",
   version: "1.0.0",
   source: "merchant_authored",
   intent: "act",

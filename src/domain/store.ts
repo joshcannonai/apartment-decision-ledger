@@ -710,7 +710,7 @@ async function searchCandidates(
     [...state.preferences, ...queryPreferences(normalized)],
     state.anchors,
   );
-  const sorted = sortCandidates(scored, "recommended", "desc", null).slice(0, 15);
+  const sorted = sortCandidates(scored, "recommended", "desc", null).slice(0, 10);
 
   // Keep a rerun's real state legible even when the deterministic demo scores
   // faster than a human can perceive the Run 2 indicator. Live provider time

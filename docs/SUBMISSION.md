@@ -50,7 +50,7 @@ The deterministic demo requires no account or API key. An optional same-origin R
 | `prepare_search` | Prepares a city search and visibly attributes relevant agent context |
 | `review_workspace` | Reads a compact current decision state without mutation |
 | `propose_preferences` | Adds visible preferences, locations, or useful follow-up questions |
-| `search_candidates` | Ranks up to 15 candidates and preserves numbered reruns |
+| `search_candidates` | Ranks up to 10 candidates and preserves numbered reruns |
 | `organize_results` | Reorders current candidates without another provider search |
 | `add_candidate` | Adds a public listing URL as explicitly unverified evidence |
 | `compare_candidates` | Opens a visible two-to-four candidate comparison |
