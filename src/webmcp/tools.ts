@@ -415,7 +415,7 @@ export const compareCandidatesTool = defineTool<CompareCandidatesInput>({
   name: "compare_candidates",
   title: "Compare apartment candidates",
   description:
-    "Open a visible side-by-side comparison for 2 to 4 existing apartment candidates. Use after ranking to inspect cost, Market Value, Personal Fit, location evidence and unknowns. It changes only the comparison view and returns compact score summaries; it does not contact a landlord or make a decision.",
+    "Return a structured comparison for 2 to 4 existing apartment candidates. Use after ranking to inspect cost, Market Value, Personal Fit and unknowns without adding controls to the renter's focused review screen. It does not contact a landlord or make a decision.",
   version: "1.0.0",
   source: "merchant_authored",
   intent: "act",
@@ -436,12 +436,9 @@ export const compareCandidatesTool = defineTool<CompareCandidatesInput>({
   },
   execute(input) {
     const comparison = workspaceActions.compareCandidates(input.candidateIds);
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("apartment-ledger:open-comparison"));
-    }
     return {
       comparison,
-      visible: true,
+      visible: false,
     };
   },
 });

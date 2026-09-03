@@ -2,7 +2,6 @@ import {
   ArrowDownUp,
   ArrowDown,
   ArrowUp,
-  Check,
   Clock3,
   LoaderCircle,
   MapPin,
@@ -17,12 +16,10 @@ import { mediaLoadingHint, shouldRequestMedia } from "../media/priority";
 type ResultsListProps = {
   candidates: ApartmentCandidate[];
   selectedId: string | null;
-  comparisonIds: string[];
   sortBy: SortOption;
   anchors: SearchAnchor[];
   sourceNote: string;
   onSelect: (candidateId: string) => void;
-  onToggleCompare: (candidateId: string) => void;
   onSort: (sort: SortOption) => void;
   mediaPhase: MediaPhase;
   visibleHeroCount: number;
@@ -46,12 +43,10 @@ const sortOptions: Array<{ value: SortOption; label: string }> = [
 export function ResultsList({
   candidates,
   selectedId,
-  comparisonIds,
   sortBy,
   anchors,
   sourceNote,
   onSelect,
-  onToggleCompare,
   onSort,
   mediaPhase,
   visibleHeroCount,
@@ -109,7 +104,6 @@ export function ResultsList({
         <ol className="result-list">
           {candidates.map((candidate, index) => {
             const selected = candidate.id === selectedId;
-            const compared = comparisonIds.includes(candidate.id);
             const primaryDistance = candidate.distances.find((distance) => distance.straightLineMiles != null);
             const heroMedia = orderCandidateMedia(candidate.media ?? [])[0];
             // During the lead phase the large decision image owns the only
@@ -179,15 +173,6 @@ export function ResultsList({
                         {index < 2 ? <span><Clock3 size={13} /> {formatFreshness(candidate.source.observedAt)}</span> : null}
                       </span>
                     </span>
-                  </button>
-                  <button
-                    className={`compare-check${compared ? " is-active" : ""}`}
-                    type="button"
-                    aria-pressed={compared}
-                    aria-label={`${compared ? "Remove" : "Add"} ${candidate.name} ${compared ? "from" : "to"} comparison`}
-                    onClick={() => onToggleCompare(candidate.id)}
-                  >
-                    {compared ? <Check size={14} /> : <span />}
                   </button>
                 </article>
               </li>

@@ -102,15 +102,13 @@ describe("Apartment Ledger UI", () => {
     });
   });
 
-  it("allows a one-item compare selection before a valid comparison exists", async () => {
+  it("keeps comparison controls out of the focused renter workspace", async () => {
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: /salt lake city demo/i }));
     await screen.findByRole("heading", { name: /best options/i });
 
-    const addButtons = screen.getAllByRole("button", { name: /add .* to comparison/i });
-    fireEvent.click(addButtons[0]);
-
-    expect(screen.getByRole("button", { name: /compare 1 option/i })).toHaveTextContent("Add one more");
+    expect(screen.queryByRole("button", { name: /comparison|compare/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: /compare/i })).not.toBeInTheDocument();
   });
 
   it("moves between the mobile workspace sections without losing the selected candidate", async () => {

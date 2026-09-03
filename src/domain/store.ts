@@ -993,7 +993,7 @@ function compareCandidates(ids: string[]) {
     {
       type: "comparison_opened",
       source: "agent",
-      message: `${uniqueIds.length} candidates are now visible in the comparison workspace.`,
+      message: `${uniqueIds.length} candidates were compared for the requesting agent.`,
     },
   );
   return state.candidates

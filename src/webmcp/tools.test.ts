@@ -128,7 +128,7 @@ describe("WebMCP apartment tools", () => {
     ).toMatchObject({ evidenceStatus: "unverified", enrichmentRequired: true });
 
     const ids = workspaceStore.getSnapshot().candidates.slice(0, 2).map((candidate) => candidate.id);
-    expect(compareCandidatesTool.execute({ candidateIds: ids })).toMatchObject({ visible: true });
+    expect(compareCandidatesTool.execute({ candidateIds: ids })).toMatchObject({ visible: false });
     expect(
       stageDecisionTool.execute({ candidateId: ids[0], rationale: "Review this current leader." }),
     ).toMatchObject({ reversible: true, externalActionTaken: false });

@@ -10,7 +10,6 @@ import {
   Navigation,
   Plus,
   Ruler,
-  Scale,
   ShieldCheck,
   Sparkles,
   X,
@@ -32,9 +31,7 @@ type RunContext = {
 
 type CandidateDetailProps = {
   candidate: ApartmentCandidate;
-  comparisonIds: string[];
   isStaged: boolean;
-  onToggleCompare: (candidateId: string) => void;
   onStage: (candidateId: string) => void;
   onAddLocation: (label: string) => SearchAnchor;
   onSortByLocation: (anchorId: string) => void;
@@ -104,10 +101,9 @@ function fitNarrative(candidate: ApartmentCandidate, rank: number, run: RunConte
   };
 }
 
-export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCompare, onStage, onAddLocation, onSortByLocation, onFocusLocation, focusedAnchorId, rank, runContext, mediaPhase, onMediaSettled }: CandidateDetailProps) {
+export function CandidateDetail({ candidate, isStaged, onStage, onAddLocation, onSortByLocation, onFocusLocation, focusedAnchorId, rank, runContext, mediaPhase, onMediaSettled }: CandidateDetailProps) {
   const [locationEditorOpen, setLocationEditorOpen] = useState(false);
   const [locationDraft, setLocationDraft] = useState("");
-  const compared = comparisonIds.includes(candidate.id);
   const activeMedia = orderCandidateMedia(candidate.media ?? [])[0];
   const activeRequest = activeMedia ? shouldRequestMedia({ phase: mediaPhase, rank, mediaIndex: 0, selected: true }) : false;
   const activeHint = mediaLoadingHint({ rank, mediaIndex: 0, selected: true });
@@ -141,9 +137,6 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
           <p className="detail-address">{candidate.address}, {candidate.city}</p>
         </div>
         <div className="detail-actions">
-          <button className={`secondary-button${compared ? " is-active" : ""}`} type="button" onClick={() => onToggleCompare(candidate.id)} aria-pressed={compared}>
-            {compared ? <Check size={15} /> : <Scale size={15} />}{compared ? "Comparing" : "Compare"}
-          </button>
           <button className="primary-button" type="button" onClick={() => onStage(candidate.id)} disabled={isStaged}>
             <Sparkles size={15} />{isStaged ? "Leader staged" : "Stage leader"}
           </button>

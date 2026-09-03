@@ -10,7 +10,6 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { CandidateDetail } from "./components/CandidateDetail";
-import { CompareTray } from "./components/CompareTray";
 import { ContextPanel } from "./components/ContextPanel";
 import { OptionalAccountDialog } from "./components/OptionalAccountDialog";
 import { ResultsList } from "./components/ResultsList";
@@ -76,17 +75,10 @@ export function App() {
   const theme = useThemePreference();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileSection, setMobileSection] = useState<"results" | "decision" | "context">("results");
-  const [compareOpen, setCompareOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [mediaPhase, setMediaPhase] = useState<MediaPhase>("lead");
   const [visibleHeroCount, setVisibleHeroCount] = useState(1);
   const settledShortlistMedia = useRef(new Set<string>());
-
-  useEffect(() => {
-    const openComparison = () => setCompareOpen(true);
-    window.addEventListener("apartment-ledger:open-comparison", openComparison);
-    return () => window.removeEventListener("apartment-ledger:open-comparison", openComparison);
-  }, []);
 
   const visibleCandidates = useMemo(() => {
     const candidatesById = new Map(workspace.candidates.map((candidate) => [candidate.id, candidate]));
@@ -97,9 +89,6 @@ export function App() {
 
   const selectedCandidate =
     visibleCandidates.find((candidate) => candidate.id === selectedId) ?? visibleCandidates[0] ?? null;
-  const comparedCandidates = workspace.comparisonIds
-    .map((candidateId) => workspace.candidates.find((candidate) => candidate.id === candidateId))
-    .filter((candidate): candidate is NonNullable<typeof candidate> => candidate != null);
   const stagedCandidate = workspace.stagedDecision
     ? workspace.candidates.find((candidate) => candidate.id === workspace.stagedDecision?.candidateId) ?? null
     : null;
@@ -167,21 +156,6 @@ export function App() {
     await workspaceActions.searchCandidates(query);
   }
 
-  function toggleCompare(candidateId: string) {
-    const alreadyIncluded = workspace.comparisonIds.includes(candidateId);
-    let nextIds: string[];
-
-    if (alreadyIncluded) {
-      nextIds = workspace.comparisonIds.filter((id) => id !== candidateId);
-    } else if (workspace.comparisonIds.length < 4) {
-      nextIds = [...workspace.comparisonIds, candidateId];
-    } else {
-      nextIds = [...workspace.comparisonIds.slice(1), candidateId];
-    }
-
-    workspaceActions.setComparisonSelection(nextIds);
-  }
-
   function organizeResults(by: SortOption) {
     const ascending = ["all_in_cost", "base_rent", "distance"].includes(by);
     workspaceActions.organizeResults({
@@ -212,7 +186,6 @@ export function App() {
 
   function resetWorkspace() {
     workspaceActions.resetWorkspace();
-    setCompareOpen(false);
     setSelectedId(null);
     setMobileSection("results");
     settledShortlistMedia.current.clear();
@@ -304,7 +277,6 @@ export function App() {
             <ResultsList
               candidates={visibleCandidates}
               selectedId={selectedCandidate.id}
-              comparisonIds={workspace.comparisonIds}
               sortBy={workspace.sort.by}
               anchors={workspace.anchors.filter((anchor) => anchor.status !== "rejected")}
               sourceNote={workspace.searchNote}
@@ -312,7 +284,6 @@ export function App() {
                 setSelectedId(candidateId);
                 setMobileSection("decision");
               }}
-              onToggleCompare={toggleCompare}
               onSort={organizeResults}
               mediaPhase={mediaPhase}
               visibleHeroCount={visibleHeroCount}
@@ -323,9 +294,7 @@ export function App() {
             />
             <CandidateDetail
               candidate={selectedCandidate}
-              comparisonIds={workspace.comparisonIds}
               isStaged={workspace.stagedDecision?.candidateId === selectedCandidate.id}
-              onToggleCompare={toggleCompare}
               onStage={(candidateId) => {
                 workspaceActions.stageDecision({
                   candidateId,
@@ -372,19 +341,6 @@ export function App() {
           </div>
         ) : null}
       </main>
-
-      <CompareTray
-        candidates={comparedCandidates}
-        open={compareOpen}
-        onOpen={() => setCompareOpen(true)}
-        onClose={() => setCompareOpen(false)}
-        onRemove={toggleCompare}
-        onSelect={(id) => {
-          setSelectedId(id);
-          setCompareOpen(false);
-          setMobileSection("decision");
-        }}
-      />
 
       <OptionalAccountDialog open={accountOpen} onClose={() => setAccountOpen(false)} />
     </div>

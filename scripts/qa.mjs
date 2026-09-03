@@ -198,8 +198,9 @@ async function verifyWebMCPTools() {
 
     const candidateIds = results.search_candidates.topCandidateIds.slice(0, 2);
     results.compare_candidates = await invokeWebMCP(page, "compare_candidates", { candidateIds });
-    await page.getByRole("dialog", { name: /compare/i }).waitFor();
-    await page.getByRole("button", { name: "Close comparison" }).last().click();
+    if (results.compare_candidates.visible !== false) {
+      throw new Error("compare_candidates should return agent-facing data without opening comparison UI.");
+    }
 
     results.stage_decision = await invokeWebMCP(page, "stage_decision", {
       candidateId: candidateIds[0],
@@ -262,9 +263,9 @@ try {
   if (await firstApproval.isVisible()) await firstApproval.click();
 
   await page.locator(".sort-control select").selectOption("market_value");
-  const compareButtons = page.locator(".compare-check");
-  await compareButtons.nth(0).click();
-  await compareButtons.nth(1).click();
+  if (await page.locator(".compare-check, .compare-tray, .compare-overlay").count()) {
+    throw new Error("Comparison UI should not appear in the focused renter workspace.");
+  }
   await waitForCompleteImages(page, 'img[data-media-role="lead-hero"]', 1);
   await waitForCompleteImages(page, 'img[data-media-role="result-hero"][data-media-rank]', 10);
   const resultSources = await page.locator('img[data-media-role="result-hero"][data-media-rank]').evaluateAll((images) => images.map((image) => image.getAttribute("src")));
