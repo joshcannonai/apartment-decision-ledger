@@ -20,6 +20,7 @@ import type {
 
 const STORAGE_KEY = "apartment-decision-ledger.workspace.v1";
 const MAX_EVENTS = 30;
+const CURRENT_DEMO_BY_ID = new Map(SLC_DEMO_CANDIDATES.map((candidate) => [candidate.id, candidate]));
 
 type Listener = () => void;
 type EventListener = (event: WorkspaceEvent) => void;
@@ -82,6 +83,18 @@ function isWorkspaceState(value: unknown): value is WorkspaceState {
   );
 }
 
+export function refreshCuratedDemoMedia(candidates: ApartmentCandidate[]) {
+  return candidates.map((candidate) => {
+    if (candidate.addedBy !== "curated_demo") return candidate;
+    const currentDemo = CURRENT_DEMO_BY_ID.get(candidate.id);
+    if (!currentDemo) return candidate;
+    return {
+      ...candidate,
+      media: currentDemo.media?.map((item) => ({ ...item })),
+    };
+  });
+}
+
 function loadPersistedState() {
   if (typeof window === "undefined") return null;
   try {
@@ -92,10 +105,14 @@ function loadPersistedState() {
     return {
       ...initialState(),
       ...parsed,
+      candidates: refreshCuratedDemoMedia(parsed.candidates),
       customRefinementQuestions: parsed.customRefinementQuestions ?? [],
       answeredQuestionIds: parsed.answeredQuestionIds ?? [],
       queuedRefinementLabels: parsed.queuedRefinementLabels ?? [],
-      searchRuns: parsed.searchRuns ?? [],
+      searchRuns: (parsed.searchRuns ?? []).map((run) => ({
+        ...run,
+        candidates: refreshCuratedDemoMedia(run.candidates),
+      })),
       activeRunNumber: parsed.activeRunNumber ?? null,
     };
   } catch {

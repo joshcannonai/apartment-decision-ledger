@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { SLC_DEMO_CANDIDATES } from "../data/slcCandidates";
 import { scoreCandidates } from "./scoring";
-import { workspaceActions, workspaceStore } from "./store";
+import { refreshCuratedDemoMedia, workspaceActions, workspaceStore } from "./store";
 
 describe("apartment workspace", () => {
   beforeEach(() => {
@@ -40,6 +40,24 @@ describe("apartment workspace", () => {
     );
     expect(resultsFirstIndex).toBeGreaterThanOrEqual(0);
     expect(questionsIndex).toBeGreaterThan(resultsFirstIndex);
+  });
+
+  it("refreshes stale media in persisted demo runs without changing user decision state", () => {
+    const current = SLC_DEMO_CANDIDATES[0];
+    const stale = {
+      ...current,
+      media: [{
+        ...current.media![0],
+        url: "/demo-media/old-shared-fallback.webp",
+        thumbnailUrl: "/demo-media/old-shared-fallback.webp",
+      }],
+      scores: { ...current.scores, recommended: 93 },
+    };
+
+    const [refreshed] = refreshCuratedDemoMedia([stale]);
+
+    expect(refreshed.media?.[0].url).toBe(current.media?.[0].url);
+    expect(refreshed.scores.recommended).toBe(93);
   });
 
   it("keeps agent context pending while applying it to the current ranking", async () => {
