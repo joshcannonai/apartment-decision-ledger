@@ -30,6 +30,8 @@ describe("Apartment Decision Ledger UI", () => {
     expect(screen.getByRole("heading", { name: /answer these to enhance/i })).toBeInTheDocument();
     expect(screen.getAllByText(/needs a workable place for a 72-inch desk/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/brought by your agent/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole("img", { name: /kitchen opening into a living room/i })).toHaveAttribute("src", "/demo-media/kitchen-living.webp");
+    expect(screen.queryByText(/no verified photo/i)).not.toBeInTheDocument();
 
     const proposal = screen.getByText("Needs a workable place for a 72-inch desk", { selector: "strong" }).closest("article");
     expect(proposal).not.toBeNull();

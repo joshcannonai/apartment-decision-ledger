@@ -16,7 +16,7 @@ Verified locally on September 2, 2026.
 | Browser console and page errors | 0 |
 | Deterministic demo results | 15 |
 | Responsive screenshot states | 9 states: empty, workspace, Updated answer, Run 2 loading, Run 2 ready, mobile results, mobile decision, mobile refinement, added-location map |
-| Progressive media sequence | Original illustrative lead image, first five result images, gallery, then background media |
+| Progressive media sequence | Kitchen/living overview first, first five result images, gallery with floor plan fourth, then background media |
 | Layout detector | 0 findings across the changed application surfaces |
 | Refinement history | Run 1 remains selectable while Run 2 searches and after it is ready |
 | Location preview | Keyless personal-list map preview rendered; University of Utah added with verified coordinates and used for distance sorting |
@@ -27,11 +27,11 @@ Seven fresh Chrome contexts measured from demo activation. This is the determini
 
 | Milestone | Average | Median | P95 |
 | --- | ---: | ---: | ---: |
-| Results visible | 113 ms | 114 ms | 127 ms |
-| Lead image visible | 124 ms | 123 ms | 136 ms |
-| First five result images visible | 125 ms | 123 ms | 136 ms |
-| Selected four-image gallery visible | 139 ms | 137 ms | 161 ms |
-| Refinement Run 2 ready | 363 ms | 362 ms | 368 ms |
+| Results visible | 101 ms | 101 ms | 131 ms |
+| Lead image visible | 121 ms | 116 ms | 139 ms |
+| First five result images visible | 122 ms | 119 ms | 139 ms |
+| Selected four-image gallery visible | 123 ms | 120 ms | 140 ms |
+| Refinement Run 2 ready | 361 ms | 361 ms | 362 ms |
 
 The Run 2 measurement begins when the explicit rerun control is selected. The deterministic demo intentionally keeps its searching state visible for at least 320 ms; it does not represent a live provider request.
 

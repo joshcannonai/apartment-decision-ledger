@@ -16,25 +16,25 @@ function item(alt: string, kind: CandidateMedia["kind"] = "photo"): CandidateMed
 }
 
 describe("orderCandidateMedia", () => {
-  it("places a known floor plan fourth when at least three photos exist", () => {
+  it("leads with an informative kitchen-living overview and places a known floor plan fourth", () => {
     const ordered = orderCandidateMedia([
       item("hero"),
-      item("kitchen"),
+      item("kitchen opening into living room"),
       item("bedroom"),
       item("bathroom"),
       item("floor", "floor_plan"),
     ]);
     expect(ordered.map((media) => media.alt)).toEqual([
+      "kitchen opening into living room",
       "hero",
-      "kitchen",
       "bedroom",
       "floor",
       "bathroom",
     ]);
   });
 
-  it("keeps ordinary photo order unchanged", () => {
-    const media = [item("hero"), item("kitchen")];
+  it("keeps equal-priority photos in their original order", () => {
+    const media = [item("view one"), item("view two")];
     expect(orderCandidateMedia(media)).toEqual(media);
   });
 });

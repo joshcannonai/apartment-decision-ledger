@@ -21,6 +21,7 @@ import { SearchHeader } from "./components/SearchHeader";
 import { useWorkspace, workspaceActions } from "./domain/store";
 import type { RefinementQuestion, SearchQuery, SortOption } from "./domain/types";
 import { SLC_DEMO_CANDIDATES } from "./data/slcCandidates";
+import { orderCandidateMedia } from "./media/order";
 import type { MediaPhase } from "./media/priority";
 
 const demoContext = {
@@ -364,6 +365,7 @@ function EmptyWorkspace({ onSearch, onDemo }: { onSearch: (city: string) => void
   const previewCandidates = ["slc-capitol-reef-206", "slc-swallow-4", "slc-fountain-view-15"]
     .map((id) => SLC_DEMO_CANDIDATES.find((candidate) => candidate.id === id))
     .filter((candidate): candidate is NonNullable<typeof candidate> => candidate != null);
+  const previewLeadMedia = previewCandidates[0] ? orderCandidateMedia(previewCandidates[0].media ?? [])[0] : null;
 
   return (
     <section className="empty-workspace">
@@ -391,8 +393,8 @@ function EmptyWorkspace({ onSearch, onDemo }: { onSearch: (city: string) => void
           <span>15 options →</span>
         </span>
         <span className="preview-lead">
-          {previewCandidates[0]?.media?.[0] ? (
-            <img src={previewCandidates[0].media[0].thumbnailUrl} alt="" loading="eager" fetchPriority="high" />
+          {previewLeadMedia ? (
+            <img src={previewLeadMedia.thumbnailUrl} alt="" loading="eager" fetchPriority="high" />
           ) : null}
           <span>
             <strong>{previewCandidates[0]?.name}</strong>
@@ -403,7 +405,7 @@ function EmptyWorkspace({ onSearch, onDemo }: { onSearch: (city: string) => void
         <span className="preview-list">
           {previewCandidates.slice(1).map((candidate, index) => (
             <span key={candidate.id}>
-              {candidate.media?.[0] ? <img src={candidate.media[0].thumbnailUrl} alt="" loading="lazy" /> : null}
+              {orderCandidateMedia(candidate.media ?? [])[0] ? <img src={orderCandidateMedia(candidate.media ?? [])[0].thumbnailUrl} alt="" loading="lazy" /> : <span className="media-skeleton media-skeleton--preview" aria-hidden="true" />}
               <span><strong>{candidate.name}</strong><small>{candidate.neighborhood}</small></span>
               <b>0{index + 2}</b>
             </span>

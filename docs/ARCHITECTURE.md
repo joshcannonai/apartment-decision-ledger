@@ -62,9 +62,9 @@ Media never blocks the result set or ranking. Project-owned illustrative images 
 3. the first three supporting images for the selected candidate;
 4. remaining selected and result images during browser idle time.
 
-Media ordering is deterministic. If trusted metadata marks a floor plan, it is placed fourth when three ordinary photos exist, otherwise at the latest available position. A future live adapter should enrich only the leading candidates from authorized provider media, cache that result, and keep page scraping out of the initial search path.
+Media ordering is deterministic. A kitchen-to-living overview, great room, or other broad living-area view leads when its description identifies one; bedrooms, bathrooms, exteriors, and amenities do not displace a more informative overview. If trusted metadata marks a floor plan, it is placed fourth when three ordinary photos exist, otherwise at the latest available position. A future live adapter should enrich only the leading candidates from authorized provider media, cache that result, and keep page scraping out of the initial search path.
 
-Every media record carries an observation time, alt text, and an explicit scope. The challenge demo uses project-owned generated media with the `illustrative` scope and labels it “not listing evidence.” The UI does not present an illustration, building exterior, or community gallery as proof of an exact unit. A failed or absent image becomes a neutral evidence placeholder and does not remove the candidate.
+Every media record carries an observation time, alt text, and an explicit scope. The challenge demo uses project-owned generated media with the `illustrative` scope and labels it “not listing evidence.” The UI does not present an illustration, building exterior, or community gallery as proof of an exact unit. An image still awaiting enrichment uses a non-blocking loading surface and does not delay or remove the candidate facts.
 
 ## Persistence
 

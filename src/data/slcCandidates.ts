@@ -96,7 +96,7 @@ const seeds: Seed[] = [
     url: "https://www.zillow.com/apartments/salt-lake-city-ut/the-swallow/9M2pT2/",
     sourceLabel: "Zillow building inventory",
     evidenceGrade: "B",
-    media: [DEMO_LIVING_ROOM],
+    media: [DEMO_KITCHEN, DEMO_LIVING_ROOM],
   },
   {
     id: "slc-uffens-408",
@@ -193,7 +193,7 @@ const seeds: Seed[] = [
     url: "https://corecommunities.appfolio.com/listings/detail/1cd69f50-6b1a-4b6b-be4b-0598c620d991",
     sourceLabel: "Property manager listing",
     evidenceGrade: "B",
-    media: [DEMO_BEDROOM],
+    media: [DEMO_KITCHEN, DEMO_BEDROOM],
   },
   {
     id: "slc-bandelier-01",
@@ -232,7 +232,7 @@ const seeds: Seed[] = [
     url: "https://www.rentler.com/places-for-rent/ut/salt-lake-city/49-s-400-e/12578743",
     sourceLabel: "Exact-unit Rentler listing",
     evidenceGrade: "C",
-    media: [DEMO_LIVING_ROOM],
+    media: [DEMO_KITCHEN, DEMO_LIVING_ROOM],
   },
   {
     id: "slc-madrid-8",
@@ -271,7 +271,7 @@ const seeds: Seed[] = [
     url: "https://rizehomesource.appfolio.com/listings/detail/dfb08d65-7132-4b9d-b891-7a7d0a0d3761",
     sourceLabel: "Property manager listing",
     evidenceGrade: "B",
-    media: [DEMO_LIVING_ROOM, DEMO_KITCHEN, DEMO_BEDROOM, DEMO_FLOOR_PLAN],
+    media: [DEMO_KITCHEN, DEMO_LIVING_ROOM, DEMO_BEDROOM, DEMO_FLOOR_PLAN],
   },
   {
     id: "slc-encore-305",

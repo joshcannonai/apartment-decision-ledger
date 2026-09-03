@@ -5,7 +5,7 @@ import {
   CalendarClock,
   Check,
   ExternalLink,
-  ImageOff,
+  LoaderCircle,
   MapPin,
   Navigation,
   Plus,
@@ -158,7 +158,10 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
               ) : activeMedia ? (
                 <span className="media-skeleton" aria-label="Listing photo queued" />
               ) : (
-                <span className="media-empty"><ImageOff size={23} /><strong>No verified media yet</strong><small>Listing facts remain available.</small></span>
+                <span className="media-loading-state" aria-label="Room preview enrichment queued">
+                  <span className="media-skeleton" aria-hidden="true" />
+                  <span className="media-loading-copy"><LoaderCircle className="spin" size={18} /><strong>Finding the clearest room view</strong><small>Kitchen and living areas are checked first.</small></span>
+                </span>
               )}
             </div>
             <div className="media-filmstrip" aria-label="Listing photos and source">

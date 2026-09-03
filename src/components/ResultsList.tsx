@@ -4,7 +4,6 @@ import {
   ArrowUp,
   Check,
   Clock3,
-  ImageOff,
   LoaderCircle,
   MapPin,
   Ruler,
@@ -12,6 +11,7 @@ import {
 import type { ApartmentCandidate, SearchAnchor, SearchRun, SortOption } from "../domain/types";
 import { formatFreshness, formatMoney, scoreTone } from "./format";
 import type { MediaPhase } from "../media/priority";
+import { orderCandidateMedia } from "../media/order";
 import { mediaLoadingHint, shouldRequestMedia } from "../media/priority";
 
 type ResultsListProps = {
@@ -109,7 +109,7 @@ export function ResultsList({
             const selected = candidate.id === selectedId;
             const compared = comparisonIds.includes(candidate.id);
             const primaryDistance = candidate.distances.find((distance) => distance.straightLineMiles != null);
-            const heroMedia = candidate.media?.[0];
+            const heroMedia = orderCandidateMedia(candidate.media ?? [])[0];
             // During the lead phase the large decision image owns the only
             // high-priority request. The matching row thumbnail joins the
             // first-screen batch after that image settles.
@@ -146,7 +146,7 @@ export function ResultsList({
                       ) : heroMedia ? (
                         <span className="media-skeleton" aria-hidden="true" />
                       ) : (
-                        <span className="media-unavailable"><ImageOff size={16} /><small>No verified photo</small></span>
+                        <span className="media-skeleton media-skeleton--preview" aria-label="Room preview loading" />
                       )}
                       {requestHero && heroMedia?.scope === "illustrative" ? <span className="result-media-label">Illustrative</span> : null}
                       <span className="result-rank">{String(index + 1).padStart(2, "0")}</span>
