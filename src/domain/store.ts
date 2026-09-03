@@ -129,7 +129,15 @@ let configuredSearchClient: SearchClient | null = null;
 function persist(next: WorkspaceState) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    const persisted = next.query ? {
+      ...next,
+      query: {
+        ...next.query,
+        sharedContextSummary: undefined,
+        budgetRationale: undefined,
+      },
+    } : next;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
   } catch {
     // Anonymous persistence is best effort; a storage-disabled browser still works.
   }
@@ -192,9 +200,12 @@ function normalizeQuery(query: SearchQuery): SearchQuery {
   return {
     city,
     state: query.state?.trim().slice(0, 40) || undefined,
+    rentalType: query.rentalType ?? "any",
     maxAllIn: query.maxAllIn,
     minBedrooms: query.minBedrooms,
     moveWindow: query.moveWindow?.trim().slice(0, 160) || undefined,
+    sharedContextSummary: query.sharedContextSummary?.trim().slice(0, 1200) || undefined,
+    budgetRationale: query.budgetRationale?.trim().slice(0, 280) || undefined,
     text: query.text?.trim().slice(0, 500) || undefined,
   };
 }
@@ -461,6 +472,14 @@ function prepareSearch(query: SearchQuery, context?: PreferenceProposalInput) {
   return {
     ready: true,
     city: normalized.city,
+    preparedFields: {
+      rentalType: normalized.rentalType,
+      maxAllIn: normalized.maxAllIn ?? null,
+      minBedrooms: normalized.minBedrooms ?? null,
+      moveWindow: normalized.moveWindow ?? null,
+      sharedContextSummary: normalized.sharedContextSummary ?? null,
+      budgetRationale: normalized.budgetRationale ?? null,
+    },
     pendingPreferenceCount: state.preferences.filter((item) => item.status === "pending").length,
     pendingAnchorCount: state.anchors.filter((item) => item.status === "pending").length,
   };
@@ -666,6 +685,12 @@ async function searchCandidates(
     { type: "search_started", source: "agent", message: `Searching apartments in ${normalized.city}.` },
   );
 
+  // Give the browser one brief paint window so the shared human-agent search
+  // process is visible without materially delaying the first result set.
+  if (runNumber === 1) {
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 520));
+  }
+
   let candidates: ApartmentCandidate[] = [];
   let sourceMode: SearchOutcome["sourceMode"] = "no_results";
   let note = "No matching results are available in the current source set.";
@@ -720,6 +745,9 @@ async function searchCandidates(
     candidates = candidates.filter(
       (candidate) => candidate.bedrooms != null && candidate.bedrooms >= normalized.minBedrooms!,
     );
+  }
+  if (normalized.rentalType && normalized.rentalType !== "any") {
+    candidates = candidates.filter((candidate) => candidate.rentalType === normalized.rentalType);
   }
 
   const scored = scoreCandidates(
@@ -933,6 +961,9 @@ function addCandidate(input: AddCandidateInput) {
       },
       recommended: 35,
     },
+    rentalType: state.query?.rentalType === "private_room" || state.query?.rentalType === "shared_room"
+      ? state.query.rentalType
+      : "whole_place",
     addedBy: input.addedBy ?? "agent_import",
   };
 

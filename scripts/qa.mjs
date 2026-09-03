@@ -108,7 +108,12 @@ async function verifyWebMCPTools() {
     results.prepare_search = await invokeWebMCP(page, "prepare_search", {
       city: "Salt Lake City",
       state: "UT",
+      rentalType: "whole_place",
       maxAllIn: 2200,
+      minBedrooms: 1,
+      moveWindow: "Within 60 days",
+      sharedContextSummary: "Plans to live alone and needs room for a 72-inch desk.",
+      budgetRationale: "Suggested from the renter's stated target, pending confirmation.",
       preferences: [
         {
           kind: "furniture",
@@ -127,6 +132,15 @@ async function verifyWebMCPTools() {
         },
       ],
     });
+    if (await page.locator('[data-agent-field="rental-type"]').inputValue() !== "whole_place") {
+      throw new Error("prepare_search did not visibly prefill rental type.");
+    }
+    if (!(await page.locator('[data-agent-field="shared-context"]').inputValue()).includes("72-inch desk")) {
+      throw new Error("prepare_search did not visibly prefill shared agent context.");
+    }
+    if (!(await page.locator('[data-agent-field="budget-rationale"]').inputValue()).includes("pending confirmation")) {
+      throw new Error("prepare_search did not visibly prefill the budget rationale.");
+    }
     results.search_candidates = await invokeWebMCP(page, "search_candidates", {
       city: "Salt Lake City",
       state: "UT",
@@ -210,12 +224,12 @@ page.on("pageerror", (error) => consoleErrors.push(error.message));
 try {
   const webmcp = await verifyWebMCPTools();
   await page.goto(baseUrl, { waitUntil: "networkidle" });
-  await page.getByRole("heading", { name: "Find the apartment that fits your actual life." }).waitFor();
+  await page.getByRole("heading", { name: /build your first apartment shortlist/i }).waitFor();
   if (!(await page.getByRole("button", { name: "Find apartments" }).isDisabled())) {
     throw new Error("The empty apartment search action should be disabled.");
   }
-  if (await page.locator("[data-agent-field]").count() !== 5) {
-    throw new Error("The entry screen did not expose all five visible WebMCP-prefillable fields.");
+  if (await page.locator("[data-agent-field]").count() !== 8) {
+    throw new Error("The entry screen did not expose all eight visible WebMCP-prefillable fields.");
   }
   await page.screenshot({ path: resolve(artifactDirectory, "empty-desktop.png"), fullPage: true });
 
@@ -230,6 +244,8 @@ try {
   }
 
   await page.getByRole("button", { name: /Open the Salt Lake City demo/i }).click();
+  await page.getByRole("heading", { name: /building your .* shortlist/i }).waitFor();
+  await page.screenshot({ path: resolve(artifactDirectory, "search-thinking-desktop.png"), fullPage: true });
   await page.getByRole("heading", { name: /best options/i }).waitFor();
   await page.getByRole("heading", { name: "Answer these to enhance and narrow your search" }).waitFor();
 
@@ -314,7 +330,7 @@ try {
         resultCount,
         tools: webmcp.tools,
         invokedTools: Object.keys(webmcp.results).sort(),
-        screenshots: 9,
+        screenshots: 10,
       },
       null,
       2,

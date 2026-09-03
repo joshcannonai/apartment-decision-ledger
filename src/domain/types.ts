@@ -24,6 +24,7 @@ export type SortOption =
   | "freshness";
 
 export type SearchStatus = "idle" | "searching" | "ready" | "error";
+export type RentalType = "any" | "whole_place" | "private_room" | "shared_room";
 
 export type SearchAnchor = {
   id: string;
@@ -118,6 +119,7 @@ export type ApartmentCandidate = {
   unknowns: string[];
   source: CandidateSource;
   media?: CandidateMedia[];
+  rentalType?: Exclude<RentalType, "any">;
   distances: DistanceEstimate[];
   scores: CandidateScores;
   addedBy: "curated_demo" | "live_search" | "agent_import" | "human_import";
@@ -175,9 +177,12 @@ export type StagedDecision = {
 export type SearchQuery = {
   city: string;
   state?: string;
+  rentalType?: RentalType;
   maxAllIn?: number;
   minBedrooms?: number;
   moveWindow?: string;
+  sharedContextSummary?: string;
+  budgetRationale?: string;
   text?: string;
 };
 

@@ -1,6 +1,6 @@
 # Verification report
 
-Verified locally on September 2, 2026.
+Verified locally on September 3, 2026.
 
 ## Production read-back
 
@@ -12,15 +12,15 @@ The production site at `https://apartmentledger.vercel.app/` returned HTTP 200 a
 | --- | --- |
 | TypeScript project references | Passed |
 | ESLint | Passed |
-| Vitest | 9 files, 32 tests passed |
+| Vitest | 11 files, 42 tests passed |
 | Production build | Passed |
 | Full npm dependency audit | 0 vulnerabilities |
 | Native Chrome WebMCP discovery | 8 of 8 tools registered |
 | Native Chrome WebMCP execution | 8 of 8 tools invoked successfully |
 | Browser console and page errors | 0 |
 | Deterministic demo results | 10 |
-| Responsive screenshot states | 9 states: empty, workspace, Updated answer, Run 2 loading, Run 2 ready, mobile results, mobile decision, mobile refinement, added-location map |
-| Progressive media sequence | Kitchen/living overview first, first five result images, gallery with floor plan fourth, then ranks 6–10 one at a time |
+| Responsive screenshot states | 10 states: empty, search progress, workspace, Updated answer, Run 2 loading, Run 2 ready, mobile results, mobile decision, mobile refinement, added-location map |
+| Progressive media sequence | Kitchen/living overview first, first five result images, then ranks 6–10 one at a time |
 | Layout detector | 0 findings across the changed application surfaces |
 | Refinement history | Run 1 remains selectable while Run 2 searches and after it is ready |
 | Location preview | Keyless personal-list map preview rendered; University of Utah added with verified coordinates and used for distance sorting |
@@ -31,12 +31,11 @@ Seven fresh Chrome contexts measured from demo activation. This is the determini
 
 | Milestone | Average | Median | P95 |
 | --- | ---: | ---: | ---: |
-| Results visible | 111 ms | 109 ms | 128 ms |
-| Lead image visible | 122 ms | 124 ms | 135 ms |
-| First five result images visible | 122 ms | 125 ms | 136 ms |
-| Selected four-image gallery visible | 170 ms | 171 ms | 177 ms |
-| All ten result images visible | 1,603 ms | 1,604 ms | 1,612 ms |
-| Refinement Run 2 ready | 395 ms | 396 ms | 398 ms |
+| Results visible | 830 ms | 830 ms | 834 ms |
+| Lead image visible | 839 ms | 839 ms | 844 ms |
+| First five result images visible | 840 ms | 840 ms | 846 ms |
+| All ten result images visible | 2,254 ms | 2,250 ms | 2,283 ms |
+| Refinement Run 2 ready | 386 ms | 389 ms | 392 ms |
 
 The Run 2 measurement begins when the explicit rerun control is selected. The deterministic demo intentionally keeps its searching state visible for at least 320 ms; it does not represent a live provider request.
 

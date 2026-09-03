@@ -420,6 +420,7 @@ export const SLC_DEMO_CANDIDATES: ApartmentCandidate[] = seeds.map((seed) => ({
     note: "Curated challenge-demo snapshot. Open the source and verify before acting.",
   },
   media: seed.media,
+  rentalType: "whole_place",
   distances: [],
   scores: structuredClone(EMPTY_SCORES),
   addedBy: "curated_demo",

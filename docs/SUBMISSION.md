@@ -20,7 +20,7 @@ Apartment Ledger explores a narrower and safer idea: the agent shares only the s
 
 ## What it does
 
-The renter can begin with only a city. The page produces a useful preliminary shortlist before asking optional questions. It separates estimated all-in cost, Market Value, and Personal Fit; preserves source freshness and unknowns; and explains why each apartment occupies its rank.
+The renter can begin with only a city or use familiar controls for whole places, private rooms, shared rooms, all-in budget, bedrooms, and move timing. Their agent can prefill those visible fields with apartment-relevant context it already has, while clearly separating remembered facts from editable suggestions. The page then produces a preliminary shortlist before asking optional questions. It separates estimated all-in cost, Market Value, and Personal Fit; preserves source freshness and unknowns; and explains why each apartment occupies its rank. Recommended ordering is the equal-weight mean of Market Value and Personal Fit.
 
 The agent can contribute budget signals, furniture constraints, lifestyle preferences, lease flexibility, and important locations. Every contribution is visibly attributed and remains pending for durable saving until the renter approves it. A renter can add a location, preview it on a built-in map, rerank by distance, preserve multiple ranking runs, compare finalists, and stage a reversible recommendation.
 
@@ -60,6 +60,7 @@ The deterministic demo requires no account or API key. An optional same-origin R
 
 - The site never receives a user's complete ChatGPT memory.
 - Only context explicitly included in a tool call reaches the page.
+- The current-run context summary and budget rationale are excluded from anonymous browser persistence.
 - Agent-proposed context is visible and attributed.
 - Human approval is required before a preference becomes durable workspace memory.
 - Listing claims retain their source, date, evidence grade, and unknowns.

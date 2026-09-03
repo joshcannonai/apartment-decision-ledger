@@ -11,12 +11,15 @@ The renter's personal agent brings only the context it chooses to share. The pag
 ## Product boundary
 
 - Complete anonymous experience; sign-in is not required.
+- Familiar rental controls cover whole places, private rooms, shared rooms, all-in budget, bedrooms, and move timing; an agent can prefill every field for review through WebMCP.
 - Results before questionnaire: a location is enough to produce a preliminary shortlist.
 - Deterministic unanswered questions and agent-supplied custom follow-ups can refine the shortlist without blocking the first result set.
 - Explicit numbered reruns preserve the original ranking and explain what changed.
 - A built-in Google Maps preview shows the listing against selected location anchors; renters can add another place, open a live Google route, and sort by anchors with verified coordinates.
 - Preferences and location anchors are visibly attributed and require approval before durable saving.
+- Apartment-relevant context shared for the current run stays visible in page state but is excluded from anonymous browser persistence.
 - Market Value Score and Personal Fit Score remain separate.
+- The default Recommended score is their transparent equal-weight mean.
 - No applications, bookings, landlord messages, payments, or lease commitments.
 - No claim of access to a user's complete ChatGPT memory.
 - Original illustrative challenge media is progressively disclosed and explicitly labeled as not being listing evidence; factual listing evidence remains source-linked and useful without media.
@@ -63,7 +66,7 @@ npm run qa
 
 The QA pass discovers and invokes all eight WebMCP tools in an isolated anonymous workspace, verifies visible UI effects, checks persistence and responsive rendering, captures desktop plus all three mobile workspace sections, and fails on browser console errors.
 
-The media benchmark opens fresh browser contexts and measures the non-blocking sequence from visible results to the lead image, the first five shortlist images, selected listing gallery, progressively released ranks 6–10, and a visible refinement rerun.
+The media benchmark opens fresh browser contexts and measures the non-blocking sequence from visible results to the lead image, the first five shortlist images, progressively released ranks 6–10, and a visible refinement rerun.
 
 ## Optional nationwide provider
 
@@ -80,7 +83,7 @@ The live adapter:
 
 ## Submission status
 
-The local product, deterministic demo, submission copy, judge guide, demo script, and verification harness are complete. Typecheck, lint, 32 tests, production build, native Chrome WebMCP execution, and the full npm security audit pass.
+The local product, deterministic demo, submission copy, judge guide, demo script, and verification harness are complete. Typecheck, lint, 42 tests, production build, native Chrome WebMCP execution, and the full npm security audit pass.
 
 Challenge-period implementation evidence is documented in [`docs/CHALLENGE_BUILD.md`](docs/CHALLENGE_BUILD.md). Judge instructions are in [`docs/JUDGE_GUIDE.md`](docs/JUDGE_GUIDE.md). This repository is licensed under the [MIT License](LICENSE).
 

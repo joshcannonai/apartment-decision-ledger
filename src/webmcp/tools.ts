@@ -5,6 +5,7 @@ import type {
   PreferenceKind,
   PreferenceProposalInput,
   PreferenceSource,
+  RentalType,
   SearchQuery,
   SortOption,
 } from "../domain/types";
@@ -29,9 +30,12 @@ type ToolAnchor = {
 type PrepareSearchInput = {
   city: string;
   state?: string;
+  rentalType?: RentalType;
   maxAllIn?: number;
   minBedrooms?: number;
   moveWindow?: string;
+  sharedContextSummary?: string;
+  budgetRationale?: string;
   request?: string;
   preferences?: ToolPreference[];
   anchors?: ToolAnchor[];
@@ -53,6 +57,7 @@ type ToolQuestion = {
 type SearchCandidatesInput = {
   city: string;
   state?: string;
+  rentalType?: RentalType;
   maxAllIn?: number;
   minBedrooms?: number;
   moveWindow?: string;
@@ -103,9 +108,12 @@ function toQuery(input: SearchCandidatesInput | PrepareSearchInput): SearchQuery
   return {
     city: input.city,
     state: input.state,
+    rentalType: input.rentalType,
     maxAllIn: input.maxAllIn,
     minBedrooms: input.minBedrooms,
     moveWindow: input.moveWindow,
+    sharedContextSummary: "sharedContextSummary" in input ? input.sharedContextSummary : undefined,
+    budgetRationale: "budgetRationale" in input ? input.budgetRationale : undefined,
     text: input.request,
   };
 }
@@ -138,7 +146,7 @@ export const prepareSearchTool = defineTool<PrepareSearchInput>({
   name: "prepare_search",
   title: "Prepare apartment search",
   description:
-    "Prepare an apartment search from the renter's request and only the context they or their agent explicitly share. Use before searching when context is available. It visibly labels agent-proposed preferences and location anchors as pending, accepts relevant custom follow-up questions, applies context only to the current search, saves nothing durably without human approval, and returns readiness counts.",
+    "Prepare an apartment search from the renter's request and only apartment-relevant context the renter or their agent explicitly shares. Use relevant information you already know about the renter to prefill the visible location, rental type, budget, bedroom, move-timing, and shared-context fields and avoid redundant questions. Clearly distinguish remembered facts from inferred suggestions; if proposing a budget from sensitive context, include a visible rationale and treat it as editable guidance. Do not invent missing information. Nothing is saved durably without human approval. Returns the visible prepared fields and pending context counts.",
   version: "1.0.0",
   source: "merchant_authored",
   intent: "act",
@@ -148,9 +156,12 @@ export const prepareSearchTool = defineTool<PrepareSearchInput>({
     properties: {
       city: { type: "string", minLength: 1, maxLength: 100 },
       state: { type: "string", maxLength: 40 },
+      rentalType: { type: "string", enum: ["any", "whole_place", "private_room", "shared_room"] },
       maxAllIn: { type: "number", minimum: 300 },
       minBedrooms: { type: "integer", minimum: 0, maximum: 10 },
       moveWindow: { type: "string", maxLength: 160 },
+      sharedContextSummary: { type: "string", maxLength: 1200 },
+      budgetRationale: { type: "string", maxLength: 280 },
       request: { type: "string", maxLength: 500 },
       preferences: {
         type: "array",
@@ -307,6 +318,7 @@ export const searchCandidatesTool = defineTool<SearchCandidatesInput>({
     properties: {
       city: { type: "string", minLength: 1, maxLength: 100 },
       state: { type: "string", maxLength: 40 },
+      rentalType: { type: "string", enum: ["any", "whole_place", "private_room", "shared_room"] },
       maxAllIn: { type: "number", minimum: 300 },
       minBedrooms: { type: "integer", minimum: 0, maximum: 10 },
       moveWindow: { type: "string", maxLength: 160 },

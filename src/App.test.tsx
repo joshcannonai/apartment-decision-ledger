@@ -14,7 +14,7 @@ describe("Apartment Ledger UI", () => {
   it("starts anonymously and makes optional identity boundaries explicit", () => {
     render(<App />);
 
-    expect(screen.getByRole("heading", { name: /fits your actual life/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /build your first apartment shortlist/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /optional sign in/i }));
 
     expect(screen.getByRole("heading", { name: /use this without an account/i })).toBeInTheDocument();
@@ -57,7 +57,10 @@ describe("Apartment Ledger UI", () => {
       state: "CO",
       maxAllIn: 2100,
       minBedrooms: 2,
+      rentalType: "whole_place",
       moveWindow: "October",
+      sharedContextSummary: "Lives alone and owns a 72-inch desk",
+      budgetRationale: "Agent suggestion based on context the user shared",
       text: "Needs parking and room for a long desk",
     }, {
       preferences: [{ kind: "furniture", label: "72-inch desk", value: true, source: "agent_context", confidence: 0.95 }],
@@ -70,10 +73,13 @@ describe("Apartment Ledger UI", () => {
     expect(screen.getByLabelText(/maximum all-in monthly cost/i)).toHaveValue(2100);
     expect(screen.getByLabelText(/minimum bedrooms/i)).toHaveValue("2");
     expect(screen.getByLabelText(/move window/i)).toHaveValue("October");
+    expect(screen.getByLabelText(/rental type/i)).toHaveValue("whole_place");
+    expect(screen.getByLabelText(/what your agent knows/i)).toHaveValue("Lives alone and owns a 72-inch desk");
+    expect(screen.getByLabelText(/budget suggestion rationale/i)).toHaveValue("Agent suggestion based on context the user shared");
     expect(screen.getByLabelText(/anything else that matters/i)).toHaveValue("Needs parking and room for a long desk");
     expect(screen.getByText("72-inch desk", { exact: true })).toBeInTheDocument();
     expect(screen.getByText("Trader Joe's", { exact: true })).toBeInTheDocument();
-    expect(document.querySelectorAll("[data-agent-field]")).toHaveLength(5);
+    expect(document.querySelectorAll("[data-agent-field]")).toHaveLength(8);
   });
 
   it("shows results before refinement and keeps agent context pending approval", async () => {

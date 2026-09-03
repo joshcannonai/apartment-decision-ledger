@@ -67,6 +67,7 @@ export type ExternalApartmentCandidate = {
   availability: string;
   features: string[];
   unknowns: string[];
+  rentalType: "whole_place";
   source: {
     url: string;
     label: string;
@@ -160,6 +161,7 @@ export function toExternalCandidate(item: NormalizedRentCastListing): ExternalAp
       "Exact-unit photos",
       "Current lease terms",
     ],
+    rentalType: "whole_place",
     source: {
       url: "https://www.rentcast.io/",
       label: item.source.label,

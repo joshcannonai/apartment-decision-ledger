@@ -8,7 +8,7 @@ Show the empty page beside the agent prompt:
 
 > Find apartments in Salt Lake City. Use the relevant context you already have about my budget, my 72-inch desk, and useful locations—but don't save anything yet.
 
-The agent calls `prepare_search`, then `search_candidates`. Cut immediately to the populated workspace.
+The agent calls `prepare_search`. Pause long enough to show the familiar rental fields, budget rationale, and apartment-relevant context visibly prefilled, then call `search_candidates` and show the truthful search-progress state before the populated workspace.
 
 Voiceover:
 

@@ -16,7 +16,7 @@ import { OptionalAccountDialog } from "./components/OptionalAccountDialog";
 import { ResultsList } from "./components/ResultsList";
 import { SearchHeader } from "./components/SearchHeader";
 import { useWorkspace, workspaceActions } from "./domain/store";
-import type { RefinementQuestion, SearchQuery, SortOption } from "./domain/types";
+import type { RefinementQuestion, RentalType, SearchQuery, SortOption } from "./domain/types";
 import type { MediaPhase } from "./media/priority";
 import { useThemePreference } from "./theme";
 
@@ -241,7 +241,7 @@ export function App() {
       <main>
         {workspace.searchStatus === "idle" && workspace.candidates.length === 0 ? (
           <EmptyWorkspace
-            key={workspace.query?.city ?? "new-ledger"}
+            key={JSON.stringify(workspace.query) ?? "new-ledger"}
             initialQuery={workspace.query}
             proposedPreferences={workspace.preferences.filter((item) => item.status === "pending").map((item) => item.label)}
             proposedAnchors={workspace.anchors.filter((item) => item.status === "pending").map((item) => item.label)}
@@ -410,7 +410,10 @@ function EmptyWorkspace({
   const [city, setCity] = useState(initialLocation);
   const [maxAllIn, setMaxAllIn] = useState(initialQuery?.maxAllIn?.toString() ?? "");
   const [minBedrooms, setMinBedrooms] = useState(initialQuery?.minBedrooms?.toString() ?? "");
+  const [rentalType, setRentalType] = useState<RentalType>(initialQuery?.rentalType ?? "whole_place");
   const [moveWindow, setMoveWindow] = useState(initialQuery?.moveWindow ?? "");
+  const [sharedContextSummary, setSharedContextSummary] = useState(initialQuery?.sharedContextSummary ?? "");
+  const [budgetRationale, setBudgetRationale] = useState(initialQuery?.budgetRationale ?? "");
   const [request, setRequest] = useState(initialQuery?.text ?? "");
   const proposedContext = [...proposedPreferences, ...proposedAnchors];
   const displayCity = initialLocation || city;
@@ -427,25 +430,28 @@ function EmptyWorkspace({
           onSearch({
             city: cityName,
             state: locationMatch?.[2]?.toUpperCase() || initialQuery?.state,
+            rentalType,
             maxAllIn: maxAllIn ? Number(maxAllIn) : undefined,
             minBedrooms: minBedrooms ? Number(minBedrooms) : undefined,
             moveWindow: moveWindow.trim() || undefined,
+            sharedContextSummary: sharedContextSummary.trim() || undefined,
+            budgetRationale: budgetRationale.trim() || undefined,
             text: request.trim() || city.trim(),
           });
         }}
       >
         <div className="empty-hero">
           {unavailableNote ? <p className="eyebrow">Search needs a live source</p> : <p className="eyebrow">New apartment ledger</p>}
-          <h1 aria-label={unavailableNote ? `${displayCity} is ready. Inventory source needed.` : "Find the apartment that fits your actual life."}>
+          <h1 aria-label={unavailableNote ? `${displayCity} is ready. Inventory source needed.` : "Build your first apartment shortlist."}>
             {unavailableNote ? (
               <><span>{displayCity} is ready.</span><span>Inventory source needed.</span></>
             ) : (
-              <><span>Find the apartment that fits</span><span>your actual life.</span></>
+              <><span>Build your first</span><span>apartment shortlist.</span></>
             )}
           </h1>
           <p>{unavailableNote
             ? "The search is prepared, but live apartment inventory is not connected yet. Open the verified Salt Lake City demo or connect the listing provider for real candidates."
-            : "Enter only what you know. Your agent can visibly prefill the rest through WebMCP."}</p>
+            : "Start with what you know. Your agent can bring relevant context it already has and visibly prefill the rest."}</p>
           <div className="city-field-heading"><span>City or metro area</span><small>WebMCP or you</small></div>
           <div className="city-entry-row">
             <MapPin size={19} />
@@ -463,16 +469,19 @@ function EmptyWorkspace({
             <small>Visible before search</small>
           </header>
           <h2 id="agent-prefill-heading">Your agent can prefill these fields</h2>
-          <p>You can change any value before searching.</p>
+          <p>Review or change anything before the first run.</p>
           <div className="agent-field-grid">
+            <label><span>Rental type <small>WebMCP</small></span><select data-agent-field="rental-type" value={rentalType} onChange={(event) => setRentalType(event.target.value as RentalType)}><option value="any">Any rental</option><option value="whole_place">Whole place</option><option value="private_room">Private room</option><option value="shared_room">Shared room</option></select></label>
             <label><span>Maximum all-in monthly cost <small>WebMCP</small></span><input data-agent-field="max-all-in" type="number" min="300" step="50" value={maxAllIn} onChange={(event) => setMaxAllIn(event.target.value)} placeholder="No maximum" /></label>
             <label><span>Minimum bedrooms <small>WebMCP</small></span><select data-agent-field="minimum-bedrooms" value={minBedrooms} onChange={(event) => setMinBedrooms(event.target.value)}><option value="">Any</option><option value="0">Studio</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label>
             <label><span>Move window <small>WebMCP</small></span><input data-agent-field="move-window" value={moveWindow} onChange={(event) => setMoveWindow(event.target.value)} placeholder="For example, October" /></label>
             <label><span>Anything else that matters <small>WebMCP</small></span><input data-agent-field="request" value={request} onChange={(event) => setRequest(event.target.value)} placeholder="Desk, pet, parking, neighborhood..." /></label>
+            <label><span>Budget suggestion rationale <small>Agent suggestion</small></span><input data-agent-field="budget-rationale" value={budgetRationale} onChange={(event) => setBudgetRationale(event.target.value)} placeholder="Why your agent suggested this amount" /></label>
+            <label className="agent-field-full"><span>What your agent knows about you <small>Optional memory context</small></span><textarea data-agent-field="shared-context" value={sharedContextSummary} onChange={(event) => setSharedContextSummary(event.target.value)} placeholder="Apartment-related context your current agent chose to share, such as living alone, a 72-inch desk, or important places." /></label>
           </div>
           <div className="agent-proposal-note">
-            <strong>Also supported</strong>
-            <span>Important locations, furniture and space needs, lifestyle preferences, and custom follow-up questions arrive as reviewable proposals.</span>
+            <strong>Your agent controls what it brings</strong>
+            <span>Apartment Ledger cannot open an agent’s complete memory. If the current agent has relevant context, it can place only those details here for you to review.</span>
           </div>
           {proposedContext.length > 0 ? (
             <div className="agent-proposal-preview" aria-label="Context proposed by your agent">
@@ -487,12 +496,19 @@ function EmptyWorkspace({
 }
 
 function SearchingState({ city, note }: { city: string; note: string }) {
+  const sources = /salt lake/i.test(city)
+    ? ["Source-linked SLC snapshot", "Property manager records", "Public listing records"]
+    : ["Connected rental inventory", "Available source records", "Listing evidence"];
   return (
-    <section className="state-page" aria-live="polite">
-      <LoaderCircle className="spin" size={24} />
+    <section className="state-page search-thinking" aria-live="polite">
+      <div className="thinking-orbit" aria-hidden="true"><LoaderCircle className="spin" size={24} /><span /><span /></div>
+      <p className="eyebrow">Agent search in progress</p>
       <h1>Building your {city} shortlist</h1>
-      <p>{note || "Normalizing costs, checking evidence, and ranking candidates."}</p>
-      <div className="loading-lines" aria-hidden="true"><span /><span /><span /></div>
+      <p>{note || "Checking connected inventory, normalizing costs, and matching each option to your life."}</p>
+      <div className="source-thinking" aria-label="Search sources and ranking stages">
+        {sources.map((source, index) => <span style={{ animationDelay: `${index * 180}ms` }} key={source}><Search size={13} /> {source}</span>)}
+      </div>
+      <div className="thinking-steps" aria-hidden="true"><span>Normalize all-in cost</span><span>Score market value</span><span>Match personal fit</span><span>Rank best options</span></div>
     </section>
   );
 }

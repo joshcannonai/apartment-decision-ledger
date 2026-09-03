@@ -82,6 +82,9 @@ describe("WebMCP apartment tools", () => {
       prepareSearchTool.execute({
         city: "Salt Lake City",
         state: "UT",
+        rentalType: "whole_place",
+        sharedContextSummary: "Lives alone and owns a 72-inch desk.",
+        budgetRationale: "Editable suggestion based on user context.",
         anchors: [{ label: "Downtown Salt Lake City", importance: 4 }],
         customQuestions: [{
           question: "Would a walk-up work with your large desk?",
@@ -89,7 +92,13 @@ describe("WebMCP apartment tools", () => {
           kind: "furniture",
         }],
       }),
-    ).toMatchObject({ ready: true });
+    ).toMatchObject({
+      ready: true,
+      preparedFields: {
+        rentalType: "whole_place",
+        sharedContextSummary: "Lives alone and owns a 72-inch desk.",
+      },
+    });
     expect(
       proposePreferencesTool.execute({
         preferences: [{ kind: "minimum_space", label: "At least 700 square feet", value: 700 }],

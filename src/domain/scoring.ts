@@ -223,17 +223,10 @@ export function scoreCandidates(
       estimateDistance(candidate.latitude, candidate.longitude, anchor),
     ),
   }));
-  const hasPersonalContext =
-    activePreferences(preferences).length > 0 || activeAnchors(anchors).length > 0;
-
   return withDistances.map((candidate) => {
     const marketValue = scoreMarketValue(candidate, withDistances);
     const personalFit = scorePersonalFit(candidate, preferences, anchors);
-    const recommended = clampScore(
-      hasPersonalContext
-        ? personalFit.score * 0.58 + marketValue.score * 0.42
-        : marketValue.score * 0.72 + 50 * 0.28,
-    );
+    const recommended = clampScore((personalFit.score + marketValue.score) / 2);
     const scores: CandidateScores = { marketValue, personalFit, recommended };
     return { ...candidate, scores };
   });

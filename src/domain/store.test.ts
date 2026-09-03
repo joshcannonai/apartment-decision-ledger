@@ -105,6 +105,25 @@ describe("apartment workspace", () => {
     );
   });
 
+  it("keeps explicitly shared agent context visible for the run but out of browser storage", () => {
+    workspaceActions.prepareSearch({
+      city: "Salt Lake City",
+      rentalType: "whole_place",
+      sharedContextSummary: "Plans to live alone and needs room for a 72-inch desk.",
+      budgetRationale: "Suggested from the renter's stated target, pending confirmation.",
+    });
+
+    const current = workspaceStore.getSnapshot();
+    const persisted = JSON.parse(
+      localStorage.getItem("apartment-decision-ledger.workspace.v1") ?? "{}",
+    );
+
+    expect(current.query?.sharedContextSummary).toContain("72-inch desk");
+    expect(current.query?.budgetRationale).toContain("pending confirmation");
+    expect(persisted.query?.sharedContextSummary).toBeUndefined();
+    expect(persisted.query?.budgetRationale).toBeUndefined();
+  });
+
   it("keeps Run 1 selectable while a queued answer creates Run 2", async () => {
     await workspaceActions.searchCandidates({ city: "Salt Lake City" });
     const first = workspaceStore.getSnapshot();
@@ -183,6 +202,9 @@ describe("apartment workspace", () => {
       expect(candidate.scores.marketValue.explanation).toContain("comparables");
       expect(candidate.scores.marketValue.caveat).toContain("displayed listings");
       expect(candidate.scores.personalFit.explanation).toContain("Neutral");
+      expect(candidate.scores.recommended).toBe(
+        Math.round((candidate.scores.marketValue.score + candidate.scores.personalFit.score) / 2),
+      );
     }
   });
 
