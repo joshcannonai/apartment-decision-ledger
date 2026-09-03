@@ -67,6 +67,6 @@ The deterministic demo requires no account or API key. An optional same-origin R
 
 ## Links
 
-- Live WebMCP URL: https://apartment-decision-ledger.vercel.app/
+- Live WebMCP URL: https://apartmentledger.vercel.app/
 - Public source repository: https://github.com/joshcannonai/apartment-decision-ledger
 - Public YouTube demo: pending capture and upload

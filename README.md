@@ -2,7 +2,7 @@
 
 An agent-native apartment decision workspace for the OpenAI WebMCP Challenge.
 
-**Live demo:** [apartment-decision-ledger.vercel.app](https://apartment-decision-ledger.vercel.app/)
+**Live demo:** [apartmentledger.vercel.app](https://apartmentledger.vercel.app/)
 
 ![Apartment Ledger workspace](docs/images/workspace-submission.webp)
 
