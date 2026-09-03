@@ -55,7 +55,7 @@ Market Value Score and Personal Fit Score remain separate.
 
 ## Progressive media
 
-Media never blocks the result set or ranking. Public source-linked images load in four phases:
+Media never blocks the result set or ranking. Project-owned illustrative images load in four phases:
 
 1. the selected leading candidate's primary decision image;
 2. primary images for the five candidates visible in the first result viewport;
@@ -64,7 +64,7 @@ Media never blocks the result set or ranking. Public source-linked images load i
 
 Media ordering is deterministic. If trusted metadata marks a floor plan, it is placed fourth when three ordinary photos exist, otherwise at the latest available position. A future live adapter should enrich only the leading candidates from authorized provider media, cache that result, and keep page scraping out of the initial search path.
 
-Every media record carries a source URL, observation time, alt text, and an explicit scope: `exact_unit`, `building`, or `community`. The UI does not present a building exterior or community gallery as proof of an exact unit. A failed or absent image becomes a neutral evidence placeholder and does not remove the candidate.
+Every media record carries an observation time, alt text, and an explicit scope. The challenge demo uses project-owned generated media with the `illustrative` scope and labels it “not listing evidence.” The UI does not present an illustration, building exterior, or community gallery as proof of an exact unit. A failed or absent image becomes a neutral evidence placeholder and does not remove the candidate.
 
 ## Persistence
 

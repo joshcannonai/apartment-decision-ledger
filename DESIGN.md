@@ -34,7 +34,7 @@ Help a renter make a defensible apartment decision with relevant personal contex
 
 When a verified floor-plan image exists, order it fourth. Do not classify an image as a floor plan from visual guesswork in the critical path; prefer provider metadata or a cached enrichment result.
 
-Images never delay facts or ranking. Every image must identify its evidence scope as exact-unit, building, or community. Never imply that representative media proves the condition or layout of an exact unit.
+Images never delay facts or ranking. Every image must identify its evidence scope as exact-unit, building, community, or illustrative. Illustrative challenge media is labeled “not listing evidence”; never imply that representative or illustrative media proves the condition or layout of an exact unit.
 
 ## Visual language
 

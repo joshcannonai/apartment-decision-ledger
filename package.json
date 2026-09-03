@@ -2,6 +2,8 @@
   "name": "apartment-decision-ledger",
   "private": true,
   "version": "0.1.0",
+  "description": "A shared human-agent apartment decision workspace built with WebMCP.",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -61,9 +61,9 @@ export type CandidateMedia = {
   url: string;
   thumbnailUrl: string;
   alt: string;
-  scope: "exact_unit" | "building" | "community";
+  scope: "exact_unit" | "building" | "community" | "illustrative";
   sourceLabel: string;
-  sourceUrl: string;
+  sourceUrl: string | null;
   observedAt: string;
   kind?: "photo" | "floor_plan";
 };
@@ -191,6 +191,7 @@ export type WorkspaceState = {
   visibleCandidateIds: string[];
   preferences: Preference[];
   anchors: SearchAnchor[];
+  focusedAnchorId: string | null;
   sort: { by: SortOption; anchorId: string | null; direction: "asc" | "desc" };
   refinementQuestions: RefinementQuestion[];
   customRefinementQuestions: RefinementQuestion[];

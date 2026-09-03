@@ -38,6 +38,8 @@ type CandidateDetailProps = {
   onStage: (candidateId: string) => void;
   onAddLocation: (label: string) => SearchAnchor;
   onSortByLocation: (anchorId: string) => void;
+  onFocusLocation: (anchorId: string) => void;
+  focusedAnchorId: string | null;
   rank: number;
   runContext: RunContext;
   mediaPhase: MediaPhase;
@@ -45,6 +47,7 @@ type CandidateDetailProps = {
 };
 
 function mediaScopeLabel(scope: CandidateMedia["scope"]) {
+  if (scope === "illustrative") return "Illustrative demo media";
   if (scope === "exact_unit") return "Exact-unit photo";
   if (scope === "building") return "Building photo";
   return "Community gallery photo";
@@ -101,14 +104,10 @@ function fitNarrative(candidate: ApartmentCandidate, rank: number, run: RunConte
   };
 }
 
-export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCompare, onStage, onAddLocation, onSortByLocation, rank, runContext, mediaPhase, onMediaSettled }: CandidateDetailProps) {
+export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCompare, onStage, onAddLocation, onSortByLocation, onFocusLocation, focusedAnchorId, rank, runContext, mediaPhase, onMediaSettled }: CandidateDetailProps) {
   const [mediaSelection, setMediaSelection] = useState({ candidateId: candidate.id, index: 0 });
   const [locationEditorOpen, setLocationEditorOpen] = useState(false);
   const [locationDraft, setLocationDraft] = useState("");
-  const [mapSelection, setMapSelection] = useState<{ candidateId: string; anchorId: string | null }>({
-    candidateId: candidate.id,
-    anchorId: candidate.distances[0]?.anchorId ?? null,
-  });
   const compared = comparisonIds.includes(candidate.id);
   const media = orderCandidateMedia(candidate.media ?? []);
   const activeMediaIndex = mediaSelection.candidateId === candidate.id ? Math.min(mediaSelection.index, Math.max(0, media.length - 1)) : 0;
@@ -117,8 +116,8 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
   const activeHint = mediaLoadingHint({ rank, mediaIndex: activeMediaIndex, selected: true });
   const tensions = candidate.scores.personalFit.tensions;
   const narrative = fitNarrative(candidate, rank, runContext);
-  const activeAnchorId = mapSelection.candidateId === candidate.id
-    ? mapSelection.anchorId
+  const activeAnchorId = focusedAnchorId && candidate.distances.some((distance) => distance.anchorId === focusedAnchorId)
+    ? focusedAnchorId
     : candidate.distances[0]?.anchorId ?? null;
   const activeDistance = candidate.distances.find((distance) => distance.anchorId === activeAnchorId)
     ?? candidate.distances[0]
@@ -181,7 +180,10 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
             </div>
           </div>
           {activeMedia ? (
-            <figcaption><span>{mediaScopeLabel(activeMedia.scope)} · {activeMedia.sourceLabel}</span><a href={activeMedia.sourceUrl} target="_blank" rel="noreferrer">Photo source <ExternalLink size={13} /></a></figcaption>
+            <figcaption>
+              <span>{mediaScopeLabel(activeMedia.scope)} · {activeMedia.sourceLabel}</span>
+              {activeMedia.sourceUrl ? <a href={activeMedia.sourceUrl} target="_blank" rel="noreferrer">Photo source <ExternalLink size={13} /></a> : <span>Not listing evidence</span>}
+            </figcaption>
           ) : null}
         </figure>
 
@@ -224,7 +226,7 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
               type="button"
               className={distance.anchorId === activeDistance?.anchorId ? "is-active" : ""}
               aria-pressed={distance.anchorId === activeDistance?.anchorId}
-              onClick={() => setMapSelection({ candidateId: candidate.id, anchorId: distance.anchorId })}
+              onClick={() => onFocusLocation(distance.anchorId)}
             >
               <MapPin size={12} />
               <span>{distance.anchorLabel}</span>
@@ -244,7 +246,7 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
               const label = locationDraft.trim();
               if (!label) return;
               const anchor = onAddLocation(label);
-              setMapSelection({ candidateId: candidate.id, anchorId: anchor.id });
+              onFocusLocation(anchor.id);
               setLocationDraft("");
               setLocationEditorOpen(false);
             }}

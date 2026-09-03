@@ -117,6 +117,21 @@ summary:focus-visible {
   border-color: #bdc9ee;
   background: #eaf0ff;
 }
+
+.result-media-label {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  max-width: calc(100% - 8px);
+  border-radius: 4px;
+  background: rgb(17 24 21 / 82%);
+  color: #fff;
+  padding: 2px 4px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  line-height: 1.2;
+}
 .result-main {
   grid-template-columns: 76px minmax(0, 1fr);
   gap: 10px;

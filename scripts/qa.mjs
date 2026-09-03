@@ -18,6 +18,7 @@ const expectedTools = [
   "organize_results",
   "prepare_search",
   "propose_preferences",
+  "review_workspace",
   "search_candidates",
   "stage_decision",
 ];
@@ -65,10 +66,18 @@ async function waitForImagePaint(page) {
 }
 
 async function waitForGoogleMapPaint(page) {
-  const mapLocator = page.locator('iframe[title^="Google map"]').first();
-  await mapLocator.scrollIntoViewIfNeeded();
-  const mapHandle = await mapLocator.elementHandle();
-  const mapFrame = await mapHandle?.contentFrame();
+  let mapFrame = null;
+  for (let attempt = 0; attempt < 3 && !mapFrame; attempt += 1) {
+    const mapLocator = page.locator('iframe[title^="Google map"]').first();
+    await mapLocator.waitFor({ state: "attached" });
+    try {
+      await mapLocator.scrollIntoViewIfNeeded();
+      const mapHandle = await mapLocator.elementHandle();
+      mapFrame = await mapHandle?.contentFrame() ?? null;
+    } catch (error) {
+      if (attempt === 2) throw error;
+    }
+  }
   await mapFrame?.waitForLoadState("domcontentloaded");
   // Google paints its map tiles after the iframe document reaches DOM ready.
   // Give the third-party canvas time to become visually inspectable.
@@ -128,6 +137,10 @@ async function verifyWebMCPTools() {
     if (results.search_candidates.resultCount !== 15) {
       throw new Error(`search_candidates returned ${results.search_candidates.resultCount}, expected 15`);
     }
+    results.review_workspace = await invokeWebMCP(page, "review_workspace", {});
+    if (results.review_workspace.leadingCandidates?.length !== 5) {
+      throw new Error("review_workspace did not return five compact leading candidates.");
+    }
 
     results.propose_preferences = await invokeWebMCP(page, "propose_preferences", {
       preferences: [
@@ -139,8 +152,18 @@ async function verifyWebMCPTools() {
           confidence: 0.78,
         },
       ],
+      anchors: [{
+        label: "University of Utah",
+        importance: 4,
+        source: "agent_context",
+        confidence: 0.84,
+      }],
     });
     await page.getByText("Prefers a quieter home base", { exact: true }).waitFor({ state: "attached" });
+    const focusedLocation = page.getByRole("button", { name: /University of Utah/i });
+    await focusedLocation.waitFor();
+    await page.waitForFunction(() => [...document.querySelectorAll('button[aria-pressed="true"]')]
+      .some((button) => button.textContent?.includes("University of Utah")));
 
     results.organize_results = await invokeWebMCP(page, "organize_results", {
       sortBy: "market_value",

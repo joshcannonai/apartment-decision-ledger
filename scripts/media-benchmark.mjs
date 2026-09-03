@@ -84,5 +84,5 @@ console.log(JSON.stringify({
   firstFiveResultImages: summarize("firstFive"),
   selectedGallery: summarize("selectedGallery"),
   refinementRerun: summarize("refinementRerun"),
-  scope: "Fresh browser contexts on the local deterministic demo. Includes network image fetches from their public source URLs; excludes browser-agent reasoning and a live listing-provider search.",
+  scope: "Fresh browser contexts on the local deterministic demo. Includes project-owned local WebP media; excludes browser-agent reasoning and a live listing-provider search.",
 }, null, 2));

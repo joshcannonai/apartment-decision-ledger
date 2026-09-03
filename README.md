@@ -2,6 +2,8 @@
 
 An agent-native apartment decision workspace for the OpenAI WebMCP Challenge.
 
+![Apartment Decision Ledger workspace](docs/images/workspace-submission.webp)
+
 The renter's personal agent brings only the context it chooses to share. The page turns that context into visible assumptions, a ranked preliminary shortlist, transparent market-value and personal-fit reasoning, refinement questions, comparisons, and a reversible staged decision.
 
 ## Product boundary
@@ -15,19 +17,20 @@ The renter's personal agent brings only the context it chooses to share. The pag
 - Market Value Score and Personal Fit Score remain separate.
 - No applications, bookings, landlord messages, payments, or lease commitments.
 - No claim of access to a user's complete ChatGPT memory.
-- Source-linked media is progressively disclosed and labeled as exact-unit, building, or community imagery; listing facts remain useful when verified media is unavailable.
+- Original illustrative challenge media is progressively disclosed and explicitly labeled as not being listing evidence; factual listing evidence remains source-linked and useful without media.
 
 ## WebMCP tools
 
-The application registers seven imperative browser tools through `@nekuda/webmcp-sdk`:
+The application registers eight imperative browser tools through `@nekuda/webmcp-sdk`, which targets the native `document.modelContext.registerTool(...)` surface:
 
 1. `prepare_search`
-2. `propose_preferences`
-3. `search_candidates`
-4. `organize_results`
-5. `add_candidate`
-6. `compare_candidates`
-7. `stage_decision`
+2. `review_workspace`
+3. `propose_preferences`
+4. `search_candidates`
+5. `organize_results`
+6. `add_candidate`
+7. `compare_candidates`
+8. `stage_decision`
 
 Every tool calls the same page-owned domain actions as the human interface and produces a visible page effect.
 
@@ -56,7 +59,7 @@ With the app running at `http://127.0.0.1:4173`, Chrome 150+ can execute the nat
 npm run qa
 ```
 
-The QA pass discovers and invokes all seven WebMCP tools in an isolated anonymous workspace, verifies visible UI effects, checks persistence and responsive rendering, captures desktop plus all three mobile workspace sections, and fails on browser console errors.
+The QA pass discovers and invokes all eight WebMCP tools in an isolated anonymous workspace, verifies visible UI effects, checks persistence and responsive rendering, captures desktop plus all three mobile workspace sections, and fails on browser console errors.
 
 The media benchmark opens fresh browser contexts and measures the non-blocking sequence from visible results to the lead image, first-screen shortlist images, selected listing gallery, and a visible refinement rerun.
 
@@ -75,6 +78,8 @@ The live adapter:
 
 ## Submission status
 
-The local product, deterministic demo, submission copy, demo script, and verification harness are complete. Typecheck, lint, 27 tests, production build, native Chrome WebMCP execution, and the full npm security audit pass.
+The local product, deterministic demo, submission copy, judge guide, demo script, and verification harness are complete. Typecheck, lint, 32 tests, production build, native Chrome WebMCP execution, and the full npm security audit pass.
+
+Challenge-period implementation evidence is documented in [`docs/CHALLENGE_BUILD.md`](docs/CHALLENGE_BUILD.md). Judge instructions are in [`docs/JUDGE_GUIDE.md`](docs/JUDGE_GUIDE.md). This repository is licensed under the [MIT License](LICENSE).
 
 Publishing a GitHub repository, deploying to Vercel, enabling paid providers, recording/uploading the demo video, and submitting the entry remain separate approval-time actions.

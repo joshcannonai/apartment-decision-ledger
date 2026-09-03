@@ -53,6 +53,7 @@ function initialState(): WorkspaceState {
     visibleCandidateIds: [],
     preferences: [],
     anchors: [],
+    focusedAnchorId: null,
     sort: { by: "recommended", anchorId: null, direction: "desc" },
     refinementQuestions: [],
     customRefinementQuestions: [],
@@ -427,6 +428,7 @@ function prepareSearch(query: SearchQuery, context?: PreferenceProposalInput) {
       const next = {
         ...current,
         ...merged,
+        focusedAnchorId: merged.anchors.at(-1)?.id ?? current.focusedAnchorId,
         query: normalized,
         searchNote: "Search prepared. Results can run now; unanswered questions will refine them later.",
       };
@@ -449,10 +451,23 @@ function prepareSearch(query: SearchQuery, context?: PreferenceProposalInput) {
 
 function proposePreferences(input: PreferenceProposalInput) {
   const countsBefore = { preferences: state.preferences.length, anchors: state.anchors.length };
+  const requestedPreferenceLabels = new Set(
+    (input.preferences ?? []).map((preference) => preference.label.trim().toLowerCase()),
+  );
+  const requestedAnchorLabels = new Set(
+    (input.anchors ?? []).map((anchor) => anchor.label.trim().toLowerCase()),
+  );
   commit(
     (current) => {
       const merged = mergeProposals(current, input);
-      const next = { ...current, ...merged };
+      const focusedAnchor = [...merged.anchors]
+        .reverse()
+        .find((anchor) => requestedAnchorLabels.has(anchor.label.toLowerCase()));
+      const next = {
+        ...current,
+        ...merged,
+        focusedAnchorId: focusedAnchor?.id ?? current.focusedAnchorId,
+      };
       const candidates = recomputeAndSort(next, next.candidates);
       return { ...next, candidates, visibleCandidateIds: candidates.map((candidate) => candidate.id) };
     },
@@ -465,6 +480,12 @@ function proposePreferences(input: PreferenceProposalInput) {
   return {
     proposedPreferences: state.preferences.length - countsBefore.preferences,
     proposedAnchors: state.anchors.length - countsBefore.anchors,
+    preferenceIds: state.preferences
+      .filter((preference) => requestedPreferenceLabels.has(preference.label.toLowerCase()))
+      .map((preference) => preference.id),
+    anchorIds: state.anchors
+      .filter((anchor) => requestedAnchorLabels.has(anchor.label.toLowerCase()))
+      .map((anchor) => anchor.id),
     saveStatus: "pending_human_review" as const,
   };
 }
@@ -535,6 +556,7 @@ function addLocationAnchor(label: string) {
       };
       return {
         ...withCandidates,
+        focusedAnchorId: selectedAnchorId,
         refinementQuestions: questionsFor(withCandidates),
       };
     },
@@ -548,6 +570,13 @@ function addLocationAnchor(label: string) {
   const selectedAnchor = state.anchors.find((anchor) => anchor.id === selectedAnchorId);
   if (!selectedAnchor) throw new Error("The location could not be added.");
   return selectedAnchor;
+}
+
+function focusLocationAnchor(anchorId: string) {
+  const anchor = state.anchors.find((item) => item.id === anchorId && item.status !== "rejected");
+  if (!anchor) throw new Error("The requested location anchor does not exist.");
+  commit((current) => ({ ...current, focusedAnchorId: anchor.id }));
+  return anchor.id;
 }
 
 function queueRefinementAnswer(
@@ -1017,6 +1046,7 @@ export const workspaceActions = {
   prepareSearch,
   proposePreferences,
   addLocationAnchor,
+  focusLocationAnchor,
   approvePreferences(ids: string[]) {
     reviewPreferences(ids, "approved");
   },

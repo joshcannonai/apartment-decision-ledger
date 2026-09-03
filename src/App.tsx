@@ -309,6 +309,8 @@ export function App() {
                 setSelectedId(selectedCandidate.id);
                 workspaceActions.organizeResults({ by: "distance", anchorId, direction: "asc" });
               }}
+              onFocusLocation={(anchorId) => workspaceActions.focusLocationAnchor(anchorId)}
+              focusedAnchorId={workspace.focusedAnchorId}
               rank={Math.max(0, visibleCandidates.findIndex((candidate) => candidate.id === selectedCandidate.id))}
               runContext={{
                 number: activeRun?.number ?? 1,

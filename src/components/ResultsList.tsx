@@ -148,6 +148,7 @@ export function ResultsList({
                       ) : (
                         <span className="media-unavailable"><ImageOff size={16} /><small>No verified photo</small></span>
                       )}
+                      {requestHero && heroMedia?.scope === "illustrative" ? <span className="result-media-label">Illustrative</span> : null}
                       <span className="result-rank">{String(index + 1).padStart(2, "0")}</span>
                     </span>
                     <span className="result-copy">

@@ -68,6 +68,7 @@ type OrganizeResultsInput = {
 type AddCandidateToolInput = Omit<AddCandidateInput, "addedBy">;
 type CompareCandidatesInput = { candidateIds: string[] };
 type StageDecisionInput = { candidateId: string; rationale: string };
+type ReviewWorkspaceInput = Record<string, never>;
 
 const preferenceProperties = {
   kind: {
@@ -227,6 +228,67 @@ export const proposePreferencesTool = defineTool<ProposePreferencesInput>({
       throw new Error("Provide at least one preference, location anchor, or custom question to propose.");
     }
     return workspaceActions.proposePreferences(toProposals(input));
+  },
+});
+
+export const reviewWorkspaceTool = defineTool<ReviewWorkspaceInput>({
+  stableKey: "apartment.review_workspace",
+  name: "review_workspace",
+  title: "Review apartment workspace",
+  description:
+    "Read a compact summary of the current apartment workspace. Use when opening or revisiting the page, or before reranking, comparing, or staging a recommendation. It returns the active search and run, up to five leading candidate IDs with decision signals, pending context, unanswered refinement questions, comparison IDs, and any staged recommendation without changing the page state.",
+  version: "1.0.0",
+  source: "merchant_authored",
+  intent: "act",
+  annotations: { readOnlyHint: true, untrustedContentHint: true },
+  inputSchema: {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  execute() {
+    const current = workspaceStore.getSnapshot();
+    if (!current.query && current.candidates.length === 0) {
+      return {
+        status: "empty" as const,
+        note: "No apartment search exists yet. Prepare or run a search to begin.",
+      };
+    }
+
+    const candidatesById = new Map(current.candidates.map((candidate) => [candidate.id, candidate]));
+    return {
+      status: current.searchStatus,
+      query: current.query,
+      activeRunNumber: current.activeRunNumber,
+      sort: current.sort,
+      focusedAnchorId: current.focusedAnchorId,
+      leadingCandidates: current.visibleCandidateIds.slice(0, 5).flatMap((candidateId, index) => {
+        const candidate = candidatesById.get(candidateId);
+        if (!candidate) return [];
+        return [{
+          rank: index + 1,
+          id: candidate.id,
+          name: candidate.name,
+          estimatedAllIn: candidate.allInEstimate,
+          marketValueScore: candidate.scores.marketValue.score,
+          personalFitScore: candidate.scores.personalFit.score,
+          evidenceGrade: candidate.source.evidenceGrade,
+          keyUnknowns: candidate.unknowns.slice(0, 3),
+        }];
+      }),
+      pendingContext: {
+        preferences: current.preferences
+          .filter((preference) => preference.status === "pending")
+          .map(({ id, label, source, confidence }) => ({ id, label, source, confidence })),
+        anchors: current.anchors
+          .filter((anchor) => anchor.status === "pending")
+          .map(({ id, label, source, confidence, verification }) => ({ id, label, source, confidence, verification })),
+      },
+      refinementQuestions: current.refinementQuestions.map(({ id, question, reason }) => ({ id, question, reason })),
+      comparisonIds: current.comparisonIds,
+      stagedDecision: current.stagedDecision,
+      note: "This is a compact workspace summary; linked listing claims still require source verification.",
+    };
   },
 });
 
@@ -409,6 +471,7 @@ export const stageDecisionTool = defineTool<StageDecisionInput>({
 
 export const apartmentWebMCPTools = [
   prepareSearchTool,
+  reviewWorkspaceTool,
   proposePreferencesTool,
   searchCandidatesTool,
   organizeResultsTool,

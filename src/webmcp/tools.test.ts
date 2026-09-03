@@ -7,6 +7,7 @@ import {
   organizeResultsTool,
   prepareSearchTool,
   proposePreferencesTool,
+  reviewWorkspaceTool,
   searchCandidatesTool,
   stageDecisionTool,
 } from "./tools";
@@ -17,6 +18,7 @@ describe("WebMCP apartment tools", () => {
   it("keeps the approved stable keys and strict top-level schemas", () => {
     expect(apartmentWebMCPTools.map((tool) => tool.stableKey)).toEqual([
       "apartment.prepare_search",
+      "apartment.review_workspace",
       "apartment.propose_preferences",
       "apartment.search_candidates",
       "apartment.organize_results",
@@ -27,11 +29,11 @@ describe("WebMCP apartment tools", () => {
     for (const tool of apartmentWebMCPTools) {
       expect(tool.name).toMatch(/^[a-z]+_[a-z_]+$/);
       expect(tool.inputSchema?.additionalProperties).toBe(false);
-      expect(tool.annotations).toMatchObject({
-        readOnlyHint: false,
-        untrustedContentHint: true,
-      });
+      expect(tool.annotations?.untrustedContentHint).toBe(true);
     }
+    expect(reviewWorkspaceTool.annotations?.readOnlyHint).toBe(true);
+    expect(apartmentWebMCPTools.filter((tool) => tool !== reviewWorkspaceTool)
+      .every((tool) => tool.annotations?.readOnlyHint === false)).toBe(true);
   });
 
   it("executes the same visible search action and returns a compact response", async () => {
@@ -44,6 +46,20 @@ describe("WebMCP apartment tools", () => {
     expect((result.topCandidateIds as unknown[]).length).toBeLessThanOrEqual(5);
     expect("refinementQuestions" in result && Array.isArray(result.refinementQuestions)).toBe(true);
     expect(workspaceStore.getSnapshot().candidates).toHaveLength(15);
+  });
+
+  it("reviews a persisted workspace without mutating it", async () => {
+    expect(reviewWorkspaceTool.execute({})).toMatchObject({ status: "empty" });
+    await workspaceActions.searchCandidates({ city: "Salt Lake City", state: "UT" });
+    const before = JSON.stringify(workspaceStore.getSnapshot());
+    const summary = reviewWorkspaceTool.execute({});
+
+    expect(summary).toMatchObject({ status: "ready", activeRunNumber: 1 });
+    if (!summary || typeof summary !== "object" || !("leadingCandidates" in summary)) {
+      throw new Error("Review tool returned no leadingCandidates array.");
+    }
+    expect(summary.leadingCandidates).toHaveLength(5);
+    expect(JSON.stringify(workspaceStore.getSnapshot())).toBe(before);
   });
 
   it("stages only a reversible recommendation with no external action", async () => {
@@ -77,10 +93,20 @@ describe("WebMCP apartment tools", () => {
     expect(
       proposePreferencesTool.execute({
         preferences: [{ kind: "minimum_space", label: "At least 700 square feet", value: 700 }],
+        anchors: [{ label: "University of Utah", importance: 4 }],
       }),
-    ).toMatchObject({ proposedPreferences: 1, saveStatus: "pending_human_review" });
+    ).toMatchObject({
+      proposedPreferences: 1,
+      proposedAnchors: 1,
+      anchorIds: [expect.stringMatching(/^anchor-/)],
+      saveStatus: "pending_human_review",
+    });
 
     await searchCandidatesTool.execute({ city: "Salt Lake City", state: "UT" });
+    expect(reviewWorkspaceTool.execute({})).toMatchObject({
+      status: "ready",
+      activeRunNumber: 1,
+    });
     expect(workspaceStore.getSnapshot().refinementQuestions.some((question) => question.origin === "agent_custom")).toBe(true);
     expect(organizeResultsTool.execute({ sortBy: "market_value" })).toMatchObject({
       resultCount: 15,

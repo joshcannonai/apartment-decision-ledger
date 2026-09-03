@@ -1,54 +1,59 @@
-# Demo script — target 2 minutes 30 seconds
+# Demo script — target 2 minutes 20 seconds
 
-## 0:00–0:18 — The problem
+The recording must show a real browser agent invoking WebMCP in the deployed application. Keep the tool-call UI visible whenever the browser permits it.
 
-“Apartment search is usually either a giant filter form or a chat answer that disappears. Your personal agent may already know useful context, but a rental site cannot and should not receive the agent’s entire memory.”
+## 0:00–0:12 — Lead with the transformation
 
-Show the empty anonymous workspace.
+Show the empty page beside the agent prompt:
 
-## 0:18–0:42 — Context without memory transfer
+> Find apartments in Salt Lake City. Use the relevant context you already have about my budget, my 72-inch desk, and useful locations—but don't save anything yet.
 
-Prompt the browser agent:
+The agent calls `prepare_search`, then `search_candidates`. Cut immediately to the populated workspace.
 
-> Find apartments in Salt Lake City. Use the relevant context you have, including that I need room for a 72-inch desk and value convenient groceries, but do not save anything yet.
+Voiceover:
 
-The agent calls `prepare_search` and `propose_preferences`. Show attributed proposals in the page and emphasize that they affect only the current search until approved.
+“Apartment search usually makes you repeat a generic form. Here, my agent contributes only the context relevant to this decision, and WebMCP turns it into a shared workspace.”
 
-## 0:42–1:08 — Results before questionnaire
+## 0:12–0:38 — Context without memory transfer
 
-The agent calls `search_candidates`. Up to 15 candidates render immediately with visible assumptions.
+Show the pending desk, budget, and location context with source and confidence. Open **Review what shaped this ranking**.
 
-Show:
+“The website never receives my complete AI memory. Every signal is structured, attributed, visible, and useful for this search without being silently saved. Only I can approve durable preferences.”
 
-- base and estimated all-in cost;
-- Market Value Score;
-- Personal Fit Score;
-- evidence grade and freshness;
-- why the apartment fits;
-- unknowns that must be verified.
+## 0:38–1:02 — A decision, not a results dump
 
-Then reveal **Answer these to enhance and narrow your search**. Explain that the product gives value before asking nonessential questions.
+Show the first-ranked candidate, original illustrative media label, estimated all-in cost, Market Value, Personal Fit, AI ranking explanation, evidence grade, source link, and unknowns.
 
-## 1:08–1:32 — Personal locations and transparent reranking
+“The first result arrives before a questionnaire. Cost and market value stay separate from personal fit, and uncertainty never disappears behind one magic score.”
 
-The agent proposes relevant location anchors and the page shows their source and confidence. Confirm one anchor and reject or reweight another.
+## 1:02–1:25 — Resume and reason about location
 
-Ask the agent to sort by Market Value Score, then by distance to the selected anchor. The agent calls `organize_results`; the same visible candidate set changes order without another market fetch.
+Prompt:
 
-## 1:32–2:02 — Shared decision workspace
+> Review this workspace. Add the University of Utah as an important location and sort around it.
 
-Ask:
+The agent calls `review_workspace`, `propose_preferences`, then `organize_results`. Show the new location chip, map focus, and reordered candidates.
 
-> Compare the three strongest options and show me what could change the recommendation.
+“Because the agent can read the compact workspace state, I can resume later without making it scrape the page or repeat the search. A location from the conversation becomes visible map and ranking context.”
 
-The agent calls `compare_candidates`. Show the side-by-side decision view with cost, fit, value, evidence, and unresolved checks.
+## 1:25–1:49 — Refine without losing the first answer
 
-## 2:02–2:20 — Human approval boundary
+Answer one suggested question, show **Updated**, and rerun. Show Run 1 remaining available while Run 2 loads, then the movement explanation.
 
-The agent calls `stage_decision`. Show the reversible recommendation and the still-pending preference approvals.
+“Follow-up questions come after useful output. A rerun never erases the original ranking, so I can see what my answer actually changed.”
 
-“The agent can research, organize, and recommend. Only the renter can make preferences durable or take consequential housing action.”
+## 1:49–2:10 — Human and agent close the loop
 
-## 2:20–2:30 — Closing
+Prompt:
+
+> Compare the strongest two options and stage your current recommendation.
+
+Show `compare_candidates`, then `stage_decision` and the visible reversible decision.
+
+“The agent can research, organize, compare, and recommend. It cannot apply, pay, message a landlord, sign, or make a preference durable for me.”
+
+## 2:10–2:20 — Close
+
+Show the workspace and eight-tool inventory.
 
 “Your agent already knows the goal. Apartment Decision Ledger makes the tradeoffs, uncertainty, and next decision visible.”
