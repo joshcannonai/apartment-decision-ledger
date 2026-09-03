@@ -12,6 +12,12 @@ export function resolveTheme(preference: ThemePreference, systemPrefersDark: boo
   return preference === "system" ? (systemPrefersDark ? "dark" : "light") : preference;
 }
 
+export function nextThemePreference(preference: ThemePreference): ThemePreference {
+  if (preference === "system") return "dark";
+  if (preference === "dark") return "light";
+  return "system";
+}
+
 function getSystemPreference() {
   return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
 }

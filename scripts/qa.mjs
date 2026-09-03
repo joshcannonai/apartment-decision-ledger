@@ -211,19 +211,28 @@ try {
   const webmcp = await verifyWebMCPTools();
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   await page.getByRole("heading", { name: "Find the apartment that fits your actual life." }).waitFor();
+  if (!(await page.getByRole("button", { name: "Find apartments" }).isDisabled())) {
+    throw new Error("The empty apartment search action should be disabled.");
+  }
   await page.screenshot({ path: resolve(artifactDirectory, "empty-desktop.png"), fullPage: true });
 
-  const themeControl = page.getByRole("combobox", { name: "Color theme" });
-  await themeControl.selectOption("dark");
+  await page.getByRole("button", { name: /Explore Central City/i }).click();
+  await page.getByText("Central City, Salt Lake City, UT", { exact: true }).waitFor();
+  if (!(await page.locator('iframe[title^="Google map"]').getAttribute("src"))?.includes("z=14")) {
+    throw new Error("The neighborhood shortcut did not retain its close map zoom.");
+  }
+
+  const themeControl = page.getByRole("button", { name: /Theme: system/i });
+  await themeControl.click();
   if (await page.locator("html").getAttribute("data-theme") !== "dark") {
     throw new Error("Dark mode did not apply to the document.");
   }
   await page.reload({ waitUntil: "networkidle" });
-  if (await themeControl.inputValue() !== "dark" || await page.locator("html").getAttribute("data-theme") !== "dark") {
+  if (await page.getByRole("button", { name: /Theme: dark/i }).count() !== 1 || await page.locator("html").getAttribute("data-theme") !== "dark") {
     throw new Error("Dark mode did not persist across reload.");
   }
 
-  await page.getByRole("button", { name: /Open the Salt Lake City decision demo/i }).click();
+  await page.getByRole("button", { name: /Open the Salt Lake City demo/i }).click();
   await page.getByRole("heading", { name: /best options/i }).waitFor();
   await page.getByRole("heading", { name: "Answer these to enhance and narrow your search" }).waitFor();
 

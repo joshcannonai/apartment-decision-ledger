@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildGoogleMapUrls } from "./googleMaps";
+import { buildGoogleDiscoveryMapUrl, buildGoogleMapUrls } from "./googleMaps";
 
 describe("buildGoogleMapUrls", () => {
   it("builds a keyless personal-list preview plus a standard Maps directions URL", () => {
@@ -23,5 +23,18 @@ describe("buildGoogleMapUrls", () => {
 
     expect(urls.embedMode).toBe("official_api");
     expect(urls.embedUrl).toContain("/embed/v1/directions?key=maps-key");
+  });
+
+  it("starts wide and zooms into a selected city or neighborhood", () => {
+    expect(buildGoogleDiscoveryMapUrl()).toContain("q=United%20States&z=3");
+    expect(buildGoogleDiscoveryMapUrl("Central City, Salt Lake City, UT")).toContain(
+      "q=Central%20City%2C%20Salt%20Lake%20City%2C%20UT&z=11",
+    );
+  });
+
+  it("accepts a closer zoom for a neighborhood focus", () => {
+    expect(buildGoogleDiscoveryMapUrl("Central City, Salt Lake City, UT", 14)).toContain(
+      "q=Central%20City%2C%20Salt%20Lake%20City%2C%20UT&z=14",
+    );
   });
 });

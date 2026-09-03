@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isThemePreference, resolveTheme } from "./theme";
+import { isThemePreference, nextThemePreference, resolveTheme } from "./theme";
 
 describe("theme preferences", () => {
   it("recognizes only supported persisted preferences", () => {
@@ -15,5 +15,11 @@ describe("theme preferences", () => {
     expect(resolveTheme("system", false)).toBe("light");
     expect(resolveTheme("dark", false)).toBe("dark");
     expect(resolveTheme("light", true)).toBe("light");
+  });
+
+  it("cycles through every mode with a single control", () => {
+    expect(nextThemePreference("system")).toBe("dark");
+    expect(nextThemePreference("dark")).toBe("light");
+    expect(nextThemePreference("light")).toBe("system");
   });
 });

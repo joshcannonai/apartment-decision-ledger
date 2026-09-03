@@ -25,13 +25,30 @@ describe("Apartment Ledger UI", () => {
   it("offers light, dark, and system themes and persists the selection", () => {
     render(<App />);
 
-    const themeSelect = screen.getByRole("combobox", { name: /color theme/i });
-    expect(themeSelect).toHaveValue("system");
-    fireEvent.change(themeSelect, { target: { value: "dark" } });
+    const themeButton = screen.getByRole("button", { name: /theme: system/i });
+    fireEvent.click(themeButton);
 
     expect(document.documentElement).toHaveAttribute("data-theme", "dark");
     expect(window.localStorage.getItem("apartment-ledger.theme")).toBe("dark");
-    expect(themeSelect).toHaveValue("dark");
+    expect(screen.getByRole("button", { name: /theme: dark/i })).toBeInTheDocument();
+  });
+
+  it("keeps a submitted city visible when live inventory is unavailable instead of rendering a blank page", async () => {
+    render(<App />);
+
+    const cityInput = screen.getByPlaceholderText(/city and state/i);
+    fireEvent.change(cityInput, { target: { value: "Denver, CO" } });
+    fireEvent.click(within(cityInput.closest("form")!).getByRole("button", { name: /find apartments/i }));
+
+    expect(await screen.findByRole("heading", { name: /Denver, CO is mapped/i })).toBeInTheDocument();
+    expect(screen.getByText(/live apartment inventory is not connected yet/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open the Salt Lake City demo/i })).toBeInTheDocument();
+  });
+
+  it("keeps the empty search action disabled until a city is entered", () => {
+    render(<App />);
+
+    expect(screen.getByRole("button", { name: /find apartments/i })).toBeDisabled();
   });
 
   it("shows results before refinement and keeps agent context pending approval", async () => {

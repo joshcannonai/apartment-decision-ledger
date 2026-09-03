@@ -1,4 +1,4 @@
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import {
   Bot,
   CircleUserRound,
@@ -11,7 +11,7 @@ import {
   Sun,
 } from "lucide-react";
 import type { SearchStatus } from "../domain/types";
-import type { ThemePreference } from "../theme";
+import { nextThemePreference, type ThemePreference } from "../theme";
 
 type SearchHeaderProps = {
   city: string;
@@ -47,13 +47,16 @@ export function SearchHeader({
   resolvedTheme,
   onThemeChange,
 }: SearchHeaderProps) {
+  const [cityDraft, setCityDraft] = useState(city);
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextCity = String(new FormData(event.currentTarget).get("city") ?? "").trim();
+    const nextCity = cityDraft.trim();
     if (nextCity) onSearch(nextCity);
   }
 
   const ThemeIcon = themePreference === "system" ? Monitor : resolvedTheme === "dark" ? Moon : Sun;
+  const nextTheme = nextThemePreference(themePreference);
 
   return (
     <header className="site-header">
@@ -67,24 +70,26 @@ export function SearchHeader({
         </span>
       </div>
 
-      <form className="city-search" onSubmit={submit} role="search">
-        <MapPin size={18} aria-hidden="true" />
-        <label className="sr-only" htmlFor="city-search">
-          City or metro area
-        </label>
-        <input
-          key={city}
-          id="city-search"
-          name="city"
-          defaultValue={city}
-          placeholder="Search a US city"
-          autoComplete="address-level2"
-        />
-        <button className="primary-button search-button" type="submit" disabled={status === "searching"}>
-          <Search size={17} aria-hidden="true" />
-          {status === "searching" ? "Searching" : "Find apartments"}
-        </button>
-      </form>
+      {hasWorkspace ? (
+        <form className="city-search" onSubmit={submit} role="search">
+          <MapPin size={18} aria-hidden="true" />
+          <label className="sr-only" htmlFor="city-search">
+            City or metro area
+          </label>
+          <input
+            id="city-search"
+            name="city"
+            value={cityDraft}
+            onChange={(event) => setCityDraft(event.target.value)}
+            placeholder="Search a US city"
+            autoComplete="address-level2"
+          />
+          <button className="primary-button search-button" type="submit" disabled={status === "searching" || !cityDraft.trim()}>
+            <Search size={17} aria-hidden="true" />
+            {status === "searching" ? "Searching" : "Find apartments"}
+          </button>
+        </form>
+      ) : <span className="header-spacer" aria-hidden="true" />}
 
       <div className="header-actions">
         <div className="agent-status" title={note || "WebMCP tools share this workspace"}>
@@ -96,19 +101,15 @@ export function SearchHeader({
             <RotateCcw size={18} />
           </button>
         ) : null}
-        <label className="theme-control" title={`Color theme: ${themePreference}`}>
+        <button
+          className="theme-control"
+          type="button"
+          onClick={() => onThemeChange(nextTheme)}
+          aria-label={`Theme: ${themePreference}. Click for ${nextTheme}.`}
+          title={`Theme: ${themePreference}. Click for ${nextTheme}.`}
+        >
           <ThemeIcon size={17} aria-hidden="true" />
-          <span className="sr-only">Color theme</span>
-          <select
-            aria-label="Color theme"
-            value={themePreference}
-            onChange={(event) => onThemeChange(event.target.value as ThemePreference)}
-          >
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="system">System</option>
-          </select>
-        </label>
+        </button>
         <button className="account-button" type="button" onClick={onAccount}>
           <CircleUserRound size={18} />
           <span>Optional sign in</span>

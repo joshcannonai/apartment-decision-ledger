@@ -2,14 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   Bot,
-  Building2,
-  CheckCircle2,
   FileText,
   List,
   LoaderCircle,
   MapPin,
   Search,
-  ShieldCheck,
   SlidersHorizontal,
 } from "lucide-react";
 import { CandidateDetail } from "./components/CandidateDetail";
@@ -20,10 +17,9 @@ import { ResultsList } from "./components/ResultsList";
 import { SearchHeader } from "./components/SearchHeader";
 import { useWorkspace, workspaceActions } from "./domain/store";
 import type { RefinementQuestion, SearchQuery, SortOption } from "./domain/types";
-import { SLC_DEMO_CANDIDATES } from "./data/slcCandidates";
-import { orderCandidateMedia } from "./media/order";
 import type { MediaPhase } from "./media/priority";
 import { useThemePreference } from "./theme";
+import { buildGoogleDiscoveryMapUrl } from "./maps/googleMaps";
 
 const demoContext = {
   preferences: [
@@ -225,11 +221,12 @@ export function App() {
     setVisibleHeroCount(1);
   }
 
-  const hasWorkspace = workspace.query != null || workspace.candidates.length > 0;
+  const hasWorkspace = workspace.candidates.length > 0;
 
   return (
     <div className="app-shell">
       <SearchHeader
+        key={workspace.query?.city ?? "new-ledger"}
         city={workspace.query?.city ?? ""}
         status={workspace.searchStatus}
         note={workspace.searchNote}
@@ -244,7 +241,7 @@ export function App() {
 
       <main>
         {workspace.searchStatus === "idle" && workspace.candidates.length === 0 ? (
-          <EmptyWorkspace onSearch={(city) => void runSearch(city)} onDemo={() => void runSearch("Salt Lake City, UT", true)} />
+          <EmptyWorkspace key={workspace.query?.city ?? "new-ledger"} initialCity={workspace.query?.city ?? ""} onSearch={(city) => void runSearch(city)} onDemo={() => void runSearch("Salt Lake City, UT", true)} />
         ) : null}
 
         {workspace.searchStatus === "searching" && workspace.candidates.length === 0 ? (
@@ -253,6 +250,15 @@ export function App() {
 
         {workspace.searchStatus === "error" ? (
           <ErrorState note={workspace.searchNote} onRetry={() => workspace.query && void runSearch(workspace.query.city)} />
+        ) : null}
+
+        {workspace.searchStatus === "ready" && workspace.candidates.length === 0 && workspace.query ? (
+          <EmptyWorkspace
+            initialCity={workspace.query.city}
+            unavailableNote={workspace.searchNote}
+            onSearch={(city) => void runSearch(city)}
+            onDemo={() => void runSearch("Salt Lake City, UT", true)}
+          />
         ) : null}
 
         {workspace.searchStatus !== "error" && workspace.candidates.length > 0 && visibleCandidates.length === 0 ? (
@@ -377,18 +383,57 @@ export function App() {
   );
 }
 
-function EmptyWorkspace({ onSearch, onDemo }: { onSearch: (city: string) => void; onDemo: () => void }) {
-  const [city, setCity] = useState("");
-  const previewCandidates = ["slc-capitol-reef-206", "slc-swallow-4", "slc-fountain-view-15"]
-    .map((id) => SLC_DEMO_CANDIDATES.find((candidate) => candidate.id === id))
-    .filter((candidate): candidate is NonNullable<typeof candidate> => candidate != null);
-  const previewLeadMedia = previewCandidates[0] ? orderCandidateMedia(previewCandidates[0].media ?? [])[0] : null;
+const SLC_MAP_FOCUSES = [
+  { label: "Central City", focus: "Central City, Salt Lake City, UT", image: "/demo-media/living-room.webp" },
+  { label: "Lower Avenues", focus: "Lower Avenues, Salt Lake City, UT", image: "/demo-media/kitchen-living.webp" },
+  { label: "Downtown", focus: "Downtown Salt Lake City, UT", image: "/demo-media/bedroom.webp" },
+];
+
+function EmptyWorkspace({
+  initialCity,
+  unavailableNote,
+  onSearch,
+  onDemo,
+}: {
+  initialCity: string;
+  unavailableNote?: string;
+  onSearch: (city: string) => void;
+  onDemo: () => void;
+}) {
+  const [city, setCity] = useState(initialCity);
+  const [mapFocus, setMapFocus] = useState(initialCity);
+  const [mapZoom, setMapZoom] = useState(initialCity ? 11 : 3);
+  const skipNextCityMapSync = useRef(false);
+
+  useEffect(() => {
+    if (skipNextCityMapSync.current) {
+      skipNextCityMapSync.current = false;
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setMapFocus(city.trim());
+      setMapZoom(city.trim() ? 11 : 3);
+    }, 320);
+    return () => window.clearTimeout(timer);
+  }, [city]);
+
+  const mapLabel = mapFocus || "United States";
+  const mapUrl = buildGoogleDiscoveryMapUrl(mapFocus, mapZoom);
 
   return (
-    <section className="empty-workspace">
+    <section className={`empty-workspace${unavailableNote ? " has-unavailable-note" : ""}`}>
       <div className="empty-hero">
-        <h1>Find the apartment that fits your actual life.</h1>
-        <p>Start with a city. Your agent can bring what it already knows, while you keep control over what becomes a saved preference.</p>
+        {unavailableNote ? <p className="eyebrow">Search needs a live source</p> : <p className="eyebrow">New apartment ledger</p>}
+        <h1 aria-label={unavailableNote ? `${initialCity} is mapped. Inventory comes next.` : "Find the apartment that fits your actual life."}>
+          {unavailableNote ? (
+            <><span>{initialCity} is mapped.</span><span>Inventory comes next.</span></>
+          ) : (
+            <><span>Find the apartment that fits</span><span>your actual life.</span></>
+          )}
+        </h1>
+        <p>{unavailableNote
+          ? "Live apartment inventory is not connected yet. The map and ledger are working; connect a listing provider for real candidates, or open the verified Salt Lake City demo now."
+          : "Start with a city. Your agent can bring the context it already knows into the same visible decision workspace."}</p>
         <form
           onSubmit={(event) => {
             event.preventDefault();
@@ -397,46 +442,46 @@ function EmptyWorkspace({ onSearch, onDemo }: { onSearch: (city: string) => void
         >
           <MapPin size={19} />
           <label className="sr-only" htmlFor="empty-city">City or metro area</label>
-          <input id="empty-city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Try Salt Lake City, UT" />
-          <button className="primary-button" type="submit"><Search size={17} /> Find apartments</button>
+          <input id="empty-city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="City and state, like Denver, CO" autoComplete="address-level2" />
+          <button className="primary-button" type="submit" disabled={!city.trim()}><Search size={17} /> Find apartments</button>
         </form>
         <button className="demo-link" type="button" onClick={onDemo}>
-          Open the Salt Lake City decision demo
+          Open the Salt Lake City demo
         </button>
+        <p className="entry-privacy"><Bot size={14} /> Agent context stays visible and pending until you approve it.</p>
       </div>
-      <button className="empty-preview" type="button" onClick={onDemo} aria-label="Open the Salt Lake City demo preview">
-        <span className="preview-heading">
-          <span><strong>Salt Lake City</strong><small>Demo preview · source-linked snapshot</small></span>
-          <span>10 options</span>
-        </span>
-        <span className="preview-lead">
-          {previewLeadMedia ? (
-            <img src={previewLeadMedia.thumbnailUrl} alt="" loading="eager" fetchPriority="high" />
-          ) : null}
-          <span>
-            <strong>{previewCandidates[0]?.name}</strong>
-            <small>{previewCandidates[0] ? `$${previewCandidates[0].allInEstimate.low}–$${previewCandidates[0].allInEstimate.high} all in` : ""}</small>
-          </span>
-          <b>01</b>
-        </span>
-        <span className="preview-list">
-          {previewCandidates.slice(1).map((candidate, index) => (
-            <span key={candidate.id}>
-              {orderCandidateMedia(candidate.media ?? [])[0] ? <img src={orderCandidateMedia(candidate.media ?? [])[0].thumbnailUrl} alt="" loading="lazy" /> : <span className="media-skeleton media-skeleton--preview" aria-hidden="true" />}
-              <span><strong>{candidate.name}</strong><small>{candidate.neighborhood}</small></span>
-              <b>0{index + 2}</b>
-            </span>
-          ))}
-        </span>
-        <span className="preview-context">
-          <Bot size={15} /> Agent brought: 72-inch desk · Trader Joe’s · character over generic luxury
-        </span>
-      </button>
-      <div className="empty-principles" aria-label="What makes the search different">
-        <article><Building2 size={19} /><strong>Results first</strong><span>A broad shortlist appears before follow-up questions.</span></article>
-        <article><ShieldCheck size={19} /><strong>Evidence attached</strong><span>Media scope, costs, sources, freshness, and unknowns stay visible.</span></article>
-        <article><CheckCircle2 size={19} /><strong>Memory by approval</strong><span>Context can shape this run without being silently saved.</span></article>
-      </div>
+      <section className={`discovery-map${mapFocus ? " is-focused" : " is-globe"}`} aria-label="Apartment search map">
+        <header>
+          <span>Map focus</span>
+          <strong>{mapLabel}</strong>
+        </header>
+        <div className="map-orb-shell">
+          <div className="map-orb">
+            <iframe key={mapUrl} title={`Google map showing ${mapLabel}`} src={mapUrl} loading="eager" referrerPolicy="no-referrer-when-downgrade" />
+            <span className="map-orb-shade" aria-hidden="true" />
+          </div>
+        </div>
+        {!unavailableNote ? (
+          <div className="neighborhood-focuses" aria-label="Salt Lake City neighborhood map shortcuts">
+            {SLC_MAP_FOCUSES.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                aria-pressed={mapFocus === item.focus}
+                onClick={() => {
+                  skipNextCityMapSync.current = true;
+                  setCity("Salt Lake City, UT");
+                  setMapFocus(item.focus);
+                  setMapZoom(14);
+                }}
+              >
+                <img src={item.image} alt="" />
+                <span><small>Explore</small><strong>{item.label}</strong></span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </section>
     </section>
   );
 }
