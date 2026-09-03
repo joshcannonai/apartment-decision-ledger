@@ -71,11 +71,18 @@ const DEMO_BEDROOM = media(
   "/demo-media/bedroom.webp",
   "Illustrative modest apartment bedroom showing furniture-clearance context",
 );
-const DEMO_FLOOR_PLAN = media(
-  "/demo-media/floor-plan.webp",
-  "Illustrative two-bedroom apartment floor plan for spatial reasoning",
-  "floor_plan",
-);
+const DEMO_SWALLOW = media("/demo-media/swallow.webp", "Illustrative historic living room opening toward a compact kitchen and balcony");
+const DEMO_UFFENS = media("/demo-media/uffens.webp", "Illustrative industrial corner apartment with exposed brick and a compact kitchen");
+const DEMO_THIRD_AVENUE = media("/demo-media/third-avenue.webp", "Illustrative older apartment living room with tall windows and mountain daylight");
+const DEMO_FOUNTAIN_VIEW = media("/demo-media/fountain-view.webp", "Illustrative bright corner living room with broad windows and a galley kitchen");
+const DEMO_POLLYANNA = media("/demo-media/pollyanna.webp", "Illustrative compact historic living room with built-ins and an arched dining opening");
+const DEMO_BANDELIER = media("/demo-media/bandelier.webp", "Illustrative long living room with oversized windows and an open kitchen");
+const DEMO_STRATTON = media("/demo-media/stratton.webp", "Illustrative vintage living room with a long practical desk wall");
+const DEMO_ENCORE = media("/demo-media/encore.webp", "Illustrative modern apartment with a concrete column and compact gray kitchen");
+const DEMO_PAPERBOX = media("/demo-media/paperbox.webp", "Illustrative downtown loft with a concrete ceiling and skyline windows");
+const DEMO_SEVENO2 = media("/demo-media/seveno2.webp", "Illustrative modern apartment with a warm wood kitchen and built-in work nook");
+const DEMO_NORTH_TEMPLE = media("/demo-media/north-temple.webp", "Illustrative industrial apartment with factory windows and weathered brick");
+const DEMO_MARQ = media("/demo-media/marq.webp", "Illustrative two-level live-work apartment with a mezzanine and open kitchen");
 
 const seeds: Seed[] = [
   {
@@ -96,7 +103,7 @@ const seeds: Seed[] = [
     url: "https://www.zillow.com/apartments/salt-lake-city-ut/the-swallow/9M2pT2/",
     sourceLabel: "Zillow building inventory",
     evidenceGrade: "B",
-    media: [DEMO_KITCHEN, DEMO_LIVING_ROOM],
+    media: [DEMO_SWALLOW],
   },
   {
     id: "slc-uffens-408",
@@ -116,6 +123,7 @@ const seeds: Seed[] = [
     url: "https://pmsystems.appfolio.com/listings/detail/ad7dd574-8880-4072-a568-70c0a0e1d705",
     sourceLabel: "Property manager listing",
     evidenceGrade: "A",
+    media: [DEMO_UFFENS],
   },
   {
     id: "slc-third-ave-4",
@@ -135,6 +143,7 @@ const seeds: Seed[] = [
     url: "https://www.zillow.com/homedetails/851-E-3rd-Ave-APT-4-Salt-Lake-City-UT-84103/2083072346_zpid/",
     sourceLabel: "Exact-unit Zillow listing",
     evidenceGrade: "B",
+    media: [DEMO_THIRD_AVENUE],
   },
   {
     id: "slc-fountain-view-15",
@@ -154,7 +163,7 @@ const seeds: Seed[] = [
     url: "https://corecommunities.appfolio.com/listings/detail/26819e04-7b8d-44b3-9889-5fe091878ce2",
     sourceLabel: "Property manager listing",
     evidenceGrade: "A",
-    media: [DEMO_KITCHEN],
+    media: [DEMO_FOUNTAIN_VIEW],
   },
   {
     id: "slc-bigelow-cottage",
@@ -174,6 +183,7 @@ const seeds: Seed[] = [
     url: "https://corecommunities.appfolio.com/listings/detail/2ddd12d4-9110-4d60-b3c3-092b3ff9d8fb",
     sourceLabel: "Property manager listing",
     evidenceGrade: "B",
+    media: [DEMO_LIVING_ROOM],
   },
   {
     id: "slc-pollyanna-528",
@@ -193,7 +203,7 @@ const seeds: Seed[] = [
     url: "https://corecommunities.appfolio.com/listings/detail/1cd69f50-6b1a-4b6b-be4b-0598c620d991",
     sourceLabel: "Property manager listing",
     evidenceGrade: "B",
-    media: [DEMO_KITCHEN, DEMO_BEDROOM],
+    media: [DEMO_POLLYANNA],
   },
   {
     id: "slc-bandelier-01",
@@ -213,6 +223,7 @@ const seeds: Seed[] = [
     url: "https://corecommunities.appfolio.com/listings/detail/92fc85ab-d15d-4c89-9547-b1e38f449302",
     sourceLabel: "Property manager listing",
     evidenceGrade: "B",
+    media: [DEMO_BANDELIER],
   },
   {
     id: "slc-stratton-11",
@@ -232,7 +243,7 @@ const seeds: Seed[] = [
     url: "https://www.rentler.com/places-for-rent/ut/salt-lake-city/49-s-400-e/12578743",
     sourceLabel: "Exact-unit Rentler listing",
     evidenceGrade: "C",
-    media: [DEMO_KITCHEN, DEMO_LIVING_ROOM],
+    media: [DEMO_STRATTON],
   },
   {
     id: "slc-madrid-8",
@@ -252,6 +263,7 @@ const seeds: Seed[] = [
     url: "https://www.zillow.com/homedetails/918-E-200-S-APT-8-Salt-Lake-City-UT-84102/450871076_zpid/",
     sourceLabel: "Exact-unit Zillow listing",
     evidenceGrade: "A",
+    media: [DEMO_BEDROOM],
   },
   {
     id: "slc-capitol-reef-206",
@@ -271,7 +283,7 @@ const seeds: Seed[] = [
     url: "https://rizehomesource.appfolio.com/listings/detail/dfb08d65-7132-4b9d-b891-7a7d0a0d3761",
     sourceLabel: "Property manager listing",
     evidenceGrade: "B",
-    media: [DEMO_KITCHEN, DEMO_LIVING_ROOM, DEMO_BEDROOM, DEMO_FLOOR_PLAN],
+    media: [DEMO_KITCHEN],
   },
   {
     id: "slc-encore-305",
@@ -291,6 +303,7 @@ const seeds: Seed[] = [
     url: "https://www.encoresaltlake.com/encore-apartments-salt-lake-city-ut/floorplans",
     sourceLabel: "Official property inventory",
     evidenceGrade: "B",
+    media: [DEMO_ENCORE],
   },
   {
     id: "slc-paperbox-1206",
@@ -310,6 +323,7 @@ const seeds: Seed[] = [
     url: "https://www.paperboxlofts.com/availableunits",
     sourceLabel: "Official property inventory",
     evidenceGrade: "B",
+    media: [DEMO_PAPERBOX],
   },
   {
     id: "slc-seveno2-526",
@@ -329,6 +343,7 @@ const seeds: Seed[] = [
     url: "https://www.seveno2main.com/floorplans/nitrogen-carbon",
     sourceLabel: "Official property inventory",
     evidenceGrade: "B",
+    media: [DEMO_SEVENO2],
   },
   {
     id: "slc-north-temple-203",
@@ -348,6 +363,7 @@ const seeds: Seed[] = [
     url: "https://homes.ksl.com/rent/detail/606-W.-North-Temple-Apt-203-Salt-Lake-City-UT-84116/1004672968",
     sourceLabel: "Exact-unit KSL listing",
     evidenceGrade: "A",
+    media: [DEMO_NORTH_TEMPLE],
   },
   {
     id: "slc-marq-0802",
@@ -367,6 +383,7 @@ const seeds: Seed[] = [
     url: "https://www.themarqutah.com/unit/picasso",
     sourceLabel: "Official unit page",
     evidenceGrade: "B",
+    media: [DEMO_MARQ],
   },
 ];
 
@@ -374,7 +391,7 @@ const seeds: Seed[] = [
  * Public, source-linked demo fixtures. Facts are an August 28, 2026 research
  * snapshot and are deliberately not presented as live availability.
  */
-export const SLC_DEMO_CANDIDATES: ApartmentCandidate[] = seeds.map((seed, index) => ({
+export const SLC_DEMO_CANDIDATES: ApartmentCandidate[] = seeds.map((seed) => ({
   id: seed.id,
   name: seed.name,
   address: seed.address,
@@ -402,7 +419,7 @@ export const SLC_DEMO_CANDIDATES: ApartmentCandidate[] = seeds.map((seed, index)
     evidenceGrade: seed.evidenceGrade,
     note: "Curated challenge-demo snapshot. Open the source and verify before acting.",
   },
-  media: seed.media ?? [index % 2 === 0 ? DEMO_KITCHEN : DEMO_LIVING_ROOM],
+  media: seed.media,
   distances: [],
   scores: structuredClone(EMPTY_SCORES),
   addedBy: "curated_demo",

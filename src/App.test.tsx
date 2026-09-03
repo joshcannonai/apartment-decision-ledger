@@ -40,7 +40,7 @@ describe("Apartment Ledger UI", () => {
     fireEvent.change(cityInput, { target: { value: "Denver, CO" } });
     fireEvent.click(within(cityInput.closest("form")!).getByRole("button", { name: /find apartments/i }));
 
-    expect(await screen.findByRole("heading", { name: /Denver, CO is mapped/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Denver, CO is ready/i })).toBeInTheDocument();
     expect(screen.getByText(/live apartment inventory is not connected yet/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /open the Salt Lake City demo/i })).toBeInTheDocument();
   });
@@ -49,6 +49,31 @@ describe("Apartment Ledger UI", () => {
     render(<App />);
 
     expect(screen.getByRole("button", { name: /find apartments/i })).toBeDisabled();
+  });
+
+  it("shows the exact browser fields an agent prepared through WebMCP before search", () => {
+    workspaceActions.prepareSearch({
+      city: "Denver",
+      state: "CO",
+      maxAllIn: 2100,
+      minBedrooms: 2,
+      moveWindow: "October",
+      text: "Needs parking and room for a long desk",
+    }, {
+      preferences: [{ kind: "furniture", label: "72-inch desk", value: true, source: "agent_context", confidence: 0.95 }],
+      anchors: [{ label: "Trader Joe's", importance: 4, source: "agent_context", confidence: 0.9 }],
+    });
+
+    render(<App />);
+
+    expect(screen.getByLabelText(/city or metro area/i)).toHaveValue("Denver, CO");
+    expect(screen.getByLabelText(/maximum all-in monthly cost/i)).toHaveValue(2100);
+    expect(screen.getByLabelText(/minimum bedrooms/i)).toHaveValue("2");
+    expect(screen.getByLabelText(/move window/i)).toHaveValue("October");
+    expect(screen.getByLabelText(/anything else that matters/i)).toHaveValue("Needs parking and room for a long desk");
+    expect(screen.getByText("72-inch desk", { exact: true })).toBeInTheDocument();
+    expect(screen.getByText("Trader Joe's", { exact: true })).toBeInTheDocument();
+    expect(document.querySelectorAll("[data-agent-field]")).toHaveLength(5);
   });
 
   it("shows results before refinement and keeps agent context pending approval", async () => {
@@ -142,6 +167,10 @@ describe("Apartment Ledger UI", () => {
     expect(screen.getByTitle(/Google map showing Capitol Reef/i)).toHaveAttribute(
       "src",
       expect.stringContaining("maps.google.com/maps?output=embed"),
+    );
+    expect(screen.getByRole("link", { name: /expand map for Capitol Reef/i })).toHaveAttribute(
+      "href",
+      expect.stringContaining("google.com/maps/search"),
     );
     fireEvent.click(screen.getByRole("button", { name: /add location/i }));
     fireEvent.change(screen.getByPlaceholderText(/place name or address/i), {

@@ -214,13 +214,10 @@ try {
   if (!(await page.getByRole("button", { name: "Find apartments" }).isDisabled())) {
     throw new Error("The empty apartment search action should be disabled.");
   }
-  await page.screenshot({ path: resolve(artifactDirectory, "empty-desktop.png"), fullPage: true });
-
-  await page.getByRole("button", { name: /Explore Central City/i }).click();
-  await page.getByText("Central City, Salt Lake City, UT", { exact: true }).waitFor();
-  if (!(await page.locator('iframe[title^="Google map"]').getAttribute("src"))?.includes("z=14")) {
-    throw new Error("The neighborhood shortcut did not retain its close map zoom.");
+  if (await page.locator("[data-agent-field]").count() !== 5) {
+    throw new Error("The entry screen did not expose all five visible WebMCP-prefillable fields.");
   }
+  await page.screenshot({ path: resolve(artifactDirectory, "empty-desktop.png"), fullPage: true });
 
   const themeControl = page.getByRole("button", { name: /Theme: system/i });
   await themeControl.click();
@@ -250,8 +247,11 @@ try {
   await compareButtons.nth(0).click();
   await compareButtons.nth(1).click();
   await waitForCompleteImages(page, 'img[data-media-role="lead-hero"]', 1);
-  await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
   await waitForCompleteImages(page, 'img[data-media-role="result-hero"][data-media-rank]', 10);
+  const resultSources = await page.locator('img[data-media-role="result-hero"][data-media-rank]').evaluateAll((images) => images.map((image) => image.getAttribute("src")));
+  if (new Set(resultSources).size !== resultSources.length) {
+    throw new Error("The demo result list rendered a duplicate lead photo.");
+  }
   await waitForImagePaint(page);
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-desktop.png"), fullPage: true });
 
@@ -275,7 +275,6 @@ try {
   await page.getByRole("button", { name: "Decision" }).click();
   await page.getByRole("heading", { name: /Capitol Reef/i }).waitFor();
   await waitForCompleteImages(page, 'img[data-media-role="lead-hero"]', 1);
-  await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
   await waitForImagePaint(page);
   await waitForGoogleMapPaint(page);
   await page.screenshot({ path: resolve(artifactDirectory, "workspace-mobile-decision.png"), fullPage: true });

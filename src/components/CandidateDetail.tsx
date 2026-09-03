@@ -105,15 +105,12 @@ function fitNarrative(candidate: ApartmentCandidate, rank: number, run: RunConte
 }
 
 export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCompare, onStage, onAddLocation, onSortByLocation, onFocusLocation, focusedAnchorId, rank, runContext, mediaPhase, onMediaSettled }: CandidateDetailProps) {
-  const [mediaSelection, setMediaSelection] = useState({ candidateId: candidate.id, index: 0 });
   const [locationEditorOpen, setLocationEditorOpen] = useState(false);
   const [locationDraft, setLocationDraft] = useState("");
   const compared = comparisonIds.includes(candidate.id);
-  const media = orderCandidateMedia(candidate.media ?? []);
-  const activeMediaIndex = mediaSelection.candidateId === candidate.id ? Math.min(mediaSelection.index, Math.max(0, media.length - 1)) : 0;
-  const activeMedia = media[activeMediaIndex] ?? media[0];
-  const activeRequest = activeMedia ? shouldRequestMedia({ phase: mediaPhase, rank, mediaIndex: activeMediaIndex, selected: true }) : false;
-  const activeHint = mediaLoadingHint({ rank, mediaIndex: activeMediaIndex, selected: true });
+  const activeMedia = orderCandidateMedia(candidate.media ?? [])[0];
+  const activeRequest = activeMedia ? shouldRequestMedia({ phase: mediaPhase, rank, mediaIndex: 0, selected: true }) : false;
+  const activeHint = mediaLoadingHint({ rank, mediaIndex: 0, selected: true });
   const tensions = candidate.scores.personalFit.tensions;
   const narrative = fitNarrative(candidate, rank, runContext);
   const activeAnchorId = focusedAnchorId && candidate.distances.some((distance) => distance.anchorId === focusedAnchorId)
@@ -125,7 +122,11 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
   const mapOrigin = candidate.latitude != null && candidate.longitude != null
     ? `${candidate.latitude},${candidate.longitude}`
     : `${candidate.address}, ${candidate.city}, ${candidate.state}`;
-  const mapUrls = buildGoogleMapUrls({
+  const listingMapUrls = buildGoogleMapUrls({
+    origin: mapOrigin,
+    embedApiKey: import.meta.env.VITE_GOOGLE_MAPS_EMBED_API_KEY,
+  });
+  const routeMapUrls = buildGoogleMapUrls({
     origin: mapOrigin,
     destination: activeDistance?.anchorLabel,
     embedApiKey: import.meta.env.VITE_GOOGLE_MAPS_EMBED_API_KEY,
@@ -150,11 +151,11 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
       </header>
 
       <div className="decision-overview">
-        <figure className="media-stage">
-          <div className="media-stage-grid">
+        <div className="media-map-pair">
+          <figure className="media-stage">
             <div className="media-hero">
               {activeMedia && activeRequest ? (
-                <img key={activeMedia.url} data-media-role="lead-hero" data-media-index={activeMediaIndex} src={activeMedia.url} alt={activeMedia.alt} loading={activeHint.loading} fetchPriority={activeHint.fetchPriority} decoding="async" onLoad={() => onMediaSettled(candidate.id, activeMediaIndex, rank)} onError={() => onMediaSettled(candidate.id, activeMediaIndex, rank)} />
+                <img key={activeMedia.url} data-media-role="lead-hero" data-media-index="0" src={activeMedia.url} alt={activeMedia.alt} loading={activeHint.loading} fetchPriority={activeHint.fetchPriority} decoding="async" onLoad={() => onMediaSettled(candidate.id, 0, rank)} onError={() => onMediaSettled(candidate.id, 0, rank)} />
               ) : activeMedia ? (
                 <span className="media-skeleton" aria-label="Listing photo queued" />
               ) : (
@@ -164,31 +165,28 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
                 </span>
               )}
             </div>
-            <div className="media-filmstrip" aria-label="Listing photos and source">
-              {media.map((item, index) => {
-                const requestThumbnail = mediaPhase !== "lead" && shouldRequestMedia({ phase: mediaPhase, rank, mediaIndex: index, selected: true });
-                const hint = mediaLoadingHint({ rank, mediaIndex: index, selected: true });
-                return (
-                  <button key={item.url} type="button" className={index === activeMediaIndex ? "is-active" : ""} onClick={() => setMediaSelection({ candidateId: candidate.id, index })} aria-label={`Show ${item.kind === "floor_plan" ? "floor plan" : `photo ${index + 1}`}: ${item.alt}`} aria-pressed={index === activeMediaIndex}>
-                    {requestThumbnail ? (
-                      <img data-media-role="detail-thumbnail" data-media-index={index} src={item.thumbnailUrl} alt="" loading={hint.loading} fetchPriority={hint.fetchPriority} decoding="async" onLoad={() => onMediaSettled(candidate.id, index, rank)} onError={() => onMediaSettled(candidate.id, index, rank)} />
-                    ) : <span className="media-skeleton" aria-hidden="true" />}
-                    {item.kind === "floor_plan" ? <span>Floor plan</span> : null}
-                  </button>
-                );
-              })}
-              <a className="listing-source-card" href={candidate.source.url} target="_blank" rel="noreferrer">
-                <ExternalLink size={16} /><span><strong>Open original listing</strong><small>Source details</small></span>
-              </a>
-            </div>
-          </div>
-          {activeMedia ? (
             <figcaption>
-              <span>{mediaScopeLabel(activeMedia.scope)} · {activeMedia.sourceLabel}</span>
-              {activeMedia.sourceUrl ? <a href={activeMedia.sourceUrl} target="_blank" rel="noreferrer">Photo source <ExternalLink size={13} /></a> : <span>Not listing evidence</span>}
+              <span>{activeMedia ? `${mediaScopeLabel(activeMedia.scope)} · ${activeMedia.sourceLabel}` : "Best room view queued"}</span>
+              <a href={candidate.source.url} target="_blank" rel="noreferrer">Original listing <ExternalLink size={13} /></a>
             </figcaption>
-          ) : null}
-        </figure>
+          </figure>
+
+          <section className="compact-map-card" aria-label={`Map preview for ${candidate.name}`}>
+            <header><span><MapPin size={14} /> Location</span><small>Click to expand</small></header>
+            <div className="compact-map-frame">
+              <iframe
+                key={candidate.id}
+                title={`Google map showing ${candidate.name}`}
+                src={listingMapUrls.embedUrl}
+                loading="lazy"
+                tabIndex={-1}
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+              <span className="compact-map-pin" aria-hidden="true"><MapPin size={24} fill="currentColor" /></span>
+              <a href={listingMapUrls.openUrl} target="_blank" rel="noreferrer" aria-label={`Expand map for ${candidate.name} in Google Maps`}><ExternalLink size={15} /> Expand map</a>
+            </div>
+          </section>
+        </div>
 
         <section className="detail-facts listing-facts-rail" aria-label="Listing facts">
           <div><Building size={17} /><span>Availability</span><strong>{candidate.availability}</strong></div>
@@ -216,10 +214,10 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
       <section className="location-preview" aria-labelledby={`location-preview-${candidate.id}`}>
         <header>
           <div>
-            <h2 id={`location-preview-${candidate.id}`}>Location preview</h2>
-            <p>See this listing relative to the places that shape your week.</p>
+            <h2 id={`location-preview-${candidate.id}`}>Places that shape your week</h2>
+            <p>Add or select a place to compare it with this listing.</p>
           </div>
-          <a href={mapUrls.openUrl} target="_blank" rel="noreferrer">Open in Google Maps <ExternalLink size={13} /></a>
+          <a href={routeMapUrls.openUrl} target="_blank" rel="noreferrer">Open route in Google Maps <ExternalLink size={13} /></a>
         </header>
 
         <div className="location-anchor-row" aria-label="Locations used for distance context">
@@ -271,19 +269,6 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
             <button className="icon-button" type="button" aria-label="Cancel adding location" onClick={() => setLocationEditorOpen(false)}><X size={15} /></button>
           </form>
         ) : null}
-
-        <div className="location-map-frame">
-          <iframe
-            key={`${candidate.id}-${activeDistance?.anchorId ?? "listing"}`}
-            title={mapUrls.embedMode === "official_api" && activeDistance
-              ? `Google map from ${candidate.name} to ${activeDistance.anchorLabel}`
-              : `Google map showing ${candidate.name}`}
-            src={mapUrls.embedUrl}
-            loading="lazy"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
-          />
-        </div>
 
         <footer>
           <span>

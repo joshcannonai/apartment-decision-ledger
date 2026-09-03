@@ -28,9 +28,3 @@ export function buildGoogleMapUrls({ origin, destination, embedApiKey }: GoogleM
     embedMode: "personal_list_fallback" as const,
   };
 }
-
-export function buildGoogleDiscoveryMapUrl(focus?: string | null, zoomLevel?: number) {
-  const query = focus?.trim() || "United States";
-  const zoom = zoomLevel ?? (focus?.trim() ? 11 : 3);
-  return `https://maps.google.com/maps?output=embed&q=${encodeURIComponent(query)}&z=${zoom}`;
-}

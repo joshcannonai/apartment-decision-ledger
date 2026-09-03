@@ -29,7 +29,7 @@ try {
     await page.goto(baseUrl, { waitUntil: "networkidle" });
 
     const startedAt = performance.now();
-    await page.getByRole("button", { name: /Open the Salt Lake City decision demo/i }).click();
+    await page.getByRole("button", { name: /Open the Salt Lake City demo/i }).click();
     await page.getByRole("heading", { name: /best options/i }).waitFor();
     const results = performance.now() - startedAt;
 
@@ -38,9 +38,6 @@ try {
 
     await waitForCompleteImages(page, 'img[data-media-role="result-hero"][data-media-rank]', 5);
     const firstFive = performance.now() - startedAt;
-
-    await waitForCompleteImages(page, 'img[data-media-role="detail-thumbnail"]', 4);
-    const selectedGallery = performance.now() - startedAt;
 
     await waitForCompleteImages(page, 'img[data-media-role="result-hero"][data-media-rank]', 10);
     const allTen = performance.now() - startedAt;
@@ -59,7 +56,7 @@ try {
     });
     const refinementRerun = performance.now() - rerunStartedAt;
 
-    samples.push({ results, leadImage, firstFive, selectedGallery, allTen, refinementRerun });
+    samples.push({ results, leadImage, firstFive, allTen, refinementRerun });
     await context.close();
   }
 } finally {
@@ -85,7 +82,6 @@ console.log(JSON.stringify({
   results: summarize("results"),
   leadImage: summarize("leadImage"),
   firstFiveResultImages: summarize("firstFive"),
-  selectedGallery: summarize("selectedGallery"),
   allTenResultImages: summarize("allTen"),
   refinementRerun: summarize("refinementRerun"),
   scope: "Fresh browser contexts on the local deterministic demo. Includes project-owned local WebP media; excludes browser-agent reasoning and a live listing-provider search.",

@@ -19,7 +19,6 @@ import { useWorkspace, workspaceActions } from "./domain/store";
 import type { RefinementQuestion, SearchQuery, SortOption } from "./domain/types";
 import type { MediaPhase } from "./media/priority";
 import { useThemePreference } from "./theme";
-import { buildGoogleDiscoveryMapUrl } from "./maps/googleMaps";
 
 const demoContext = {
   preferences: [
@@ -158,12 +157,12 @@ export function App() {
     }
   }
 
-  async function runSearch(city: string, includeDemoContext = false) {
+  async function runSearch(input: string | SearchQuery, includeDemoContext = false) {
     setMobileSection("results");
     settledShortlistMedia.current.clear();
     setMediaPhase("lead");
     setVisibleHeroCount(1);
-    const query: SearchQuery = { city, text: city };
+    const query: SearchQuery = typeof input === "string" ? { city: input, text: input } : input;
     workspaceActions.prepareSearch(query, includeDemoContext ? demoContext : undefined);
     await workspaceActions.searchCandidates(query);
   }
@@ -241,7 +240,14 @@ export function App() {
 
       <main>
         {workspace.searchStatus === "idle" && workspace.candidates.length === 0 ? (
-          <EmptyWorkspace key={workspace.query?.city ?? "new-ledger"} initialCity={workspace.query?.city ?? ""} onSearch={(city) => void runSearch(city)} onDemo={() => void runSearch("Salt Lake City, UT", true)} />
+          <EmptyWorkspace
+            key={workspace.query?.city ?? "new-ledger"}
+            initialQuery={workspace.query}
+            proposedPreferences={workspace.preferences.filter((item) => item.status === "pending").map((item) => item.label)}
+            proposedAnchors={workspace.anchors.filter((item) => item.status === "pending").map((item) => item.label)}
+            onSearch={(query) => void runSearch(query)}
+            onDemo={() => void runSearch("Salt Lake City, UT", true)}
+          />
         ) : null}
 
         {workspace.searchStatus === "searching" && workspace.candidates.length === 0 ? (
@@ -254,9 +260,11 @@ export function App() {
 
         {workspace.searchStatus === "ready" && workspace.candidates.length === 0 && workspace.query ? (
           <EmptyWorkspace
-            initialCity={workspace.query.city}
+            initialQuery={workspace.query}
             unavailableNote={workspace.searchNote}
-            onSearch={(city) => void runSearch(city)}
+            proposedPreferences={workspace.preferences.filter((item) => item.status === "pending").map((item) => item.label)}
+            proposedAnchors={workspace.anchors.filter((item) => item.status === "pending").map((item) => item.label)}
+            onSearch={(query) => void runSearch(query)}
             onDemo={() => void runSearch("Salt Lake City, UT", true)}
           />
         ) : null}
@@ -383,105 +391,97 @@ export function App() {
   );
 }
 
-const SLC_MAP_FOCUSES = [
-  { label: "Central City", focus: "Central City, Salt Lake City, UT", image: "/demo-media/living-room.webp" },
-  { label: "Lower Avenues", focus: "Lower Avenues, Salt Lake City, UT", image: "/demo-media/kitchen-living.webp" },
-  { label: "Downtown", focus: "Downtown Salt Lake City, UT", image: "/demo-media/bedroom.webp" },
-];
-
 function EmptyWorkspace({
-  initialCity,
+  initialQuery,
   unavailableNote,
+  proposedPreferences,
+  proposedAnchors,
   onSearch,
   onDemo,
 }: {
-  initialCity: string;
+  initialQuery: SearchQuery | null;
   unavailableNote?: string;
-  onSearch: (city: string) => void;
+  proposedPreferences: string[];
+  proposedAnchors: string[];
+  onSearch: (query: SearchQuery) => void;
   onDemo: () => void;
 }) {
-  const [city, setCity] = useState(initialCity);
-  const [mapFocus, setMapFocus] = useState(initialCity);
-  const [mapZoom, setMapZoom] = useState(initialCity ? 11 : 3);
-  const skipNextCityMapSync = useRef(false);
-
-  useEffect(() => {
-    if (skipNextCityMapSync.current) {
-      skipNextCityMapSync.current = false;
-      return;
-    }
-    const timer = window.setTimeout(() => {
-      setMapFocus(city.trim());
-      setMapZoom(city.trim() ? 11 : 3);
-    }, 320);
-    return () => window.clearTimeout(timer);
-  }, [city]);
-
-  const mapLabel = mapFocus || "United States";
-  const mapUrl = buildGoogleDiscoveryMapUrl(mapFocus, mapZoom);
+  const initialLocation = [initialQuery?.city, initialQuery?.state].filter(Boolean).join(", ");
+  const [city, setCity] = useState(initialLocation);
+  const [maxAllIn, setMaxAllIn] = useState(initialQuery?.maxAllIn?.toString() ?? "");
+  const [minBedrooms, setMinBedrooms] = useState(initialQuery?.minBedrooms?.toString() ?? "");
+  const [moveWindow, setMoveWindow] = useState(initialQuery?.moveWindow ?? "");
+  const [request, setRequest] = useState(initialQuery?.text ?? "");
+  const proposedContext = [...proposedPreferences, ...proposedAnchors];
+  const displayCity = initialLocation || city;
 
   return (
     <section className={`empty-workspace${unavailableNote ? " has-unavailable-note" : ""}`}>
-      <div className="empty-hero">
-        {unavailableNote ? <p className="eyebrow">Search needs a live source</p> : <p className="eyebrow">New apartment ledger</p>}
-        <h1 aria-label={unavailableNote ? `${initialCity} is mapped. Inventory comes next.` : "Find the apartment that fits your actual life."}>
-          {unavailableNote ? (
-            <><span>{initialCity} is mapped.</span><span>Inventory comes next.</span></>
-          ) : (
-            <><span>Find the apartment that fits</span><span>your actual life.</span></>
-          )}
-        </h1>
-        <p>{unavailableNote
-          ? "Live apartment inventory is not connected yet. The map and ledger are working; connect a listing provider for real candidates, or open the verified Salt Lake City demo now."
-          : "Start with a city. Your agent can bring the context it already knows into the same visible decision workspace."}</p>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (city.trim()) onSearch(city.trim());
-          }}
-        >
-          <MapPin size={19} />
-          <label className="sr-only" htmlFor="empty-city">City or metro area</label>
-          <input id="empty-city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="City and state, like Denver, CO" autoComplete="address-level2" />
-          <button className="primary-button" type="submit" disabled={!city.trim()}><Search size={17} /> Find apartments</button>
-        </form>
-        <button className="demo-link" type="button" onClick={onDemo}>
-          Open the Salt Lake City demo
-        </button>
-        <p className="entry-privacy"><Bot size={14} /> Agent context stays visible and pending until you approve it.</p>
-      </div>
-      <section className={`discovery-map${mapFocus ? " is-focused" : " is-globe"}`} aria-label="Apartment search map">
-        <header>
-          <span>Map focus</span>
-          <strong>{mapLabel}</strong>
-        </header>
-        <div className="map-orb-shell">
-          <div className="map-orb">
-            <iframe key={mapUrl} title={`Google map showing ${mapLabel}`} src={mapUrl} loading="eager" referrerPolicy="no-referrer-when-downgrade" />
-            <span className="map-orb-shade" aria-hidden="true" />
+      <form
+        className="ledger-entry-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const locationMatch = city.trim().match(/^(.*?),\s*([A-Za-z]{2})$/);
+          const cityName = locationMatch?.[1]?.trim() || city.trim();
+          if (!cityName) return;
+          onSearch({
+            city: cityName,
+            state: locationMatch?.[2]?.toUpperCase() || initialQuery?.state,
+            maxAllIn: maxAllIn ? Number(maxAllIn) : undefined,
+            minBedrooms: minBedrooms ? Number(minBedrooms) : undefined,
+            moveWindow: moveWindow.trim() || undefined,
+            text: request.trim() || city.trim(),
+          });
+        }}
+      >
+        <div className="empty-hero">
+          {unavailableNote ? <p className="eyebrow">Search needs a live source</p> : <p className="eyebrow">New apartment ledger</p>}
+          <h1 aria-label={unavailableNote ? `${displayCity} is ready. Inventory source needed.` : "Find the apartment that fits your actual life."}>
+            {unavailableNote ? (
+              <><span>{displayCity} is ready.</span><span>Inventory source needed.</span></>
+            ) : (
+              <><span>Find the apartment that fits</span><span>your actual life.</span></>
+            )}
+          </h1>
+          <p>{unavailableNote
+            ? "The search is prepared, but live apartment inventory is not connected yet. Open the verified Salt Lake City demo or connect the listing provider for real candidates."
+            : "Enter only what you know. Your agent can visibly prefill the rest through WebMCP."}</p>
+          <div className="city-field-heading"><span>City or metro area</span><small>WebMCP or you</small></div>
+          <div className="city-entry-row">
+            <MapPin size={19} />
+            <label className="sr-only" htmlFor="empty-city">City or metro area</label>
+            <input id="empty-city" data-agent-field="city" value={city} onChange={(event) => setCity(event.target.value)} placeholder="City and state, like Denver, CO" autoComplete="address-level2" />
+            <button className="primary-button" type="submit" disabled={!city.trim()}><Search size={17} /> Find apartments</button>
           </div>
+          <button className="demo-link" type="button" onClick={onDemo}>Open the Salt Lake City demo</button>
+          <p className="entry-privacy"><Bot size={14} /> Agent context shapes this search, but is not saved until you approve it.</p>
         </div>
-        {!unavailableNote ? (
-          <div className="neighborhood-focuses" aria-label="Salt Lake City neighborhood map shortcuts">
-            {SLC_MAP_FOCUSES.map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                aria-pressed={mapFocus === item.focus}
-                onClick={() => {
-                  skipNextCityMapSync.current = true;
-                  setCity("Salt Lake City, UT");
-                  setMapFocus(item.focus);
-                  setMapZoom(14);
-                }}
-              >
-                <img src={item.image} alt="" />
-                <span><small>Explore</small><strong>{item.label}</strong></span>
-              </button>
-            ))}
+
+        <section className="agent-prefill-panel" aria-labelledby="agent-prefill-heading">
+          <header>
+            <span><Bot size={15} /> WebMCP agent inputs</span>
+            <small>Visible before search</small>
+          </header>
+          <h2 id="agent-prefill-heading">Your agent can prefill these fields</h2>
+          <p>You can change any value before searching.</p>
+          <div className="agent-field-grid">
+            <label><span>Maximum all-in monthly cost <small>WebMCP</small></span><input data-agent-field="max-all-in" type="number" min="300" step="50" value={maxAllIn} onChange={(event) => setMaxAllIn(event.target.value)} placeholder="No maximum" /></label>
+            <label><span>Minimum bedrooms <small>WebMCP</small></span><select data-agent-field="minimum-bedrooms" value={minBedrooms} onChange={(event) => setMinBedrooms(event.target.value)}><option value="">Any</option><option value="0">Studio</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option></select></label>
+            <label><span>Move window <small>WebMCP</small></span><input data-agent-field="move-window" value={moveWindow} onChange={(event) => setMoveWindow(event.target.value)} placeholder="For example, October" /></label>
+            <label><span>Anything else that matters <small>WebMCP</small></span><input data-agent-field="request" value={request} onChange={(event) => setRequest(event.target.value)} placeholder="Desk, pet, parking, neighborhood..." /></label>
           </div>
-        ) : null}
-      </section>
+          <div className="agent-proposal-note">
+            <strong>Also supported</strong>
+            <span>Important locations, furniture and space needs, lifestyle preferences, and custom follow-up questions arrive as reviewable proposals.</span>
+          </div>
+          {proposedContext.length > 0 ? (
+            <div className="agent-proposal-preview" aria-label="Context proposed by your agent">
+              <strong>Proposed by your agent</strong>
+              <div>{proposedContext.slice(0, 4).map((label) => <span key={label}>{label}</span>)}</div>
+            </div>
+          ) : null}
+        </section>
+      </form>
     </section>
   );
 }
