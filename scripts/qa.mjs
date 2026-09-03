@@ -309,6 +309,16 @@ try {
   if (!(await mapFrame.getAttribute("src"))?.includes("maps.google.com/maps?output=embed")) {
     throw new Error("The keyless Google Maps preview was not rendered.");
   }
+  if (await mapFrame.evaluate((frame) => getComputedStyle(frame).pointerEvents === "none")) {
+    throw new Error("The embedded Google Maps preview is not interactive.");
+  }
+  const externalEvidenceLinks = page.getByRole("link", { name: /Original listing|Expand map|Open route in Google Maps/i });
+  const externalEvidenceLinkCount = await externalEvidenceLinks.count();
+  for (let index = 0; index < externalEvidenceLinkCount; index += 1) {
+    if (await externalEvidenceLinks.nth(index).getAttribute("target") !== "_blank") {
+      throw new Error("An external listing or map link would replace the Apartment Ledger tab.");
+    }
+  }
   await page.getByRole("button", { name: /add location/i }).click();
   await page.getByPlaceholder("Place name or address").fill("University of Utah");
   await page.getByRole("button", { name: "Add to search" }).click();

@@ -168,14 +168,18 @@ describe("Apartment Ledger UI", () => {
     fireEvent.click(screen.getByRole("button", { name: /salt lake city demo/i }));
     await screen.findByRole("heading", { name: /best options/i });
 
-    expect(screen.getByTitle(/Google map showing Capitol Reef/i)).toHaveAttribute(
+    const mapFrame = screen.getByTitle(/Google map showing Capitol Reef/i);
+    expect(mapFrame).toHaveAttribute(
       "src",
       expect.stringContaining("maps.google.com/maps?output=embed"),
     );
+    expect(mapFrame).not.toHaveAttribute("tabindex");
     const mapLink = screen.getByRole("link", { name: /expand map for Capitol Reef/i });
     expect(mapLink).toHaveAttribute("href", expect.stringContaining("google.com/maps/search"));
-    expect(mapLink).not.toHaveAttribute("target");
-    expect(screen.getByRole("link", { name: /original listing/i })).not.toHaveAttribute("target");
+    expect(mapLink).toHaveAttribute("target", "_blank");
+    expect(mapLink).toHaveAttribute("rel", "noopener noreferrer");
+    expect(screen.getByRole("link", { name: /original listing/i })).toHaveAttribute("target", "_blank");
+    expect(screen.getByRole("link", { name: /open route in Google Maps/i })).toHaveAttribute("target", "_blank");
     fireEvent.click(screen.getByRole("button", { name: /add location/i }));
     fireEvent.change(screen.getByPlaceholderText(/place name or address/i), {
       target: { value: "University of Utah" },
