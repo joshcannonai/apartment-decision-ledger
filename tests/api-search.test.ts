@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
-import handler from "./search.js";
-import type { ApiRequest, ApiResponse } from "./_lib/http.js";
+import handler from "../api/search.js";
+import type { ApiRequest, ApiResponse } from "../api/_lib/http.js";
 
 function responseHarness() {
   const headers = new Map<string, string>();
