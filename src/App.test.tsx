@@ -174,10 +174,10 @@ describe("Apartment Ledger UI", () => {
       "src",
       expect.stringContaining("maps.google.com/maps?output=embed"),
     );
-    expect(screen.getByRole("link", { name: /expand map for Capitol Reef/i })).toHaveAttribute(
-      "href",
-      expect.stringContaining("google.com/maps/search"),
-    );
+    const mapLink = screen.getByRole("link", { name: /expand map for Capitol Reef/i });
+    expect(mapLink).toHaveAttribute("href", expect.stringContaining("google.com/maps/search"));
+    expect(mapLink).not.toHaveAttribute("target");
+    expect(screen.getByRole("link", { name: /original listing/i })).not.toHaveAttribute("target");
     fireEvent.click(screen.getByRole("button", { name: /add location/i }));
     fireEvent.change(screen.getByPlaceholderText(/place name or address/i), {
       target: { value: "University of Utah" },

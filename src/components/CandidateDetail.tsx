@@ -167,7 +167,7 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
             </div>
             <figcaption>
               <span>{activeMedia ? `${mediaScopeLabel(activeMedia.scope)} · ${activeMedia.sourceLabel}` : "Best room view queued"}</span>
-              <a href={candidate.source.url} target="_blank" rel="noreferrer">Original listing <ExternalLink size={13} /></a>
+              <a href={candidate.source.url}>Original listing <ExternalLink size={13} /></a>
             </figcaption>
           </figure>
 
@@ -183,7 +183,7 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
                 referrerPolicy="strict-origin-when-cross-origin"
               />
               <span className="compact-map-pin" aria-hidden="true"><MapPin size={24} fill="currentColor" /></span>
-              <a href={listingMapUrls.openUrl} target="_blank" rel="noreferrer" aria-label={`Expand map for ${candidate.name} in Google Maps`}><ExternalLink size={15} /> Expand map</a>
+              <a href={listingMapUrls.openUrl} aria-label={`Expand map for ${candidate.name} in Google Maps`}><ExternalLink size={15} /> Expand map</a>
             </div>
           </section>
         </div>
@@ -217,7 +217,7 @@ export function CandidateDetail({ candidate, comparisonIds, isStaged, onToggleCo
             <h2 id={`location-preview-${candidate.id}`}>Places that shape your week</h2>
             <p>Add or select a place to compare it with this listing.</p>
           </div>
-          <a href={routeMapUrls.openUrl} target="_blank" rel="noreferrer">Open route in Google Maps <ExternalLink size={13} /></a>
+          <a href={routeMapUrls.openUrl}>Open route in Google Maps <ExternalLink size={13} /></a>
         </header>
 
         <div className="location-anchor-row" aria-label="Locations used for distance context">
