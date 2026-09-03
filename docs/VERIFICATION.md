@@ -27,12 +27,12 @@ Seven fresh Chrome contexts measured from demo activation. This is the determini
 
 | Milestone | Average | Median | P95 |
 | --- | ---: | ---: | ---: |
-| Results visible | 107 ms | 113 ms | 132 ms |
-| Lead image visible | 124 ms | 121 ms | 139 ms |
-| First five result images visible | 125 ms | 122 ms | 139 ms |
-| Selected four-image gallery visible | 130 ms | 126 ms | 163 ms |
-| All ten result images visible | 1,592 ms | 1,582 ms | 1,627 ms |
-| Refinement Run 2 ready | 362 ms | 361 ms | 365 ms |
+| Results visible | 111 ms | 109 ms | 128 ms |
+| Lead image visible | 122 ms | 124 ms | 135 ms |
+| First five result images visible | 122 ms | 125 ms | 136 ms |
+| Selected four-image gallery visible | 170 ms | 171 ms | 177 ms |
+| All ten result images visible | 1,603 ms | 1,604 ms | 1,612 ms |
+| Refinement Run 2 ready | 395 ms | 396 ms | 398 ms |
 
 The Run 2 measurement begins when the explicit rerun control is selected. The deterministic demo intentionally keeps its searching state visible for at least 320 ms; it does not represent a live provider request.
 
