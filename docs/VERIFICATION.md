@@ -4,7 +4,7 @@ Verified locally on September 3, 2026.
 
 ## Production read-back
 
-The production site at `https://apartmentledger.vercel.app/` returned HTTP 200 and the expected WebMCP permissions policy on September 2, 2026. The native Chrome QA was then rerun against the production deployment: all eight tools registered and executed, 10 results rendered, nine responsive states were captured, and no browser console or page errors were reported.
+The production site at `https://apartmentledger.vercel.app/` returned HTTP 200 and the expected WebMCP permissions policy on September 3, 2026. The native Chrome QA was then rerun against the production deployment: all eight tools registered and executed, 10 results rendered, ten responsive states were captured, and no browser console or page errors were reported.
 
 ## Automated checks
 
