@@ -1,10 +1,10 @@
-# Apartment Decision Ledger
+# Apartment Ledger
 
 An agent-native apartment decision workspace for the OpenAI WebMCP Challenge.
 
 **Live demo:** [apartment-decision-ledger.vercel.app](https://apartment-decision-ledger.vercel.app/)
 
-![Apartment Decision Ledger workspace](docs/images/workspace-submission.webp)
+![Apartment Ledger workspace](docs/images/workspace-submission.webp)
 
 The renter's personal agent brings only the context it chooses to share. The page turns that context into visible assumptions, a ranked preliminary shortlist, transparent market-value and personal-fit reasoning, refinement questions, comparisons, and a reversible staged decision.
 

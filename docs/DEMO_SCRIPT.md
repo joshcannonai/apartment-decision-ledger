@@ -56,4 +56,4 @@ Show `compare_candidates`, then `stage_decision` and the visible reversible deci
 
 Show the workspace and eight-tool inventory.
 
-“Your agent already knows the goal. Apartment Decision Ledger makes the tradeoffs, uncertainty, and next decision visible.”
+“Your agent already knows the goal. Apartment Ledger makes the tradeoffs, uncertainty, and next decision visible.”

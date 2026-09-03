@@ -1,6 +1,6 @@
 # Original illustrative demo media
 
-These four images were generated specifically for Apartment Decision Ledger on September 2, 2026 with OpenAI's built-in image-generation tool. They are fictional, contain no people, brands, addresses, or property names, and are presented in the interface as illustrative media rather than evidence of any listing.
+These four images were generated specifically for Apartment Ledger on September 2, 2026 with OpenAI's built-in image-generation tool. They are fictional, contain no people, brands, addresses, or property names, and are presented in the interface as illustrative media rather than evidence of any listing.
 
 The production prompts requested:
 

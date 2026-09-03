@@ -1,6 +1,6 @@
-# Apartment Decision Ledger design system
+# Apartment Ledger design system
 
-This file encodes product-specific visual judgment for humans and coding agents. It follows the approach described in [Vercel's design.md article](https://vercel.com/blog/how-our-agents-build-on-brand-pages-with-design-md), while the resulting interface and brand remain original to Apartment Decision Ledger.
+This file encodes product-specific visual judgment for humans and coding agents. It follows the approach described in [Vercel's design.md article](https://vercel.com/blog/how-our-agents-build-on-brand-pages-with-design-md), while the resulting interface and brand remain original to Apartment Ledger.
 
 ## Product promise
 

@@ -45,7 +45,7 @@ export function SearchHeader({
 
   return (
     <header className="site-header">
-      <div className="brand-lockup" aria-label="Apartment Decision Ledger home">
+      <div className="brand-lockup" aria-label="Apartment Ledger home">
         <span className="brand-mark" aria-hidden="true">
           <DecisionMark />
         </span>

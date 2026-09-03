@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { App } from "./App";
 import { workspaceActions, workspaceStore } from "./domain/store";
 
-describe("Apartment Decision Ledger UI", () => {
+describe("Apartment Ledger UI", () => {
   beforeEach(() => {
     window.localStorage.clear();
     workspaceActions.resetWorkspace();

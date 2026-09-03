@@ -2,7 +2,7 @@
 
 ## Product mechanism
 
-Apartment Decision Ledger is a shared stateful workspace, not a chat transcript and not a listing marketplace clone.
+Apartment Ledger is a shared stateful workspace, not a chat transcript and not a listing marketplace clone.
 
 ```text
 personal agent or human interface

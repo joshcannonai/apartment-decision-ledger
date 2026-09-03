@@ -2,7 +2,7 @@
 
 ## Project title
 
-Apartment Decision Ledger
+Apartment Ledger
 
 ## Tagline
 
@@ -16,7 +16,7 @@ A personal agent contributes only relevant renter context; a WebMCP page turns i
 
 Apartment search forces people into one of two bad experiences: a long generic filter form, or an AI answer whose assumptions and evidence disappear inside a chat. A personal agent may already know that its user owns a 72-inch desk, prefers character over generic luxury, or regularly needs to reach a particular part of town. Re-entering all of that is tedious, but handing a website the user's complete AI memory would be invasive.
 
-Apartment Decision Ledger explores a narrower and safer idea: the agent shares only the structured context relevant to this search, and the website turns it into a visible decision workspace the renter controls.
+Apartment Ledger explores a narrower and safer idea: the agent shares only the structured context relevant to this search, and the website turns it into a visible decision workspace the renter controls.
 
 ## What it does
 

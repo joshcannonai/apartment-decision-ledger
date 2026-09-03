@@ -1,6 +1,6 @@
 # WebMCP Challenge build record
 
-Apartment Decision Ledger was created during the WebMCP Challenge submission period. The repository's first commit is dated August 31, 2026, after the submission period opened on August 25, 2026.
+Apartment Ledger was created during the WebMCP Challenge submission period. The repository's first commit is dated August 31, 2026, after the submission period opened on August 25, 2026.
 
 ## Challenge-period implementation
 
