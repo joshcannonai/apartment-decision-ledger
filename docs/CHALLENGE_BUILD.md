@@ -14,7 +14,7 @@ Apartment Ledger was created during the WebMCP Challenge submission period. The 
 | `e8049d1` | Sep 1 | Transparent score and fit reasoning |
 | `f0be076` | Sep 1 | Map-based location context and distance sorting |
 
-The final submission commit adds a read-only workspace-resumption tool, submission-safe original demo media, licensing, judge instructions, and the public submission package.
+The final challenge-period build added a read-only workspace-resumption tool, original sample media, licensing, judge instructions, and a draft public submission package. Apartment Ledger was not submitted before the deadline and now continues as an open-source project.
 
 Run `git log --format='%h %aI %s' --reverse` to verify the timestamped history.
 

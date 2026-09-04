@@ -41,7 +41,7 @@ The Run 2 measurement begins when the explicit rerun control is selected. The de
 
 ## Per-tool WebMCP ladder
 
-All tools were tested on the anonymous local application with Chrome's native `document.modelContext` surface. The QA harness discovers each registered tool with `getTools()`, invokes it with `executeTool()`, checks its structured result, and verifies the declared visible page effect.
+All tools were tested on the anonymous local application with Chrome's native `document.modelContext` surface. The QA harness discovers each registered tool with `getTools()`, invokes it with `executeTool()`, checks its structured result, and verifies its declared visible or agent-only effect.
 
 | Tool | Registration | Invocation and visible effect | State |
 | --- | --- | --- | --- |
@@ -51,7 +51,7 @@ All tools were tested on the anonymous local application with Chrome's native `d
 | `search_candidates` | Present anonymously | 10 source-linked demo candidates rendered before refinement questions | verified |
 | `organize_results` | Present anonymously | Market Value ordering applied to the visible list | verified |
 | `add_candidate` | Present anonymously | Public URL candidate appeared as unverified and enrichment-required | verified |
-| `compare_candidates` | Present anonymously | Two-candidate comparison sheet opened | verified |
+| `compare_candidates` | Present anonymously | Structured two-candidate comparison returned without adding comparison UI | verified |
 | `stage_decision` | Present anonymously | Reversible staged recommendation and rationale appeared | verified |
 
 No tool called a paid API, contacted a landlord, applied for housing, sent a message, made a payment, or signed a lease during verification. Demo images are project-owned illustrative media and are visibly labeled as not being listing evidence.

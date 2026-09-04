@@ -27,9 +27,9 @@ This is page-owned state, so the same behavior applies whether the answer came f
 
 ## Search modes
 
-### Verified demo
+### Sample workspace
 
-The default Salt Lake City experience uses a curated source-linked candidate pool. It demonstrates the entire human-agent workflow without credentials, paid calls, or claims of live market-wide completeness.
+The Salt Lake City experience uses a curated source-linked candidate pool. It demonstrates the entire human-agent workflow without credentials, paid calls, or claims of live market-wide completeness.
 
 ### Optional nationwide adapter
 
@@ -64,11 +64,11 @@ Media never blocks the result set or ranking. Project-owned illustrative images 
 
 Media ordering is deterministic. A kitchen-to-living overview, great room, or other broad living-area view leads when its description identifies one; bedrooms, bathrooms, exteriors, and amenities do not displace a more informative overview. If trusted metadata marks a floor plan, it is placed fourth when three ordinary photos exist, otherwise at the latest available position. A future live adapter should enrich only the leading candidates from authorized provider media, cache that result, and keep page scraping out of the initial search path.
 
-Every media record carries an observation time, alt text, and an explicit scope. The challenge demo uses project-owned generated media with the `illustrative` scope and labels it “not listing evidence.” The UI does not present an illustration, building exterior, or community gallery as proof of an exact unit. An image still awaiting enrichment uses a non-blocking loading surface and does not delay or remove the candidate facts.
+Every media record carries an observation time, alt text, and an explicit scope. The sample workspace uses project-owned generated media with the `illustrative` scope and labels it “not listing evidence.” The UI does not present an illustration, building exterior, or community gallery as proof of an exact unit. An image still awaiting enrichment uses a non-blocking loading surface and does not delay or remove the candidate facts.
 
 ## Persistence
 
-The first release uses a versioned anonymous workspace in browser storage. A later account layer may attach that workspace to a user after explicit authentication. Sign-in is never required for the challenge path and never imports model-provider memory.
+The first release uses a versioned anonymous workspace in browser storage. A later account layer may attach that workspace to a user after explicit authentication. Sign-in is never required for the core workflow and never imports model-provider memory.
 
 ## Safety boundaries
 

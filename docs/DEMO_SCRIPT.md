@@ -1,4 +1,6 @@
-# Demo script — target 2 minutes 20 seconds
+# Archived demo script — target 2 minutes 20 seconds
+
+Apartment Ledger was not submitted before the challenge deadline. This draft is retained as a concise product walkthrough.
 
 The recording must show a real browser agent invoking WebMCP in the deployed application. Keep the tool-call UI visible whenever the browser permits it.
 
@@ -48,7 +50,7 @@ Prompt:
 
 > Compare the strongest two options and stage your current recommendation.
 
-Show `compare_candidates`, then `stage_decision` and the visible reversible decision.
+Show the structured `compare_candidates` result, then call `stage_decision` and show the visible reversible decision.
 
 “The agent can research, organize, compare, and recommend. It cannot apply, pay, message a landlord, sign, or make a preference durable for me.”
 

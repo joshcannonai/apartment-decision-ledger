@@ -1,4 +1,6 @@
-# Judge guide
+# Archived judge guide
+
+Apartment Ledger was not submitted before the challenge deadline. This guide is retained as a historical WebMCP evaluation path.
 
 ## Fastest path
 
@@ -12,7 +14,7 @@
 
    > Review this workspace, add the University of Utah as an important location, sort around it, and compare the strongest two options.
 
-5. The agent can call `review_workspace`, `propose_preferences`, `organize_results`, and `compare_candidates`. The location appears in the map context, the cards reorder, and the comparison opens on the same page.
+5. The agent can call `review_workspace`, `propose_preferences`, `organize_results`, and `compare_candidates`. The location appears in the map context, the cards reorder, and the structured comparison returns to the requesting agent without adding comparison controls to the focused renter workspace.
 6. Ask the agent to stage its leading recommendation. `stage_decision` creates a reversible on-page recommendation; it never contacts a property or commits the renter.
 
 ## Deterministic fallback

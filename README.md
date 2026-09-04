@@ -1,54 +1,76 @@
 # Apartment Ledger
 
-An agent-native apartment decision workspace for the OpenAI WebMCP Challenge.
+An open-source, agent-native workspace for making apartment decisions with visible evidence, preferences, uncertainty, and tradeoffs.
 
-**Live demo:** [apartmentledger.vercel.app](https://apartmentledger.vercel.app/)
+**Live app:** [apartmentledger.vercel.app](https://apartmentledger.vercel.app/)
 
 ![Apartment Ledger workspace](docs/images/workspace-submission.webp)
 
-The renter's personal agent brings only the context it chooses to share. The page turns that context into visible assumptions, a ranked preliminary shortlist, transparent market-value and personal-fit reasoning, refinement questions, comparisons, and a reversible staged decision.
+Apartment Ledger gives a renter and their browser agent one shared workspace. The agent can contribute only the apartment-relevant context it chooses to share, while the renter can inspect what shaped the ranking, refine it, and keep the final decision under human control.
 
-## Product boundary
+## What works today
 
-- Complete anonymous experience; sign-in is not required.
-- Familiar rental controls cover whole places, private rooms, shared rooms, all-in budget, bedrooms, and move timing; an agent can prefill every field for review through WebMCP.
-- Results before questionnaire: a location is enough to produce a preliminary shortlist.
-- Deterministic unanswered questions and agent-supplied custom follow-ups can refine the shortlist without blocking the first result set.
-- Explicit numbered reruns preserve the original ranking and explain what changed.
-- A built-in Google Maps preview shows the listing against selected location anchors; renters can add another place, open a live Google route, and sort by anchors with verified coordinates.
-- Preferences and location anchors are visibly attributed and require approval before durable saving.
-- Apartment-relevant context shared for the current run stays visible in page state but is excluded from anonymous browser persistence.
-- Market Value Score and Personal Fit Score remain separate.
-- The default Recommended score is their transparent equal-weight mean.
-- No applications, bookings, landlord messages, payments, or lease commitments.
-- No claim of access to a user's complete ChatGPT memory.
-- Original illustrative challenge media is progressively disclosed and explicitly labeled as not being listing evidence; factual listing evidence remains source-linked and useful without media.
+- Anonymous use with versioned browser-local workspace persistence.
+- Familiar search fields for rental type, budget, bedrooms, timing, and free-form needs.
+- Separate Market Value, Personal Fit, and transparent Recommended scores.
+- Attributed agent context that requires human approval before durable saving.
+- Numbered ranking runs that preserve the earlier result set after refinement.
+- Interactive Google Maps previews, user-defined location anchors, and distance sorting.
+- Source freshness, evidence grades, missing facts, and verification prompts.
+- A deterministic Salt Lake City sample workspace that requires no credentials.
+- An optional server-side RentCast adapter for nationwide active listings.
+- Listing URL import through WebMCP as explicitly unverified evidence.
 
-## WebMCP tools
+Apartment Ledger does not apply for housing, contact landlords, make payments, sign leases, or claim access to a user's complete model-provider memory.
 
-The application registers eight imperative browser tools through `@nekuda/webmcp-sdk`, which targets the native `document.modelContext.registerTool(...)` surface:
-
-1. `prepare_search`
-2. `review_workspace`
-3. `propose_preferences`
-4. `search_candidates`
-5. `organize_results`
-6. `add_candidate`
-7. `compare_candidates`
-8. `stage_decision`
-
-Every tool calls the same page-owned domain actions as the human interface and produces a visible page effect.
-
-## Local development
+## Quick start
 
 ```bash
+git clone https://github.com/joshcannonai/apartment-decision-ledger.git
+cd apartment-decision-ledger
 npm install
 npm run dev
 ```
 
-The deterministic Salt Lake City demo does not require credentials.
+Open the local URL and select **Use Salt Lake City demo**. No account or API key is required.
 
-It reuses the personal shortlist's keyless Google map-preview pattern. For the supported production embed and in-page directions mode, configure a website-restricted `VITE_GOOGLE_MAPS_EMBED_API_KEY`; Google Maps links themselves do not require a key.
+## Real listing data
+
+The decision workspace is independent of any listing marketplace. Candidate data can arrive through three explicit modes:
+
+1. **Sample workspace:** project-owned, dated demonstration data.
+2. **Provider adapter:** the included RentCast adapter can return active listings across the United States.
+3. **Listing import:** an agent can add a public listing URL as unverified evidence for enrichment and review.
+
+To enable RentCast, copy `.env.example`, apply `db/001_provider_budget_and_cache.sql` to a dedicated Neon database, and configure:
+
+```bash
+ENABLE_LIVE_RENTCAST=true
+VITE_ENABLE_LIVE_SEARCH=true
+RENTCAST_API_KEY=your_server_side_key
+DATABASE_URL=your_neon_connection_string
+```
+
+The adapter uses an atomic monthly request cap and shared cache. RentCast listing records do not currently provide the original marketplace URL or rich listing media, so the UI identifies those facts as missing instead of fabricating them. See [`docs/PROVIDER_ADAPTERS.md`](docs/PROVIDER_ADAPTERS.md).
+
+## WebMCP
+
+The application registers eight browser tools through `@nekuda/webmcp-sdk` against the native `document.modelContext.registerTool(...)` surface:
+
+| Tool | Purpose |
+| --- | --- |
+| `prepare_search` | Prepare visible search fields and attributed agent context |
+| `review_workspace` | Read compact current decision state without scraping the page |
+| `propose_preferences` | Add visible preference, location, or follow-up proposals |
+| `search_candidates` | Run the search and preserve numbered ranking runs |
+| `organize_results` | Sort the current candidate set without another provider request |
+| `add_candidate` | Import a public listing URL as unverified evidence |
+| `compare_candidates` | Return a structured comparison to the requesting agent |
+| `stage_decision` | Stage a reversible recommendation for human review |
+
+The human interface and WebMCP tools call the same page-owned domain actions. Agent-originated changes that affect the shared workspace remain visible; read-only and agent-only structured results do not pretend to create UI state.
+
+## Development and verification
 
 ```bash
 npm test
@@ -58,33 +80,24 @@ npm run build
 npm run benchmark:media
 ```
 
-With the app running at `http://127.0.0.1:4173`, Chrome 150+ can execute the native browser verification:
+With the production build running at `http://127.0.0.1:4173`, Chrome 150+ with WebMCP testing enabled can run the native browser verification:
 
 ```bash
 npm run qa
 ```
 
-The QA pass discovers and invokes all eight WebMCP tools in an isolated anonymous workspace, verifies visible UI effects, checks persistence and responsive rendering, captures desktop plus all three mobile workspace sections, and fails on browser console errors.
+The current verification suite covers 42 tests, all eight WebMCP tools, responsive workspace states, progressive media, interactive maps, separate-tab evidence links, and browser console failures. Details are in [`docs/VERIFICATION.md`](docs/VERIFICATION.md).
 
-The media benchmark opens fresh browser contexts and measures the non-blocking sequence from visible results to the lead image, the first five shortlist images, progressively released ranks 6–10, and a visible refinement rerun.
+## Project contracts
 
-## Optional nationwide provider
+- [`CONTEXT.md`](CONTEXT.md) defines the shared product language.
+- [`SPEC.md`](SPEC.md) defines stable behavior and safety boundaries.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) explains the current implementation.
+- [`docs/adr/0001-provider-adapter-boundary.md`](docs/adr/0001-provider-adapter-boundary.md) records why listing acquisition remains replaceable.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) explains how to contribute safely.
 
-Live nationwide search is disabled by default. Copy `.env.example`, apply `db/001_provider_budget_and_cache.sql` to a dedicated Neon database, and configure the RentCast variables only when ready.
+The original WebMCP Challenge work is retained as project history in [`docs/CHALLENGE_BUILD.md`](docs/CHALLENGE_BUILD.md). Apartment Ledger was not submitted before that challenge deadline; the repository now continues as an open-source product.
 
-The live adapter:
+## License
 
-- requires an atomic database reservation before each uncached RentCast request;
-- defaults to 45 requests per month, below the 50-request free allocation;
-- caches normalized searches;
-- returns an honest demo fallback when unavailable;
-- exposes no browser credentials;
-- does not pretend RentCast supplies photos or original listing links.
-
-## Submission status
-
-The local product, deterministic demo, submission copy, judge guide, demo script, and verification harness are complete. Typecheck, lint, 42 tests, production build, native Chrome WebMCP execution, and the full npm security audit pass.
-
-Challenge-period implementation evidence is documented in [`docs/CHALLENGE_BUILD.md`](docs/CHALLENGE_BUILD.md). Judge instructions are in [`docs/JUDGE_GUIDE.md`](docs/JUDGE_GUIDE.md). This repository is licensed under the [MIT License](LICENSE).
-
-The public repository and production Vercel deployment are live. Enabling paid providers, recording/uploading the demo video, and submitting the Devpost entry remain separate approval-time actions.
+[MIT](LICENSE)

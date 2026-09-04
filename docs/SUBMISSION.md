@@ -1,4 +1,6 @@
-# Devpost submission draft
+# Archived Devpost submission draft
+
+Apartment Ledger was not submitted before the challenge deadline. This file is retained as historical product-positioning material and does not describe a completed submission.
 
 ## Project title
 
@@ -22,7 +24,7 @@ Apartment Ledger explores a narrower and safer idea: the agent shares only the s
 
 The renter can begin with only a city or use familiar controls for whole places, private rooms, shared rooms, all-in budget, bedrooms, and move timing. Their agent can prefill those visible fields with apartment-relevant context it already has, while clearly separating remembered facts from editable suggestions. The page then produces a preliminary shortlist before asking optional questions. It separates estimated all-in cost, Market Value, and Personal Fit; preserves source freshness and unknowns; and explains why each apartment occupies its rank. Recommended ordering is the equal-weight mean of Market Value and Personal Fit.
 
-The agent can contribute budget signals, furniture constraints, lifestyle preferences, lease flexibility, and important locations. Every contribution is visibly attributed and remains pending for durable saving until the renter approves it. A renter can add a location, preview it on a built-in map, rerank by distance, preserve multiple ranking runs, compare finalists, and stage a reversible recommendation.
+The agent can contribute budget signals, furniture constraints, lifestyle preferences, lease flexibility, and important locations. Every contribution is visibly attributed and remains pending for durable saving until the renter approves it. A renter can add a location, preview it on a built-in map, rerank by distance, preserve multiple ranking runs, ask the agent for a structured comparison, and stage a reversible recommendation.
 
 The Salt Lake City demo uses a deterministic, dated, source-linked listing snapshot. Original illustrative media keeps the demonstration visually useful without presenting a generic image as evidence of a specific unit.
 
@@ -31,9 +33,9 @@ The Salt Lake City demo uses a deterministic, dated, source-linked listing snaps
 WebMCP is not an add-on automation layer here. It is the collaboration boundary between two complementary kinds of context:
 
 - the personal agent knows the renter's goals and can choose the small subset relevant to apartment search;
-- the website knows candidate evidence, costs, scoring, source freshness, location distances, comparison state, and approval rules.
+- the website knows candidate evidence, costs, scoring, source freshness, location distances, and approval rules.
 
-Eight imperative WebMCP tools call the same page-owned domain actions as the human interface. Agent calls visibly prepare searches, add attributed context, render or reorder candidates, focus location evidence, open comparisons, and stage recommendations. The read-only `review_workspace` tool lets an agent resume an existing decision without scraping the interface. Neither side replaces the other, and there is no hidden remote MCP state competing with the page.
+Eight WebMCP tools call the same page-owned domain actions as the human interface. Agent calls visibly prepare searches, add attributed context, render or reorder candidates, focus location evidence, and stage recommendations. The read-only `review_workspace` tool lets an agent resume an existing decision without scraping the interface, while `compare_candidates` returns a compact structured comparison to the requesting agent. Neither side replaces the other, and there is no hidden remote MCP state competing with the page.
 
 This makes a previously awkward workflow possible: a renter can tell their agent only “help me find an apartment,” receive an immediate personalized first pass, inspect exactly what shaped it, answer only the questions that would materially change the ranking, and continue making the decision in the same visible workspace.
 
@@ -53,7 +55,7 @@ The deterministic demo requires no account or API key. An optional same-origin R
 | `search_candidates` | Ranks up to 10 candidates and preserves numbered reruns |
 | `organize_results` | Reorders current candidates without another provider search |
 | `add_candidate` | Adds a public listing URL as explicitly unverified evidence |
-| `compare_candidates` | Opens a visible two-to-four candidate comparison |
+| `compare_candidates` | Returns a structured two-to-four candidate comparison to the agent |
 | `stage_decision` | Records a reversible recommendation for human review |
 
 ## Safety and privacy
